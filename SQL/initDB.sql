@@ -6,111 +6,112 @@ GO
 CREATE TABLE [Product]
 (
 	[ID] INT PRIMARY KEY IDENTITY(1,1) NOT NULL,
-	[Name]
-	[Price]
-	[Description]
-	[Picture]
-	[CategoryID]
-	[CompanyID]
-	[IsAvailable]
-	[IntroductionDate]
-	[Properties]
+	[Name] VARCHAR(64) NOT NULL,
+	[Price] MONEY NOT NULL,
+	[Description] VARCHAR(1024) NOT NULL,
+	[Picture] IMAGE NULL,
+	[CategoryID] INT NULL,
+	[CompanyID] INT NULL,
+	[IsAvailable] BIT NOT NULL,
+	[IntroductionDate] DATE NULL,
+	[Properties] JSON NULL
 );
 
 CREATE TABLE [ProductCategory]
 (
 	[ID] INT PRIMARY KEY IDENTITY(1,1) NOT NULL,
-	[Name]
+	[Name] VARCHAR(128) NOT NULL
 );
 
 CREATE TABLE [ProductCompany]
 (
 	[ID] INT PRIMARY KEY IDENTITY(1,1) NOT NULL,
-	[Name]
+	[Name] VARCHAR(128) NOT NULL
 );
 
 CREATE TABLE [Review]
 (
 	[ID] INT PRIMARY KEY IDENTITY(1,1) NOT NULL,
-	[Description]
-	[Rating]
-	[UserID]
+	[Description] NVARCHAR(256) NOT NULL,
+	[RatingID] INT NOT NULL,
+	[UserID] INT NOT NULL
 );
 
 CREATE TABLE [Cart]
 (
 	[ID] INT PRIMARY KEY IDENTITY(1,1) NOT NULL,
-	[UserID]
-	[IsActive]
-	[PromoCodeID]
+	[UserID] INT NULL,
+	[IsActive] BIT NOT NULL,
+	[PromoCodeID] INT NULL
 );
 
 CREATE TABLE [Cart_Product]
 (
 	[ID] INT PRIMARY KEY IDENTITY(1,1) NOT NULL,
-	[ProductID]
-	[CartID]
+	[ProductID] INT NOT NULL,
+	[CartID] INT NOT NULL
 );
 
 CREATE TABLE [PromoCode]
 (
 	[ID] INT PRIMARY KEY IDENTITY(1,1) NOT NULL,
-	[Code]
-	[StartDate]
-	[EndDate]
-	[Percentage]
-	[MaximumMoney]
+	[Code] CHAR(16) NOT NULL,
+	[StartDate] DATETIME NOT NULL,
+	[EndDate] DATETIME NOT NULL,
+	[Percentage] INT NOT NULL, CHECK([Percentage] <= 100 AND [Percentage] >= 0),
+	[MaximumMoney] MONEY NULL
 );
 
 CREATE TABLE [User]
 (
 	[ID] INT PRIMARY KEY IDENTITY(1,1) NOT NULL,
-	[Name]
-	[LastName]
-	[Password]
-	[Email]
+	[Name] NVARCHAR(32) NOT NULL,
+	[LastName] NVARCHAR(32) NOT NULL,
+	[Password] VARCHAR(64) NOT NULL,
+	[Email] VARCHAR(256) NOT NULL
 );
 
 CREATE TABLE [FavouriteProduct]
 (
 	[ID] INT PRIMARY KEY IDENTITY(1,1) NOT NULL,
-	[UserID]
-	[ProductID]
+	[UserID] INT NOT NULL,
+	[ProductID] INT NOT NULL
 );
 
 CREATE TABLE [List]
 (
 	[ID] INT PRIMARY KEY IDENTITY(1,1) NOT NULL,
-	[Link] UNIQUE
-	[Name]
+	[Link] VARCHAR(128) NULL UNIQUE,
+	[Name] VARCHAR(32) NOT NULL
 );
 
 CREATE TABLE [List_Product]
 (
 	[ID] INT PRIMARY KEY IDENTITY(1,1) NOT NULL,
-	[ProductID]
-	[ListID]
+	[ProductID] INT NOT NULL,
+	[ListID] INT NOT NULL
 );
 
 CREATE TABLE [Order]
 (
 	[ID] INT PRIMARY KEY IDENTITY(1,1) NOT NULL,
-	[CartID]
-	[StatusID]
-	[OrderDate]
-	[PaymentMethodID]
-	[Price]
-	[Address]
+	[CartID] INT NOT NULL,
+	[StatusID] INT NOT NULL,
+	[OrderDate] DATETIME NOT NULL,
+	[PaymentMethodID] INT NULL,
+	[Price] MONEY NOT NULL,
+	[Address] NVARCHAR(256) NOT NULL,
+	[NeedInstallationAssistance] BIT DEFAULT(0)
 );
 
 CREATE TABLE [OrderStatus]
 (
 	[ID] INT PRIMARY KEY IDENTITY(1,1) NOT NULL,
-	[Name]
+	[Name] VARCHAR(16) NOT NULL
 );
 
 CREATE TABLE [PaymentMethod]
 (
 	[ID] INT PRIMARY KEY IDENTITY(1,1) NOT NULL,
-	[Name]
+	[Name] VARCHAR(32) NOT NULL
 );
