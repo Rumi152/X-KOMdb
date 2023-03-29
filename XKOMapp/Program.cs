@@ -1,4 +1,4 @@
-﻿namespace ConsoleApp1
+﻿namespace XKOMapp
 {
     internal class Program
     {
