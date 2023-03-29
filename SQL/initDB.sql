@@ -14,7 +14,7 @@ CREATE TABLE [Product]
 	[CompanyID] INT NULL,
 	[IsAvailable] BIT NOT NULL,
 	[IntroductionDate] DATE NULL,
-	[Properties] JSON NULL
+	[Properties] VARCHAR(MAX) NULL
 );
 
 CREATE TABLE [ProductCategory]
