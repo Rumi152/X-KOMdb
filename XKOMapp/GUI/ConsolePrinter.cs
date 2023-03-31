@@ -15,6 +15,9 @@ public class ConsolePrinter
     private readonly List<ConsoleRow> rows = new List<ConsoleRow>();
     private int? contentStart = null;
 
+    /// <summary>
+    /// current index of Cursor from top
+    /// </summary>
     public int CursorIndex { get; private set; } = 0;
 
     public ConsolePrinter()
@@ -22,26 +25,44 @@ public class ConsolePrinter
         ClearMemory();
     }
 
+    /// <summary>
+    /// Resets cursor to lowest value possible
+    /// </summary>
     public void ResetCursor()
     {
         CursorIndex = 0;
         ClampCursor();
     }
+
+    /// <summary>
+    /// Clams cursor with allowed positions
+    /// </summary>
     public void ClampCursor()
     {
         CursorIndex = Math.Clamp(CursorIndex, contentStart ?? 0, rows.Count - 1);
     }
+
+    /// <summary>
+    /// Moves cursor up if possible
+    /// </summary>
     public void CursorUp()
     {
         CursorIndex--;
         ClampCursor();
     }
+
+    /// <summary>
+    /// Moves cursor down if possible
+    /// </summary>
     public void CursorDown()
     {
         CursorIndex++;
         ClampCursor();
     }
 
+    /// <summary>
+    /// Interact with row hovered on right now
+    /// </summary>
     public void Interract()
     {
         if (!contentStart.HasValue)
@@ -50,8 +71,21 @@ public class ConsolePrinter
         rows.ElementAtOrDefault(CursorIndex)?.OnInteraction();
     }
 
+
+    /// <summary>
+    /// Add new row to memory
+    /// </summary>
+    /// <param name="row">ConsoleRow to add</param>
     public void AddRow(ConsoleRow row) => rows.Add(row);
+
+    /// <summary>
+    /// Ends header section and starts interactible content (resets after clearing memory)
+    /// </summary>
     public void StartContent() => contentStart = rows.Count;
+
+    /// <summary>
+    /// Clears buffer and memory
+    /// </summary>
     public void ClearMemory()
     {
         rows.Clear();
@@ -59,6 +93,9 @@ public class ConsolePrinter
     }
 
 
+    /// <summary>
+    /// Clears buffers holding items ready to render
+    /// </summary>
     private void ClearBuffer()
     {
         content = new Grid().AddColumns(2);
@@ -66,6 +103,10 @@ public class ConsolePrinter
 
         preContent.Clear();
     }
+
+    /// <summary>
+    /// Reload buffers using memory
+    /// </summary>
     public void ReloadBuffer()
     {
         ClearBuffer();
@@ -90,6 +131,10 @@ public class ConsolePrinter
             });
         }
     }
+
+    /// <summary>
+    /// Prints content of buffers
+    /// </summary>
     public void PrintBuffer()
     {
         preContent.ForEach(renderable =>
@@ -100,5 +145,8 @@ public class ConsolePrinter
         AnsiConsole.Write(content);
     }
 
+    /// <summary>
+    /// Clears console
+    /// </summary>
     public void ClearScreen() => Console.Clear();
 }
