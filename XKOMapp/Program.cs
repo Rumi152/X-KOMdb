@@ -6,7 +6,9 @@ namespace XKOMapp
     {
         static void Main(string[] args)
         {
-            AnsiConsoleExtensions.StandardHeader();
+            new ProductView().PrintView();
+
+            Console.ReadKey();
         }
     }
 }
