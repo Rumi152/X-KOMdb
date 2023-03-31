@@ -81,7 +81,10 @@ public class ConsolePrinter
                 if (index < contentStart)
                     preContent.Add(row.GetRenderContent());
                 else
-                    content.AddRow(new Text((index == CursorIndex) ? ">" : " "), row.GetRenderContent());
+                {
+                    bool hovered = (index == CursorIndex);
+                    content.AddRow(new Text(hovered ? ">" : " "), row.GetRenderContent(hovered));
+                }
 
                 index++;
             });

@@ -10,24 +10,40 @@ namespace XKOMapp.GUI;
 
 public class ConsoleRow
 {
-    private readonly IRenderable renderContent;
-    private readonly ConsoleRowInteractionAction interactionAction;
+    public IRenderable renderContent;
+    public IRenderable hoveredRenderContent;
+    private readonly ConsoleRowAction interactionAction;
 
-    public ConsoleRow(IRenderable renderContent, ConsoleRowInteractionAction interactionAction)
+    public ConsoleRow(IRenderable renderContent, ConsoleRowAction interactionAction)
     {
         this.renderContent = renderContent;
+        this.hoveredRenderContent = renderContent;
+        this.interactionAction = interactionAction;
+    }
+
+    public ConsoleRow(IRenderable renderContent, IRenderable hoveredRenderContent, ConsoleRowAction interactionAction)
+    {
+        this.renderContent = renderContent;
+        this.hoveredRenderContent = hoveredRenderContent;
         this.interactionAction = interactionAction;
     }
 
     public ConsoleRow(IRenderable renderContent)
     {
         this.renderContent = renderContent;
-        this.interactionAction = null;
+        this.hoveredRenderContent = renderContent;
+        interactionAction = null;
     }
 
-    public IRenderable GetRenderContent() => renderContent;
-    public void OnInteraction() => interactionAction?.Invoke();
+    public ConsoleRow(IRenderable renderContent, IRenderable hoveredRenderContent)
+    {
+        this.renderContent = renderContent;
+        this.hoveredRenderContent = hoveredRenderContent;
+        interactionAction = null;
+    }
+
+    public IRenderable GetRenderContent(bool hovered = false) => hovered ? hoveredRenderContent : renderContent;
+    public void OnInteraction() => interactionAction?.Invoke(this);
 }
 
-//TODO Add OnHover and callbackContext (row)
-public delegate void ConsoleRowInteractionAction();
+public delegate void ConsoleRowAction(ConsoleRow row);

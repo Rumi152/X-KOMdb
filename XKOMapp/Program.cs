@@ -8,18 +8,20 @@ namespace XKOMapp
     {
         static void Main(string[] args)
         {
-            //AnsiConsoleExtensions.StandardHeader();
+            Console.CursorVisible = false;
             var printer = new ConsolePrinter();
 
+            printer.AddRow(AnsiConsoleExtensions.StandardHeader.ToConsoleRow());
             printer.AddRow(new ConsoleRow(new Text("Yoo1")));
             printer.AddRow(new ConsoleRow(new Text("Yoo2")));
             printer.AddRow(new ConsoleRow(new Text("Yoo3")));
             printer.AddRow(new ConsoleRow(new Text("Yoo4")));
+            printer.AddRow(AnsiConsoleExtensions.StandardLine.ToConsoleRow());
             printer.StartContent();
-            printer.AddRow(new ConsoleRow(new Text("Yoo5"), () =>
-            {
-                printer.AddRow(new ConsoleRow(new Text("Never gonna give you up")));
-            }));
+            printer.AddRow(new ConsoleRow(
+                new Text("Yoo5"),
+                new Markup("[yellow]Yoo5[/]")
+            ));
             printer.AddRow(new ConsoleRow(new Text("Yoo6")));
 
             printer.AddRow(new ConsoleRow(new Markup("[red]Yooo7[/]")));
@@ -30,10 +32,9 @@ namespace XKOMapp
 
             printer.AddRow(new ConsoleRow(new Text("Yoo10")));
 
-            printer.AddRow(new ConsoleRow(new Panel("Yooo11 (Sequel)").RoundedBorder().Header("Luigi"), () =>
-            {
-                printer.AddRow(new ConsoleRow(new Text("no one expected the spanish inquisition")));
-            }));
+            printer.AddRow(new ConsoleRow(
+                new Panel("Yooo11 (Sequel)").RoundedBorder().Header("Luigi"),
+                (row) => printer.AddRow(new ConsoleRow(new Text("no one expected the spanish inquisition")))));
 
             printer.ReloadBuffer();
             printer.PrintBuffer();
