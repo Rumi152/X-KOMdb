@@ -15,10 +15,10 @@ namespace XKOMapp
             printer.AddRow(new ConsoleRow(new Text("Yoo2")));
             printer.AddRow(new ConsoleRow(new Text("Yoo3")));
             printer.AddRow(new ConsoleRow(new Text("Yoo4")));
+            printer.StartContent();
             printer.AddRow(new ConsoleRow(new Text("Yoo5"), () =>
             {
                 printer.AddRow(new ConsoleRow(new Text("Never gonna give you up")));
-                printer.PrintBuffer();
             }));
             printer.AddRow(new ConsoleRow(new Text("Yoo6")));
 
@@ -33,10 +33,9 @@ namespace XKOMapp
             printer.AddRow(new ConsoleRow(new Panel("Yooo11 (Sequel)").RoundedBorder().Header("Luigi"), () =>
             {
                 printer.AddRow(new ConsoleRow(new Text("no one expected the spanish inquisition")));
-                printer.PrintBuffer();
             }));
 
-
+            printer.ReloadBuffer();
             printer.PrintBuffer();
 
             while (true)
@@ -62,6 +61,10 @@ namespace XKOMapp
                         default:
                             break;
                     }
+
+                    printer.ClearScreen();
+                    printer.ReloadBuffer();
+                    printer.PrintBuffer();
                 }
             }
 

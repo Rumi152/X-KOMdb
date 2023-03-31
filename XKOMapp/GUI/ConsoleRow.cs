@@ -29,4 +29,5 @@ public class ConsoleRow
     public void OnInteraction() => interactionAction?.Invoke();
 }
 
+//TODO Add OnHover and callbackContext (row)
 public delegate void ConsoleRowInteractionAction();
