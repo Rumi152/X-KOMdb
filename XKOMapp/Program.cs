@@ -1,4 +1,6 @@
-﻿namespace XKOMapp
+﻿using Spectre.Console;
+
+namespace XKOMapp
 {
     internal class Program
     {
