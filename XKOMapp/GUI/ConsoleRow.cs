@@ -10,8 +10,8 @@ namespace XKOMapp.GUI;
 
 public class ConsoleRow
 {
-    public IRenderable renderContent;
-    public IRenderable hoveredRenderContent;
+    private IRenderable renderContent;
+    private IRenderable hoveredRenderContent;
     private readonly ConsoleRowAction interactionAction;
 
     public ConsoleRow(IRenderable renderContent, ConsoleRowAction interactionAction)
