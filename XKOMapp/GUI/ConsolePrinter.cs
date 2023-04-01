@@ -1,45 +1,37 @@
 ﻿using Spectre.Console;
 using Spectre.Console.Rendering;
-using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
-using System.Text;
+using System.Diagnostics.CodeAnalysis;
+using XKOMapp.GUI.ConsoleRows;
+
 namespace XKOMapp.GUI;
 
 public class ConsolePrinter
 {
     private Grid content;
     private readonly List<IRenderable> preContent = new();
-
-    private readonly List<ConsoleRow> rows = new List<ConsoleRow>();
-    private int? contentStart = null;
+    private readonly List<IConsoleRow> rows = new List<IConsoleRow>();
 
     /// <summary>
-    /// current index of Cursor from top
+    /// Current index of Cursor from top
+    /// Null if there is no content rows
     /// </summary>
-    public int CursorIndex { get; private set; } = 0;
+    public int? CursorIndex { get; private set; } = null;
+    private int? previousCursorIndex = null;
+    private int? contentStart = null;
 
-    public ConsolePrinter()
-    {
-        ClearMemory();
-    }
+
+    public ConsolePrinter() => ClearMemory();
+
 
     /// <summary>
     /// Resets cursor to lowest value possible
     /// </summary>
     public void ResetCursor()
     {
-        CursorIndex = 0;
+        CursorIndex = null;
         ClampCursor();
-    }
 
-    /// <summary>
-    /// Clams cursor with allowed positions
-    /// </summary>
-    public void ClampCursor()
-    {
-        CursorIndex = Math.Clamp(CursorIndex, contentStart ?? 0, rows.Count - 1);
+        OnCursorChange();
     }
 
     /// <summary>
@@ -47,8 +39,12 @@ public class ConsolePrinter
     /// </summary>
     public void CursorUp()
     {
-        CursorIndex--;
+        if (CursorIndex is not null)
+            CursorIndex--;
+
         ClampCursor();
+
+        OnCursorChange();
     }
 
     /// <summary>
@@ -56,8 +52,56 @@ public class ConsolePrinter
     /// </summary>
     public void CursorDown()
     {
-        CursorIndex++;
+        if (CursorIndex is not null)
+            CursorIndex++;
+
         ClampCursor();
+
+        OnCursorChange();
+    }
+
+    // Invoke on possible change of cursor position
+    private void OnCursorChange()
+    {
+        if (previousCursorIndex == CursorIndex)
+            return;
+
+        if (previousCursorIndex is not null)
+        {
+            var row = rows.ElementAtOrDefault(previousCursorIndex.Value);
+            if (row is not null)
+            {
+                if (row is IHoverConsoleRow converted)
+                {
+                    converted.OnHoverEnd();
+                }
+            }
+        }
+        if (CursorIndex is not null)
+        {
+            var row = rows.ElementAtOrDefault(CursorIndex.Value);
+            if (row is not null)
+            {
+                if (row is IHoverConsoleRow converted)
+                {
+                    converted.OnHoverStart();
+                }
+            }
+        }
+
+        previousCursorIndex = CursorIndex;
+    }
+
+    // Clamps cursor with allowed positions
+    private void ClampCursor()
+    {
+        if (contentStart is null || contentStart >= rows.Count)
+        {
+            CursorIndex = null;
+            return;
+        }
+
+        CursorIndex = Math.Clamp(CursorIndex ?? 0, contentStart.Value, rows.Count - 1);
     }
 
     /// <summary>
@@ -65,10 +109,18 @@ public class ConsolePrinter
     /// </summary>
     public void Interract()
     {
-        if (!contentStart.HasValue)
+        if (CursorIndex is null)
             return;
 
-        rows.ElementAtOrDefault(CursorIndex)?.OnInteraction();
+        IConsoleRow? row = rows.ElementAtOrDefault(CursorIndex.Value);
+
+        if (row is null)
+            return;
+
+        if (row is not IInteractableConsoleRow converted)
+            return;
+
+        converted.OnInteraction();
     }
 
 
@@ -76,7 +128,7 @@ public class ConsolePrinter
     /// Add new row to memory
     /// </summary>
     /// <param name="row">ConsoleRow to add</param>
-    public void AddRow(ConsoleRow row) => rows.Add(row);
+    public void AddRow(IConsoleRow row) => rows.Add(row);
 
     /// <summary>
     /// Ends header section and starts interactible content (resets after clearing memory)
@@ -84,12 +136,16 @@ public class ConsolePrinter
     public void StartContent() => contentStart = rows.Count;
 
     /// <summary>
-    /// Clears buffer and memory
+    /// Clears buffer, screen and memory
     /// </summary>
     public void ClearMemory()
     {
         rows.Clear();
         ClearBuffer();
+        ClearScreen();
+
+        contentStart = null;
+        ResetCursor();
     }
 
 
@@ -111,25 +167,36 @@ public class ConsolePrinter
     {
         ClearBuffer();
         ClampCursor();
+        OnCursorChange();
 
-        if (!contentStart.HasValue)
-            preContent.AddRange(rows.Select(row => row.GetRenderContent()));
-        else
+        if (contentStart is null)
         {
-            int index = 0;
-            rows.ForEach(row =>
+            preContent.AddRange(rows.Select(row => row.GetRenderContent()));
+            return;
+        }
+
+        int index = 0;
+        rows.ForEach(row =>
+        {
+            if (index < contentStart)
+                preContent.Add(row.GetRenderContent());
+            else
             {
-                if (index < contentStart)
-                    preContent.Add(row.GetRenderContent());
-                else
+                bool hovered = (index == CursorIndex);
+
+                string cursor = ">";
+                string background = " ";
+                if (row is ICustomCursorConsoleRow converted)
                 {
-                    bool hovered = (index == CursorIndex);
-                    content.AddRow(new Text(hovered ? ">" : " "), row.GetRenderContent(hovered));
+                    cursor = converted.GetCustomCursor();
+                    background = converted.GetCustomCursorBackground();
                 }
 
-                index++;
-            });
-        }
+                content.AddRow(new Markup(hovered ? cursor : background), row.GetRenderContent());
+            }
+
+            index++;
+        });
     }
 
     /// <summary>
@@ -140,7 +207,6 @@ public class ConsolePrinter
         preContent.ForEach(renderable =>
         {
             AnsiConsole.Write(renderable);
-            AnsiConsole.WriteLine();
         });
         AnsiConsole.Write(content);
     }
