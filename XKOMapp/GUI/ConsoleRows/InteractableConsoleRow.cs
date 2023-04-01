@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -11,9 +12,10 @@ public class InteractableConsoleRow : IInteractableConsoleRow
 {
     private IRenderable renderContent;
     private readonly ConsoleRowAction interactionAction;
+    private ConsolePrinter printer;
 
     public IRenderable GetRenderContent() => renderContent;
-    public void OnInteraction() => interactionAction?.Invoke(this);
+    public void OnInteraction(ConsolePrinter printer) => interactionAction?.Invoke(this, printer);
 
 
     /// <summary>

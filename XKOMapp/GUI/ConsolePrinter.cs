@@ -1,6 +1,7 @@
 ﻿using Spectre.Console;
 using Spectre.Console.Rendering;
 using System.Diagnostics.CodeAnalysis;
+using System.Linq;
 using XKOMapp.GUI.ConsoleRows;
 
 namespace XKOMapp.GUI;
@@ -95,13 +96,31 @@ public class ConsolePrinter
     // Clamps cursor with allowed positions
     private void ClampCursor()
     {
-        if (contentStart is null || contentStart >= rows.Count)
+        var availableIndexes = GetAvailableCursorIndexes();
+
+        if(availableIndexes.Count == 0)
         {
             CursorIndex = null;
             return;
         }
 
         CursorIndex = Math.Clamp(CursorIndex ?? 0, contentStart.Value, rows.Count - 1);
+
+        if (availableIndexes.Contains(CursorIndex.Value))
+            return;
+
+
+        CursorIndex = availableIndexes.First();
+    }
+
+    private List<int> GetAvailableCursorIndexes()
+    {
+        if (contentStart is null)
+            return new List<int>();
+
+        return Enumerable.Range(contentStart.Value, Math.Max(0, rows.Count - contentStart.Value))
+            .Where(index => rows[index] is not IHideableConsoleRow converted || !converted.IsHidden)
+            .ToList();
     }
 
     /// <summary>
@@ -120,7 +139,7 @@ public class ConsolePrinter
         if (row is not IInteractableConsoleRow converted)
             return;
 
-        converted.OnInteraction();
+        converted.OnInteraction(this);
     }
 
 
@@ -176,27 +195,39 @@ public class ConsolePrinter
         }
 
         int index = 0;
-        rows.ForEach(row =>
-        {
-            if (index < contentStart)
-                preContent.Add(row.GetRenderContent());
-            else
+        rows
+            .Where(row =>
             {
-                bool hovered = (index == CursorIndex);
+                if (row is not IHideableConsoleRow converted)
+                    return true;
 
-                string cursor = ">";
-                string background = " ";
-                if (row is ICustomCursorConsoleRow converted)
+                if (!converted.IsHidden)
+                    return true;
+
+                return false;
+            })
+            .ToList()
+            .ForEach(row =>
                 {
-                    cursor = converted.GetCustomCursor();
-                    background = converted.GetCustomCursorBackground();
-                }
+                    if (index < contentStart)
+                        preContent.Add(row.GetRenderContent());
+                    else
+                    {
+                        bool hovered = (index == CursorIndex);
 
-                content.AddRow(new Markup(hovered ? cursor : background), row.GetRenderContent());
-            }
+                        string cursor = ">";
+                        string background = " ";
+                        if (row is ICustomCursorConsoleRow converted)
+                        {
+                            cursor = converted.GetCustomCursor();
+                            background = converted.GetCustomCursorBackground();
+                        }
 
-            index++;
-        });
+                        content.AddRow(new Markup(hovered ? cursor : background), row.GetRenderContent());
+                    }
+
+                    index++;
+                });
     }
 
     /// <summary>

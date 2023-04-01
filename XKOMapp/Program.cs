@@ -49,11 +49,11 @@ namespace XKOMapp
             //row with interaction on clicked enter
             printer.AddRow(new InteractableConsoleRow(
                 new Panel("PanelNr2").RoundedBorder().Header("Click me"),
-                (row) => printer.AddRow(new BasicConsoleRow(new Text("Dynamiaclly added row")))));
+                (row, _) => printer.AddRow(new BasicConsoleRow(new Text("Dynamiaclly added row")))));
 
             printer.AddRow(new InteractableConsoleRow(
                     new Text("Click to end Test1"),
-                    (row) => end = true
+                    (row, _) => end = true
                 ));
 
             printer.ReloadBuffer(); //reloading buffers from rows list
@@ -118,7 +118,7 @@ namespace XKOMapp
             int counter = 0;
             printer.AddRow(new InteractableConsoleRow(
                     new Panel("PanelNr2").RoundedBorder().Header("Click me"),
-                    (row) =>
+                    (row, _) =>
                     {
                         counter++;
                         ((InteractableConsoleRow)row).SetRenderContent(new Text(counter.ToString()));
@@ -126,6 +126,10 @@ namespace XKOMapp
                         printer.PrintBuffer();
                     }
                 ));
+
+            printer.AddRow(new BasicConsoleRow(new Text("Text2")));
+
+            printer.AddRow(new HideOnClickConsoleRow(new Text("Click to hide")));
 
             printer.ReloadBuffer(); //reloading buffers from rows list
             printer.PrintBuffer(); //rendering from buffers
