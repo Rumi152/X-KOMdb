@@ -1,29 +1,28 @@
 ﻿using Spectre.Console;
 using Spectre.Console.Rendering;
-using System;
-using System.Collections.Generic;
-using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
-using System.Text;
+using XKOMapp.GUI.ConsoleRows;
+
 namespace XKOMapp.GUI;
 
 public class ConsolePrinter
 {
     private Grid content;
     private readonly List<IRenderable> preContent = new();
-
-    private readonly List<ConsoleRow> rows = new List<ConsoleRow>();
-    private int? contentStart = null;
+    private readonly List<IConsoleRow> rows = new List<IConsoleRow>();
 
     /// <summary>
-    /// current index of Cursor from top
+    /// Current index of Cursor from top
+    /// <para>Null if there is no content rows</para>
     /// </summary>
-    public int CursorIndex { get; private set; } = 0;
+    public int? CursorIndex { get; private set; } = null;
+    private int? previousCursorIndex = null;
+    private int? contentStart = null;
 
-    public ConsolePrinter()
-    {
-        ClearMemory();
-    }
+
+    public ConsolePrinter() => ClearMemory();
+
 
     /// <summary>
     /// Resets cursor to lowest value possible
@@ -31,15 +30,9 @@ public class ConsolePrinter
     public void ResetCursor()
     {
         CursorIndex = 0;
-        ClampCursor();
-    }
 
-    /// <summary>
-    /// Clams cursor with allowed positions
-    /// </summary>
-    public void ClampCursor()
-    {
-        CursorIndex = Math.Clamp(CursorIndex, contentStart ?? 0, rows.Count - 1);
+        ClampCursorUp();
+        OnCursorChange();
     }
 
     /// <summary>
@@ -47,8 +40,11 @@ public class ConsolePrinter
     /// </summary>
     public void CursorUp()
     {
-        CursorIndex--;
-        ClampCursor();
+        if (CursorIndex is not null)
+            CursorIndex--;
+
+        ClampCursorUp();
+        OnCursorChange();
     }
 
     /// <summary>
@@ -56,8 +52,123 @@ public class ConsolePrinter
     /// </summary>
     public void CursorDown()
     {
-        CursorIndex++;
-        ClampCursor();
+        if (CursorIndex is not null)
+            CursorIndex++;
+
+        ClampCursorDown();
+        OnCursorChange();
+    }
+
+    /// <summary>
+    /// Invoke on possible change of cursor position
+    /// </summary>
+    private void OnCursorChange()
+    {
+        if (previousCursorIndex == CursorIndex)
+            return;
+
+        if (previousCursorIndex is not null)
+        {
+            var row = rows.ElementAtOrDefault(previousCursorIndex.Value);
+            if (row is not null)
+            {
+                if (row is IHoverConsoleRow converted)
+                {
+                    converted.OnHoverEnd();
+                }
+            }
+        }
+        if (CursorIndex is not null)
+        {
+            var row = rows.ElementAtOrDefault(CursorIndex.Value);
+            if (row is not null)
+            {
+                if (row is IHoverConsoleRow converted)
+                {
+                    converted.OnHoverStart();
+                }
+            }
+        }
+
+        previousCursorIndex = CursorIndex;
+    }
+
+    /// <summary>
+    /// Clamps cursor with allowed positions
+    /// <para>Prefers closest higher position if current in not possible</para>
+    /// </summary>
+    private void ClampCursorUp()
+    {
+        var availableIndexes = GetAvailableCursorIndexes();
+
+        if(availableIndexes.Count == 0)
+        {
+            CursorIndex = null;
+            return;
+        }
+
+        CursorIndex = Math.Clamp(CursorIndex ?? 0, contentStart.Value, rows.Count - 1);
+
+        if (availableIndexes.Contains(CursorIndex.Value))
+            return;
+
+        var previousIndex = CursorIndex;
+        CursorIndex = availableIndexes
+            .Where(index => index < previousIndex)
+            .LastOrDefault(-1);
+
+        if(CursorIndex == -1)
+        {
+            CursorIndex = availableIndexes
+                .Where(index => index > previousIndex)
+                .First();
+        }
+    }
+
+    /// <summary>
+    /// Clamps cursor with allowed positions
+    /// <para>Prefers closest lower position if current in not possible</para>
+    /// </summary>
+    private void ClampCursorDown()
+    {
+        var availableIndexes = GetAvailableCursorIndexes();
+
+        if (availableIndexes.Count == 0)
+        {
+            CursorIndex = null;
+            return;
+        }
+
+        CursorIndex = Math.Clamp(CursorIndex ?? 0, contentStart.Value, rows.Count - 1);
+
+        if (availableIndexes.Contains(CursorIndex.Value))
+            return;
+
+        var previousIndex = CursorIndex;
+        CursorIndex = availableIndexes
+            .Where(index => index > previousIndex)
+            .FirstOrDefault(-1);
+
+        if (CursorIndex == -1)
+        {
+            CursorIndex = availableIndexes
+                .Where(index => index < previousIndex)
+                .Last();
+        }
+    }
+
+    /// <summary>
+    /// Gets available cursor positions (not hidden content)
+    /// </summary>
+    /// <returns>List<int> of available positions for cursor</returns>
+    private List<int> GetAvailableCursorIndexes()
+    {
+        if (contentStart is null)
+            return new List<int>();
+
+        return Enumerable.Range(contentStart.Value, Math.Max(0, rows.Count - contentStart.Value))
+            .Where(index => rows[index] is not IHideableConsoleRow converted || !converted.IsHidden)
+            .ToList();
     }
 
     /// <summary>
@@ -65,10 +176,18 @@ public class ConsolePrinter
     /// </summary>
     public void Interract()
     {
-        if (!contentStart.HasValue)
+        if (CursorIndex is null)
             return;
 
-        rows.ElementAtOrDefault(CursorIndex)?.OnInteraction();
+        IConsoleRow? row = rows.ElementAtOrDefault(CursorIndex.Value);
+
+        if (row is null)
+            return;
+
+        if (row is not IInteractableConsoleRow converted)
+            return;
+
+        converted.OnInteraction(this);
     }
 
 
@@ -76,7 +195,7 @@ public class ConsolePrinter
     /// Add new row to memory
     /// </summary>
     /// <param name="row">ConsoleRow to add</param>
-    public void AddRow(ConsoleRow row) => rows.Add(row);
+    public void AddRow(IConsoleRow row) => rows.Add(row);
 
     /// <summary>
     /// Ends header section and starts interactible content (resets after clearing memory)
@@ -84,12 +203,16 @@ public class ConsolePrinter
     public void StartContent() => contentStart = rows.Count;
 
     /// <summary>
-    /// Clears buffer and memory
+    /// Clears buffer, screen and memory
     /// </summary>
     public void ClearMemory()
     {
         rows.Clear();
         ClearBuffer();
+        ClearScreen();
+
+        contentStart = null;
+        ResetCursor();
     }
 
 
@@ -110,26 +233,41 @@ public class ConsolePrinter
     public void ReloadBuffer()
     {
         ClearBuffer();
-        ClampCursor();
+        ClampCursorUp();
+        OnCursorChange();
 
-        if (!contentStart.HasValue)
-            preContent.AddRange(rows.Select(row => row.GetRenderContent()));
-        else
+        if (contentStart is null)
         {
-            int index = 0;
-            rows.ForEach(row =>
-            {
-                if (index < contentStart)
-                    preContent.Add(row.GetRenderContent());
-                else
-                {
-                    bool hovered = (index == CursorIndex);
-                    content.AddRow(new Text(hovered ? ">" : " "), row.GetRenderContent(hovered));
-                }
-
-                index++;
-            });
+            preContent.AddRange(rows.Select(row => row.GetRenderContent()));
+            return;
         }
+
+        int index = 0;
+        rows
+            .ForEach(row =>
+                {
+                    if(row is not IHideableConsoleRow hideableConverted || !hideableConverted.IsHidden)
+                    {
+                        if (index < contentStart)
+                            preContent.Add(row.GetRenderContent());
+                        else
+                        {
+                            bool hovered = (index == CursorIndex);
+
+                            string cursor = ">";
+                            string background = " ";
+                            if (row is ICustomCursorConsoleRow customCursorConverted)
+                            {
+                                cursor = customCursorConverted.GetCustomCursor();
+                                background = customCursorConverted.GetCustomCursorBackground();
+                            }
+
+                            content.AddRow(new Markup(hovered ? cursor : background), row.GetRenderContent());
+                        }
+                    }
+
+                    index++;
+                });
     }
 
     /// <summary>
@@ -140,7 +278,6 @@ public class ConsolePrinter
         preContent.ForEach(renderable =>
         {
             AnsiConsole.Write(renderable);
-            AnsiConsole.WriteLine();
         });
         AnsiConsole.Write(content);
     }
