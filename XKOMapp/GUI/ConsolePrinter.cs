@@ -30,7 +30,7 @@ public class ConsolePrinter
     public void ResetCursor()
     {
         CursorIndex = null;
-        ClampCursor();
+        ClampCursorDown();
 
         OnCursorChange();
     }
@@ -43,7 +43,7 @@ public class ConsolePrinter
         if (CursorIndex is not null)
             CursorIndex--;
 
-        ClampCursor();
+        ClampCursorDown();
 
         OnCursorChange();
     }
@@ -56,7 +56,7 @@ public class ConsolePrinter
         if (CursorIndex is not null)
             CursorIndex++;
 
-        ClampCursor();
+        ClampCursorUp();
 
         OnCursorChange();
     }
@@ -94,7 +94,7 @@ public class ConsolePrinter
     }
 
     // Clamps cursor with allowed positions
-    private void ClampCursor()
+    private void ClampCursorDown()
     {
         var availableIndexes = GetAvailableCursorIndexes();
 
@@ -109,8 +109,45 @@ public class ConsolePrinter
         if (availableIndexes.Contains(CursorIndex.Value))
             return;
 
+        var previousIndex = CursorIndex;
+        CursorIndex = availableIndexes
+            .Where(index => index < previousIndex)
+            .LastOrDefault(-1);
 
-        CursorIndex = availableIndexes.First();
+        if(CursorIndex == -1)
+        {
+            CursorIndex = availableIndexes
+                .Where(index => index > previousIndex)
+                .First();
+        }
+    }
+    // Clamps cursor with allowed positions
+    private void ClampCursorUp()
+    {
+        var availableIndexes = GetAvailableCursorIndexes();
+
+        if (availableIndexes.Count == 0)
+        {
+            CursorIndex = null;
+            return;
+        }
+
+        CursorIndex = Math.Clamp(CursorIndex ?? 0, contentStart.Value, rows.Count - 1);
+
+        if (availableIndexes.Contains(CursorIndex.Value))
+            return;
+
+        var previousIndex = CursorIndex;
+        CursorIndex = availableIndexes
+            .Where(index => index > previousIndex)
+            .FirstOrDefault(-1);
+
+        if (CursorIndex == -1)
+        {
+            CursorIndex = availableIndexes
+                .Where(index => index < previousIndex)
+                .Last();
+        }
     }
 
     private List<int> GetAvailableCursorIndexes()
@@ -185,7 +222,7 @@ public class ConsolePrinter
     public void ReloadBuffer()
     {
         ClearBuffer();
-        ClampCursor();
+        ClampCursorDown();
         OnCursorChange();
 
         if (contentStart is null)
@@ -196,34 +233,26 @@ public class ConsolePrinter
 
         int index = 0;
         rows
-            .Where(row =>
-            {
-                if (row is not IHideableConsoleRow converted)
-                    return true;
-
-                if (!converted.IsHidden)
-                    return true;
-
-                return false;
-            })
-            .ToList()
             .ForEach(row =>
                 {
-                    if (index < contentStart)
-                        preContent.Add(row.GetRenderContent());
-                    else
+                    if(row is not IHideableConsoleRow hideableConverted || !hideableConverted.IsHidden)
                     {
-                        bool hovered = (index == CursorIndex);
-
-                        string cursor = ">";
-                        string background = " ";
-                        if (row is ICustomCursorConsoleRow converted)
+                        if (index < contentStart)
+                            preContent.Add(row.GetRenderContent());
+                        else
                         {
-                            cursor = converted.GetCustomCursor();
-                            background = converted.GetCustomCursorBackground();
-                        }
+                            bool hovered = (index == CursorIndex);
 
-                        content.AddRow(new Markup(hovered ? cursor : background), row.GetRenderContent());
+                            string cursor = ">";
+                            string background = " ";
+                            if (row is ICustomCursorConsoleRow customCursorConverted)
+                            {
+                                cursor = customCursorConverted.GetCustomCursor();
+                                background = customCursorConverted.GetCustomCursorBackground();
+                            }
+
+                            content.AddRow(new Markup(hovered ? cursor : background), row.GetRenderContent());
+                        }
                     }
 
                     index++;

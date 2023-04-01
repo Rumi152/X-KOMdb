@@ -107,11 +107,15 @@ namespace XKOMapp
 
             printer.StartContent(); //starts interactible content zone
 
+            printer.AddRow(new HideOnClickConsoleRow(new Text("Click to hide")));
             //row that is different when hovered
             printer.AddRow(new HoveredStylizationConsoleRow(
                 new Text("Walter"),
                 new Markup("White")
             ));
+            printer.AddRow(new BasicConsoleRow(new Text("Text1")));
+            printer.AddRow(new HideOnClickConsoleRow(new Text("Click to hide")));
+            printer.AddRow(new BasicConsoleRow(new Text("Text1")));
             printer.AddRow(new BasicConsoleRow(new Text("Text1")));
 
             //row with interaction on clicked enter
