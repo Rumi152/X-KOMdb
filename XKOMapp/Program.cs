@@ -11,10 +11,10 @@ namespace XKOMapp
             Console.CursorVisible = false;
             var printer = new ConsolePrinter();
 
-            printer.AddRow(AnsiConsoleExtensions.StandardHeader.ToConsoleRow()); //creates row with standard header
+            printer.AddRow(StandardRenderables.StandardHeader.ToConsoleRow()); //creates row with standard header
             printer.AddRow(new ConsoleRow(new Text("Info")));
             printer.AddRow(new ConsoleRow(new Text("Info2")));
-            printer.AddRow(AnsiConsoleExtensions.StandardLine.ToConsoleRow()); //creates row with standard separator line
+            printer.AddRow(StandardRenderables.StandardLine.ToConsoleRow()); //creates row with standard separator line
             printer.StartContent(); //starts interactible content
 
             //row that is different when hovered
