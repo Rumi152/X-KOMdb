@@ -14,7 +14,7 @@ public class ConsolePrinter
 
     /// <summary>
     /// Current index of Cursor from top
-    /// Null if there is no content rows
+    /// <para>Null if there is no content rows</para>
     /// </summary>
     public int? CursorIndex { get; private set; } = null;
     private int? previousCursorIndex = null;
@@ -29,9 +29,9 @@ public class ConsolePrinter
     /// </summary>
     public void ResetCursor()
     {
-        CursorIndex = null;
-        ClampCursorDown();
+        CursorIndex = 0;
 
+        ClampCursorUp();
         OnCursorChange();
     }
 
@@ -43,8 +43,7 @@ public class ConsolePrinter
         if (CursorIndex is not null)
             CursorIndex--;
 
-        ClampCursorDown();
-
+        ClampCursorUp();
         OnCursorChange();
     }
 
@@ -56,12 +55,13 @@ public class ConsolePrinter
         if (CursorIndex is not null)
             CursorIndex++;
 
-        ClampCursorUp();
-
+        ClampCursorDown();
         OnCursorChange();
     }
 
-    // Invoke on possible change of cursor position
+    /// <summary>
+    /// Invoke on possible change of cursor position
+    /// </summary>
     private void OnCursorChange()
     {
         if (previousCursorIndex == CursorIndex)
@@ -93,8 +93,11 @@ public class ConsolePrinter
         previousCursorIndex = CursorIndex;
     }
 
-    // Clamps cursor with allowed positions
-    private void ClampCursorDown()
+    /// <summary>
+    /// Clamps cursor with allowed positions
+    /// <para>Prefers closest higher position if current in not possible</para>
+    /// </summary>
+    private void ClampCursorUp()
     {
         var availableIndexes = GetAvailableCursorIndexes();
 
@@ -121,8 +124,12 @@ public class ConsolePrinter
                 .First();
         }
     }
-    // Clamps cursor with allowed positions
-    private void ClampCursorUp()
+
+    /// <summary>
+    /// Clamps cursor with allowed positions
+    /// <para>Prefers closest lower position if current in not possible</para>
+    /// </summary>
+    private void ClampCursorDown()
     {
         var availableIndexes = GetAvailableCursorIndexes();
 
@@ -150,6 +157,10 @@ public class ConsolePrinter
         }
     }
 
+    /// <summary>
+    /// Gets available cursor positions (not hidden content)
+    /// </summary>
+    /// <returns>List<int> of available positions for cursor</returns>
     private List<int> GetAvailableCursorIndexes()
     {
         if (contentStart is null)
@@ -222,7 +233,7 @@ public class ConsolePrinter
     public void ReloadBuffer()
     {
         ClearBuffer();
-        ClampCursorDown();
+        ClampCursorUp();
         OnCursorChange();
 
         if (contentStart is null)
