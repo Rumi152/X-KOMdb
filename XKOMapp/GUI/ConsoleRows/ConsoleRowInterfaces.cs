@@ -65,6 +65,41 @@ public interface IHideableConsoleRow : IConsoleRow
 }
 
 /// <summary>
+/// ConsoleRow which can be turned on and off
+/// </summary>
+public interface ISwitchableConsoleRow : IConsoleRow
+{
+    public bool IsActive { get; protected set; }
+
+    void TurnOn()
+    {
+        if (IsActive)
+            return;
+
+        IsActive = true;
+        OnTurningOn();
+    }
+    void TurnOff()
+    {
+        if (!IsActive)
+            return;
+
+        IsActive = false;
+        OnTurningOff();
+    }
+    void Swich()
+    {
+        if (IsActive)
+            TurnOff();
+        else
+            TurnOn();
+    }
+
+    protected void OnTurningOff();
+    protected void OnTurningOn();
+}
+
+/// <summary>
 /// Delegate for action invoked by ConsoleRow
 /// </summary>
 /// <param name="row">Row invoking action</param>
