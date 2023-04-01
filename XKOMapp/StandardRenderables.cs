@@ -25,4 +25,9 @@ public static class StandardRenderables
     {
         return new ConsoleRow(renderable);
     }
+
+    public static void StandardRule()
+    {
+        AnsiConsole.Write(new Rule().HeavyBorder().RuleStyle(Style.Parse("#0e8f75")));
+    }
 }
