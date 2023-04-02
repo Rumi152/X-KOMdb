@@ -246,7 +246,25 @@ public class ConsolePrinter
         rows
             .ForEach(row =>
                 {
-                    if(row is not IHideableConsoleRow hideableConverted || !hideableConverted.IsHidden)
+                    int cursorStickyStart = 5;
+                    int paddingBottom = 2;
+
+                    if (index >= contentStart)
+                    {
+                        if(index < (CursorIndex ?? 0) - cursorStickyStart)
+                        {
+                            index++;
+                            return;
+                        }
+                    }
+
+                    if (index > Console.WindowHeight - paddingBottom + Math.Max(0, (CursorIndex ?? 0) - cursorStickyStart - contentStart.Value))
+                    {
+                        index++;
+                        return;
+                    }
+
+                    if (row is not IHideableConsoleRow hideableConverted || !hideableConverted.IsHidden)
                     {
                         if (index < contentStart)
                             preContent.Add(row.GetRenderContent());

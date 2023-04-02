@@ -15,8 +15,7 @@ namespace XKOMapp
             Console.CursorVisible = false;
             printer = new ConsolePrinter();
 
-            FirstTest();
-            SecondTest();
+            ScrollTest();
         }
 
         //TEMP
@@ -141,6 +140,88 @@ namespace XKOMapp
             //checking for input in loop
             while (true)
             {
+                if (Console.KeyAvailable)
+                {
+                    var key = Console.ReadKey(true).Key;
+
+                    switch (key)
+                    {
+                        case ConsoleKey.DownArrow:
+                            printer.CursorDown();
+                            break;
+
+                        case ConsoleKey.UpArrow:
+                            printer.CursorUp();
+                            break;
+
+                        case ConsoleKey.Enter:
+                            printer.Interract();
+                            break;
+
+                        default:
+                            break;
+                    }
+
+                    //refreshing screen
+                    printer.ClearScreen();
+                    printer.ReloadBuffer();
+                    printer.PrintBuffer();
+                }
+            }
+        }
+
+        //TEMP
+        private static void ScrollTest()
+        {
+            bool end = false;
+
+            printer.AddRow(StandardRenderables.StandardHeader.ToBasicConsoleRow()); //creates row with standard header
+            printer.AddRow(new BasicConsoleRow(new Text("Info\n")));
+            printer.AddRow(new BasicConsoleRow(new Text("Info\n")));
+            printer.AddRow(new BasicConsoleRow(new Text("Info\n")));
+            printer.AddRow(new BasicConsoleRow(new Text("Info2\n")));
+            printer.AddRow(StandardRenderables.StandardLine.ToBasicConsoleRow()); //creates row with standard separator line
+
+            printer.StartContent(); //starts interactible content zone
+
+            printer.AddRow(new InteractableConsoleRow(
+                new Text("Click me"),
+                (row, _) => printer.AddRow(new BasicConsoleRow(new Text("Dynamiaclly added row" + ++counter)))));
+            //row that is different when hovered
+            printer.AddRow(new HoveredStylizationConsoleRow(
+                new Text("White"),
+                new Markup("[yellow]Yellow[/]")
+            ));
+            printer.AddRow(new BasicConsoleRow(new Text("Text1")));
+            printer.AddRow(new BasicConsoleRow(new Markup("[red]Text2[/]"))); //stylized text
+            printer.AddRow(new BasicConsoleRow(new Text("Text3")));
+            printer.AddRow(new BasicConsoleRow(new Text("Text5")));
+            printer.AddRow(new HoveredStylizationConsoleRow(
+                new Text("Text6"),
+                new Text("No one expected the spanish inquisition")
+            ));
+
+            //row with interaction on clicked enter
+            printer.AddRow(new InteractableConsoleRow(
+                new Text("Click me"),
+                (row, _) => printer.AddRow(new BasicConsoleRow(new Text("Dynamiaclly added row" + ++counter)))));
+
+            printer.AddRow(new BasicConsoleRow(new Markup("[red]Text2[/]"))); //stylized text
+            printer.AddRow(new BasicConsoleRow(new Text("Text3")));
+            printer.AddRow(new BasicConsoleRow(new Text("Text5")));
+
+            printer.ReloadBuffer(); //reloading buffers from rows list
+            printer.PrintBuffer(); //rendering from buffers
+
+            //checking for input in loop
+            while (true)
+            {
+                if (end)
+                {
+                    printer.ClearMemory();
+                    return;
+                }
+
                 if (Console.KeyAvailable)
                 {
                     var key = Console.ReadKey(true).Key;
