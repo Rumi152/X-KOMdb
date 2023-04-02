@@ -10,20 +10,20 @@ namespace XKOMapp.GUI.ConsoleRows
     internal class HideableConsoleRow : IHideableConsoleRow
     {
         private IRenderable renderContent;
-        bool isHidden;
-        bool IHideableConsoleRow.IsHidden { get => isHidden; set => isHidden = value; }
+        bool isHidden = true;
+        bool ISwitchableConsoleRow.IsActive { get => isHidden; set => isHidden = value; }
 
         public HideableConsoleRow(IRenderable renderable) => this.renderContent = renderable;
 
         public IRenderable GetRenderContent() => renderContent;
         public void SetRenderContent(IRenderable renderContent) => this.renderContent = renderContent;
 
-        void IHideableConsoleRow.OnHide()
+        void ISwitchableConsoleRow.OnTurningOff()
         {
 
         }
 
-        void IHideableConsoleRow.OnShow()
+        void ISwitchableConsoleRow.OnTurningOn()
         {
 
         }

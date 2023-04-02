@@ -45,35 +45,7 @@ public interface ICustomCursorConsoleRow : IConsoleRow
 }
 
 /// <summary>
-/// ConsoleRow which can be hidden
-/// </summary>
-public interface IHideableConsoleRow : IConsoleRow
-{
-    public bool IsHidden { get; protected set; }
-
-    void Hide()
-    {
-        if (IsHidden)
-            return;
-
-        IsHidden = true;
-        OnHide();
-    }
-    void Show()
-    {
-        if (!IsHidden)
-            return;
-
-        IsHidden = false;
-        OnShow();
-    }
-
-    protected void OnHide();
-    protected void OnShow();
-}
-
-/// <summary>
-/// ConsoleRow which can be turned on and off
+/// ConsoleRow which switched between two states
 /// </summary>
 public interface ISwitchableConsoleRow : IConsoleRow
 {
@@ -105,6 +77,22 @@ public interface ISwitchableConsoleRow : IConsoleRow
 
     protected void OnTurningOff();
     protected void OnTurningOn();
+}
+
+/// <summary>
+/// ConsoleRow which can be turned on and off
+/// </summary>
+public interface IDeactivableConsoleRow : ISwitchableConsoleRow
+{
+
+}
+
+/// <summary>
+/// ConsoleRow which can be hidden
+/// </summary>
+public interface IHideableConsoleRow : IDeactivableConsoleRow
+{
+
 }
 
 /// <summary>

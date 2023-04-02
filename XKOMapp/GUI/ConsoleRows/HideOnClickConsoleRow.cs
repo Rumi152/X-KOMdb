@@ -6,8 +6,8 @@ namespace XKOMapp.GUI.ConsoleRows
     {
         private IRenderable renderContent;
         private readonly ConsoleRowAction interactionAction;
-        bool isHidden;
-        bool IHideableConsoleRow.IsHidden { get => isHidden; set => isHidden = value; }
+        bool isHidden = true;
+        bool ISwitchableConsoleRow.IsActive { get => isHidden; set => isHidden = value; }
 
         public IRenderable GetRenderContent() => renderContent;
         public void SetRenderContent(IRenderable renderContent) => this.renderContent = renderContent;
@@ -19,20 +19,20 @@ namespace XKOMapp.GUI.ConsoleRows
             this.renderContent = renderContent;
             this.interactionAction = (row, printer) =>
             {
-                ((IHideableConsoleRow)this).Hide();
+                ((IHideableConsoleRow)this).TurnOff();
                 printer.ReloadBuffer();
                 printer.PrintBuffer();
             };
         }
 
-        void IHideableConsoleRow.OnHide()
+        void ISwitchableConsoleRow.OnTurningOff()
         {
 
         }
 
-        void IHideableConsoleRow.OnShow()
+        void ISwitchableConsoleRow.OnTurningOn()
         {
-
+            throw new NotImplementedException();
         }
     }
 }
