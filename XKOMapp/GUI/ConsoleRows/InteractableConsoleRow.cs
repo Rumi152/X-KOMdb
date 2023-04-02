@@ -12,7 +12,6 @@ public class InteractableConsoleRow : IInteractableConsoleRow
 {
     private IRenderable renderContent;
     private readonly ConsoleRowAction interactionAction;
-    private ConsolePrinter printer;
 
     public IRenderable GetRenderContent() => renderContent;
     public void OnInteraction(ConsolePrinter printer) => interactionAction?.Invoke(this, printer);

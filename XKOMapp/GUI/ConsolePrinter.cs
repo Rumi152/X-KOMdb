@@ -101,7 +101,7 @@ public class ConsolePrinter
     {
         var availableIndexes = GetAvailableCursorIndexes();
 
-        if(availableIndexes.Count == 0)
+        if (availableIndexes.Count == 0)
         {
             CursorIndex = null;
             return;
@@ -117,7 +117,7 @@ public class ConsolePrinter
             .Where(index => index < previousIndex)
             .LastOrDefault(-1);
 
-        if(CursorIndex == -1)
+        if (CursorIndex == -1)
         {
             CursorIndex = availableIndexes
                 .Where(index => index > previousIndex)
@@ -236,56 +236,54 @@ public class ConsolePrinter
         ClampCursorUp();
         OnCursorChange();
 
-        if (contentStart is null)
+        const int cursorStickyStart = 0;
+        const int paddingBottom = 2;
+
+        int endLineIndex = 0;
+        for (int index = 0; index < rows.Count; index++)
         {
-            preContent.AddRange(rows.Select(row => row.GetRenderContent()));
-            return;
+            IConsoleRow row = rows[index];
+
+            bool isHidden = row is IHideableConsoleRow hideableConverted && hideableConverted.IsHidden;
+            if (isHidden)
+                continue;
+
+            bool isContent = contentStart is not null && index >= contentStart;
+            int lineSpan = (row as ICustomLineSpanConsoleRow)?.GetRenderHeight() ?? 1;
+            int startLineIndex = endLineIndex;
+
+            if (!isContent)
+            {
+                endLineIndex = lineSpan + startLineIndex;
+                if (endLineIndex > Console.WindowHeight - paddingBottom)
+                    return;
+
+                preContent.Add(row.GetRenderContent());
+                continue;
+            }
+
+            if (index < (CursorIndex ?? 0) - cursorStickyStart)
+            {
+                endLineIndex = 1 + startLineIndex;
+                continue;
+            }
+
+            endLineIndex = lineSpan + startLineIndex;
+            if (endLineIndex > Console.WindowHeight - paddingBottom + Math.Max(0, (CursorIndex ?? 0) - cursorStickyStart - contentStart.Value))
+                return;
+
+            bool hovered = (index == CursorIndex);
+
+            string cursor = ">";
+            string background = " ";
+            if (row is ICustomCursorConsoleRow customCursorConverted)
+            {
+                cursor = customCursorConverted.GetCustomCursor();
+                background = customCursorConverted.GetCustomCursorBackground();
+            }
+
+            content.AddRow(new Markup(hovered ? cursor : background), row.GetRenderContent());
         }
-
-        int index = 0;
-        rows
-            .ForEach(row =>
-                {
-                    int cursorStickyStart = 5;
-                    int paddingBottom = 2;
-
-                    if (index >= contentStart)
-                    {
-                        if(index < (CursorIndex ?? 0) - cursorStickyStart)
-                        {
-                            index++;
-                            return;
-                        }
-                    }
-
-                    if (index > Console.WindowHeight - paddingBottom + Math.Max(0, (CursorIndex ?? 0) - cursorStickyStart - contentStart.Value))
-                    {
-                        index++;
-                        return;
-                    }
-
-                    if (row is not IHideableConsoleRow hideableConverted || !hideableConverted.IsHidden)
-                    {
-                        if (index < contentStart)
-                            preContent.Add(row.GetRenderContent());
-                        else
-                        {
-                            bool hovered = (index == CursorIndex);
-
-                            string cursor = ">";
-                            string background = " ";
-                            if (row is ICustomCursorConsoleRow customCursorConverted)
-                            {
-                                cursor = customCursorConverted.GetCustomCursor();
-                                background = customCursorConverted.GetCustomCursorBackground();
-                            }
-
-                            content.AddRow(new Markup(hovered ? cursor : background), row.GetRenderContent());
-                        }
-                    }
-
-                    index++;
-                });
     }
 
     /// <summary>

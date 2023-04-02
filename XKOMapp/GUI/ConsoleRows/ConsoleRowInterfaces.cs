@@ -11,6 +11,14 @@ public interface IConsoleRow
 }
 
 /// <summary>
+/// ConsoleRow that can take more than one row
+/// </summary>
+public interface ICustomLineSpanConsoleRow : IConsoleRow
+{
+    int GetRenderHeight();
+}
+
+/// <summary>
 /// ConsoleRow with action on click
 /// </summary>
 public interface IInteractableConsoleRow : IConsoleRow
