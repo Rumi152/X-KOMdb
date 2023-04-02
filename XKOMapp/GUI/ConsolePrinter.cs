@@ -8,6 +8,15 @@ namespace XKOMapp.GUI;
 
 public class ConsolePrinter
 {
+    /// <summary>
+    /// Number of rows after which screen starts to scroll
+    /// </summary>
+    const int cursorStickyStart = 5;
+    /// <summary>
+    /// Number of rows left at bottom of screen
+    /// </summary>
+    const int paddingBottom = 1;
+
     private Grid content;
     private readonly List<IRenderable> preContent = new();
     private readonly List<IConsoleRow> rows = new List<IConsoleRow>();
@@ -235,9 +244,6 @@ public class ConsolePrinter
         ClearBuffer();
         ClampCursorUp();
         OnCursorChange();
-
-        const int cursorStickyStart = 0;
-        const int paddingBottom = 2;
 
         int endLineIndex = 0;
         for (int index = 0; index < rows.Count; index++)

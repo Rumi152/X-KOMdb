@@ -173,44 +173,39 @@ namespace XKOMapp
         //TEMP
         private static void ScrollTest()
         {
-            printer.AddRow(StandardRenderables.StandardHeader.ToBasicConsoleRow()); //creates row with standard header
-            printer.AddRow(new BasicConsoleRow(new Text("Info\n")));
-            printer.AddRow(new BasicConsoleRow(new Text("Info\n")));
-            printer.AddRow(new BasicConsoleRow(new Text("Info\n")));
-            printer.AddRow(new BasicConsoleRow(new Text("Info2\n")));
-            printer.AddRow(StandardRenderables.StandardLine.ToBasicConsoleRow()); //creates row with standard separator line
+            printer.AddRow(StandardRenderables.StandardHeader.ToBasicConsoleRow());
+            printer.AddRow(new BasicConsoleRow(new Text("Header1\n")));
+            printer.AddRow(new BasicConsoleRow(new Text("Header2\n")));
+            printer.AddRow(StandardRenderables.StandardSeparator.ToBasicConsoleRow());
 
             printer.StartContent(); //starts interactible content zone
 
+            //row that creates new rows on click
+            int counter = 0;
             printer.AddRow(new InteractableConsoleRow(
-                new Text("Click me"),
-                (row, _) => printer.AddRow(new BasicConsoleRow(new Text("Dynamiaclly added row")))));
-            //row that is different when hovered
-            printer.AddRow(new HoveredStylizationConsoleRow(
-                new Text("White"),
-                new Markup("[yellow]Yellow[/]")
-            ));
+                new Text("ClickMe"),
+                (row, _) => printer.AddRow(new BasicConsoleRow(new Text("AddedRow" + ++counter)))));
+
             printer.AddRow(new BasicConsoleRow(new Text("Text1")));
-            printer.AddRow(new BasicConsoleRow(new Markup("[red]Text2[/]"))); //stylized text
-            //printer.AddRow(new BasicConsoleRow(new Text("Text3")));
-            printer.AddRow(new MultiLineConsoleRow(new Text("Text3\n\tx\n\tx\n\tx"), 4));
-            printer.AddRow(new BasicConsoleRow(new Text("Text5")));
-            printer.AddRow(new HoveredStylizationConsoleRow(
-                new Text("Text6"),
-                new Text("No one expected the spanish inquisition")
-            ));
-
-            //row with interaction on clicked enter
-            printer.AddRow(new InteractableConsoleRow(
-                new Text("Click me"),
-                (row, _) => printer.AddRow(new BasicConsoleRow(new Text("Dynamiaclly added row")))));
-
-            printer.AddRow(new BasicConsoleRow(new Markup("[red]Text2[/]"))); //stylized text
+            printer.AddRow(new MultiLineConsoleRow(new Text("Text2\n\tParagraph1\n\tParagraph2\n\tParagrapgh3"), 4)); //row that takes more than 1 line
             printer.AddRow(new BasicConsoleRow(new Text("Text3")));
+            printer.AddRow(new BasicConsoleRow(new Text("Text4")));
             printer.AddRow(new BasicConsoleRow(new Text("Text5")));
+            printer.AddRow(new BasicConsoleRow(new Text("Text6")));
+            printer.AddRow(new BasicConsoleRow(new Text("Text7")));
+            printer.AddRow(new HideOnClickConsoleRow(new Text("ClickToHide"))); //row that disapears on click
 
-            printer.ReloadBuffer(); //reloading buffers from rows list
-            printer.PrintBuffer(); //rendering from buffers
+            //row that creates new rows on click
+            int counter2 = 0;
+            printer.AddRow(new InteractableConsoleRow(
+                new Text("ClickMe"),
+                (row, _) => printer.AddRow(new BasicConsoleRow(new Text("AddedRow" + ++counter2)))));
+
+            printer.AddRow(new BasicConsoleRow(new Text("Text8")));
+            printer.AddRow(new BasicConsoleRow(new Text("Text9")));
+
+            printer.ReloadBuffer();
+            printer.PrintBuffer();
 
             //checking for input in loop
             while (true)

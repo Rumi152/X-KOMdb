@@ -15,7 +15,7 @@ public static class StandardRenderables
     /// <summary>
     /// Standard line separator IRenderable
     /// </summary>
-    public static IRenderable StandardLine => new Rule().HeavyBorder().RuleStyle(Style.Parse("#0e8f75"));
+    public static IRenderable StandardSeparator => new Rule().HeavyBorder().RuleStyle(Style.Parse("#0e8f75"));
 
     /// <summary>
     /// Converts IRenderable to simplest form of Console row
