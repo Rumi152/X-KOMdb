@@ -204,7 +204,11 @@ public class ConsolePrinter
     /// <summary>
     /// Enables scrolling for current memory
     /// </summary>
-    public void EnableScrolling() => scrollingEnabled = true;
+    public void EnableScrolling()
+    {
+        throw new NotImplementedException("Scrolling mode is not implemented yet");
+        scrollingEnabled = true;
+    }
 
     /// <summary>
     /// Clears buffer, screen and memory
