@@ -285,5 +285,5 @@ public class ConsolePrinter
     /// <summary>
     /// Clears console
     /// </summary>
-    public void ClearScreen() => Console.Clear();
+    public void ClearScreen() => AnsiConsole.Clear();
 }
