@@ -27,7 +27,7 @@ namespace XKOMapp
         //    printer.AddRow(new BasicConsoleRow(new Text("Info\n")));
         //    printer.AddRow(new BasicConsoleRow(new Text("Info2\n")));
         //    printer.AddRow(StandardRenderables.StandardLine.ToBasicConsoleRow()); //creates row with standard separator line
-            
+
         //    printer.StartContent(); //starts interactible content zone
 
         //    //row that is different when hovered
@@ -173,6 +173,8 @@ namespace XKOMapp
         //TEMP
         private static void ScrollTest()
         {
+            printer.EnableScrolling();
+
             printer.AddRow(StandardRenderables.StandardHeader.ToBasicConsoleRow());
             printer.AddRow(new BasicConsoleRow(new Text("Header1\n")));
             printer.AddRow(new BasicConsoleRow(new Text("Header2\n")));
@@ -190,7 +192,7 @@ namespace XKOMapp
             printer.AddRow(new MultiLineConsoleRow(new Text("Text2\n\tParagraph1\n\tParagraph2\n\tParagrapgh3"), 4)); //row that takes more than 1 line
             printer.AddRow(new BasicConsoleRow(new Text("Text3")));
             printer.AddRow(new BasicConsoleRow(new Text("Text4")));
-            printer.AddRow(new MultiLineConsoleRow(new Text("Text5\n\tParagraph1\n\tParagraph2\n\tParagrapgh3"), 4)); //row that takes more than 1 line
+            printer.AddRow(new MultiLineConsoleRow(new Text("Text5\n\tParagrapgh\n\tParagrapgh\n\tParagrapgh\n\tParagrapgh"), 5)); //row that takes more than 1 line
             printer.AddRow(new BasicConsoleRow(new Text("Text6")));
             printer.AddRow(new MultiLineConsoleRow(new Text("Text7\n\tParagraph1\n\tParagraph2\n\tParagrapgh3"), 4)); //row that takes more than 1 line
             printer.AddRow(new HideOnClickConsoleRow(new Text("ClickToHide"))); //row that disapears on click
