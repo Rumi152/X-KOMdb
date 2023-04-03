@@ -305,6 +305,16 @@ public class ConsolePrinter
     }
 
     /// <summary>
+    /// Prints content of memory
+    /// <para>Also reloads buffers</para>
+    /// </summary>
+    public void PrintMemory()
+    {
+        ReloadBuffer();
+        PrintBuffer();
+    }
+
+    /// <summary>
     /// Clears console
     /// </summary>
     public void ClearScreen() => AnsiConsole.Clear();
