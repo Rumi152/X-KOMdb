@@ -174,9 +174,17 @@ public class ConsolePrinter
         if (contentStart is null)
             return new List<int>();
 
-        return Enumerable.Range(0, rows.Count)
-            .Where(index => index >= contentStart && (rows[index] is not IDeactivableConsoleRow converted || converted.IsActive))
-            .ToList();
+        var active = Enumerable.Range(0, rows.Count)
+            .Where(index => index >= contentStart && (rows[index] is not IDeactivableConsoleRow converted || converted.IsActive));
+
+        var focused = Enumerable.Range(0, rows.Count)
+            .Where(index => rows[index] is IFocusableConsoleRow converted && converted.IsActive)
+            .Intersect(active);
+
+        if (focused.Any())
+            return focused.ToList();
+
+        return active.ToList();
     }
 
 
@@ -187,6 +195,24 @@ public class ConsolePrinter
     {
         if (currentCursorRow is IInteractableConsoleRow converted)
             converted.OnInteraction();
+    }
+
+    /// <summary>
+    /// Switch mode of the row currently hovered right
+    /// </summary>
+    public void ModeSwitchRight()
+    {
+        if (currentCursorRow is IXAxisInteractableConsoleRow converted)
+            converted.MoveRight();
+    }
+
+    /// <summary>
+    /// Switch mode of the row currently hovered left
+    /// </summary>
+    public void ModeSwitchLeft()
+    {
+        if (currentCursorRow is IXAxisInteractableConsoleRow converted)
+            converted.MoveLeft();
     }
 
 

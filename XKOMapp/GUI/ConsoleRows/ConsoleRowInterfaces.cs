@@ -45,8 +45,42 @@ public interface ICustomCursorConsoleRow : IConsoleRow
     string GetCustomCursorBackground();
 }
 
+public interface IXAxisInteractableConsoleRow : IConsoleRow
+{
+    void MoveRight();
+    void MoveLeft();
+}
+
 /// <summary>
-/// ConsoleRow which switched between two states
+/// ConsoleRow that can have multiple modes
+/// </summary>
+public interface IModesConsoleRow : IConsoleRow
+{
+    public int ModeIndex { get; protected set; }
+    public int ModesCount { get;}
+
+    public void IncrementModeIndex()
+    {
+        if (ModeIndex + 1 >= ModesCount)
+            return;
+
+        ModeIndex++;
+        OnModeChange();
+    }
+    public void DecrementModeIndex()
+    {
+        if (ModeIndex <= 0)
+            return;
+
+        ModeIndex--;
+        OnModeChange();
+    }
+
+    protected void OnModeChange();
+}
+
+/// <summary>
+/// ConsoleRow which can be switched between two states
 /// </summary>
 public interface ISwitchableConsoleRow : IConsoleRow
 {
@@ -68,7 +102,7 @@ public interface ISwitchableConsoleRow : IConsoleRow
         IsActive = false;
         OnTurningOff();
     }
-    public void Swich()
+    public void Switch()
     {
         if (IsActive)
             TurnOff();
@@ -92,6 +126,15 @@ public interface IDeactivableConsoleRow : ISwitchableConsoleRow
 /// ConsoleRow which can be hidden
 /// </summary>
 public interface IHideableConsoleRow : IDeactivableConsoleRow
+{
+
+}
+
+/// <summary>
+/// ConsoleRow which can be activated, to switch printer to focus mode
+/// <para>Focus mode means that only currently activated IFocusableConsoleRows can bo available for cursor</para>
+/// </summary>
+public interface IFocusableConsoleRow : ISwitchableConsoleRow
 {
 
 }

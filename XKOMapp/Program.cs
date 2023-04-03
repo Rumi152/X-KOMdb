@@ -36,9 +36,27 @@ namespace XKOMapp
                 (row, _) => printer.AddRow(new BasicConsoleRow(new Text("AddedRow" + ++counter)))));
 
             printer.AddRow(new BasicConsoleRow(new Text("Text1")));
-            printer.AddRow(new MultiLineConsoleRow(new Text("Text2\n\tParagraph1\n\tParagraph2\n\tParagrapgh3"), 4)); //row that takes more than 1 line
+
+            printer.AddRow(
+                new ModesConsoleRow(
+                        new ModesConsoleRow.ConsoleRowModeData { renderContent = new Markup("Modes [bold blue]1[/] 2 3")},
+                        new ModesConsoleRow.ConsoleRowModeData { renderContent = new Markup("Modes 1 [bold blue]2[/] 3") },
+                        new ModesConsoleRow.ConsoleRowModeData { renderContent = new Markup("Modes 1 2 [bold blue]3[/]") }
+                    )
+                );
+
             printer.AddRow(new BasicConsoleRow(new Text("Text3")));
             printer.AddRow(new BasicConsoleRow(new Text("Text4")));
+
+            List<IFocusableConsoleRow> focusableRows = new();
+            for(int i = 0; i < 4; i++)
+                focusableRows.Add( new FocusableConsoleRow(new Text("\tFocused" + 1)));
+            printer.AddRow(new FocusableGroupParentConsoleRow(
+                new Text("FocusMode"),
+                focusableRows
+                ));
+            focusableRows.ForEach(x => printer.AddRow(x));
+
             printer.AddRow(new MultiLineConsoleRow(new Text("Text5\n\tParagrapgh\n\tParagrapgh\n\tParagrapgh\n\tParagrapgh"), 5)); //row that takes more than 1 line
             printer.AddRow(new BasicConsoleRow(new Text("Text6")));
             printer.AddRow(new MultiLineConsoleRow(new Text("Text7\n\tParagraph1\n\tParagraph2\n\tParagrapgh3"), 4)); //row that takes more than 1 line
@@ -75,6 +93,14 @@ namespace XKOMapp
 
                         case ConsoleKey.Enter:
                             printer.Interract();
+                            break;
+
+                        case ConsoleKey.LeftArrow:
+                            printer.ModeSwitchLeft();
+                            break;
+
+                        case ConsoleKey.RightArrow:
+                            printer.ModeSwitchRight();
                             break;
 
                         default:
