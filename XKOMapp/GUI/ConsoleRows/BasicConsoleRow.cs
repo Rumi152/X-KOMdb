@@ -4,10 +4,15 @@ namespace XKOMapp.GUI.ConsoleRows;
 
 public class BasicConsoleRow : IConsoleRow
 {
-    private IRenderable renderContent;
+    protected readonly IRenderable renderContent;
+    protected ConsolePrinter? owner;
 
     public BasicConsoleRow(IRenderable renderable) => this.renderContent = renderable;
 
     public IRenderable GetRenderContent() => renderContent;
-    public void SetRenderContent(IRenderable renderContent) => this.renderContent = renderContent;
+
+    public void SetOwnership(ConsolePrinter owner)
+    {
+        this.owner = owner;
+    }
 }

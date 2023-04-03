@@ -8,6 +8,15 @@ namespace XKOMapp.GUI.ConsoleRows;
 public interface IConsoleRow
 {
     IRenderable GetRenderContent();
+    void SetOwnership(ConsolePrinter owner);
+}
+
+/// <summary>
+/// ConsoleRow that can take more than one row
+/// </summary>
+public interface ICustomLineSpanConsoleRow : IConsoleRow
+{
+    int GetRenderHeight();
 }
 
 /// <summary>
@@ -15,7 +24,7 @@ public interface IConsoleRow
 /// </summary>
 public interface IInteractableConsoleRow : IConsoleRow
 {
-    void OnInteraction(ConsolePrinter printer);
+    void OnInteraction();
 }
 
 /// <summary>
@@ -37,36 +46,59 @@ public interface ICustomCursorConsoleRow : IConsoleRow
 }
 
 /// <summary>
+/// ConsoleRow which switched between two states
+/// </summary>
+public interface ISwitchableConsoleRow : IConsoleRow
+{
+    public bool IsActive { get; protected set; }
+
+    public void TurnOn()
+    {
+        if (IsActive)
+            return;
+
+        IsActive = true;
+        OnTurningOn();
+    }
+    public void TurnOff()
+    {
+        if (!IsActive)
+            return;
+
+        IsActive = false;
+        OnTurningOff();
+    }
+    public void Swich()
+    {
+        if (IsActive)
+            TurnOff();
+        else
+            TurnOn();
+    }
+
+    protected void OnTurningOff();
+    protected void OnTurningOn();
+}
+
+/// <summary>
+/// ConsoleRow which can be turned on and off
+/// </summary>
+public interface IDeactivableConsoleRow : ISwitchableConsoleRow
+{
+
+}
+
+/// <summary>
 /// ConsoleRow which can be hidden
 /// </summary>
-public interface IHideableConsoleRow : IConsoleRow
+public interface IHideableConsoleRow : IDeactivableConsoleRow
 {
-    public bool IsHidden { get; protected set; }
 
-    void Hide()
-    {
-        if (IsHidden)
-            return;
-
-        IsHidden = true;
-        OnHide();
-    }
-    void Show()
-    {
-        if (!IsHidden)
-            return;
-
-        IsHidden = false;
-        OnShow();
-    }
-
-    protected void OnHide();
-    protected void OnShow();
 }
 
 /// <summary>
 /// Delegate for action invoked by ConsoleRow
 /// </summary>
 /// <param name="row">Row invoking action</param>
-/// <param name="printer">Printer owning row</param>
-public delegate void ConsoleRowAction(IConsoleRow row, ConsolePrinter printer);
+/// <param name="rowOwner">Printer owning row</param>
+public delegate void ConsoleRowAction(IConsoleRow row, ConsolePrinter? rowOwner);

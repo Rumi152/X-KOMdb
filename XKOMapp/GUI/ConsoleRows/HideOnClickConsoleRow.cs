@@ -2,37 +2,13 @@
 
 namespace XKOMapp.GUI.ConsoleRows
 {
-    public class HideOnClickConsoleRow : IInteractableConsoleRow, IHideableConsoleRow
+    public class HideOnClickConsoleRow : HideableConsoleRow, IInteractableConsoleRow
     {
-        private IRenderable renderContent;
-        private readonly ConsoleRowAction interactionAction;
-        bool isHidden;
-        bool IHideableConsoleRow.IsHidden { get => isHidden; set => isHidden = value; }
-
-        public IRenderable GetRenderContent() => renderContent;
-        public void SetRenderContent(IRenderable renderContent) => this.renderContent = renderContent;
-
-        public void OnInteraction(ConsolePrinter printer) => interactionAction?.Invoke(this, printer);
-
-        public HideOnClickConsoleRow(IRenderable renderContent)
+        public HideOnClickConsoleRow(IRenderable renderable) : base(renderable)
         {
-            this.renderContent = renderContent;
-            this.interactionAction = (row, printer) =>
-            {
-                ((IHideableConsoleRow)this).Hide();
-                printer.ReloadBuffer();
-                printer.PrintBuffer();
-            };
         }
 
-        void IHideableConsoleRow.OnHide()
-        {
 
-        }
-
-        void IHideableConsoleRow.OnShow()
-        {
-
-        }
+        public void OnInteraction() => ((IHideableConsoleRow)this).TurnOff();
     }
 }
