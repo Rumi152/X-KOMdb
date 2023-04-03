@@ -97,6 +97,15 @@ public interface IHideableConsoleRow : IDeactivableConsoleRow
 }
 
 /// <summary>
+/// ConsoleRow which can be activated, to switch printer to focus mode
+/// <para>Focus mode means that only currently activated IFocusableConsoleRows can bo available for cursor</para>
+/// </summary>
+public interface IFocusableConsoleRow : ISwitchableConsoleRow
+{
+
+}
+
+/// <summary>
 /// Delegate for action invoked by ConsoleRow
 /// </summary>
 /// <param name="row">Row invoking action</param>

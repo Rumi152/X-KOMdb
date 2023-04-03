@@ -174,9 +174,17 @@ public class ConsolePrinter
         if (contentStart is null)
             return new List<int>();
 
-        return Enumerable.Range(0, rows.Count)
-            .Where(index => index >= contentStart && (rows[index] is not IDeactivableConsoleRow converted || converted.IsActive))
-            .ToList();
+        var active = Enumerable.Range(0, rows.Count)
+            .Where(index => index >= contentStart && (rows[index] is not IDeactivableConsoleRow converted || converted.IsActive));
+
+        var focused = Enumerable.Range(0, rows.Count)
+            .Where(index => rows[index] is IFocusableConsoleRow converted && converted.IsActive)
+            .Intersect(active);
+
+        if (focused.Any())
+            return focused.ToList();
+
+        return active.ToList();
     }
 
 
