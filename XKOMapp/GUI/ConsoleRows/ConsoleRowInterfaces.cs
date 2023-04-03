@@ -8,6 +8,7 @@ namespace XKOMapp.GUI.ConsoleRows;
 public interface IConsoleRow
 {
     IRenderable GetRenderContent();
+    void SetOwnership(ConsolePrinter owner);
 }
 
 /// <summary>
@@ -23,7 +24,7 @@ public interface ICustomLineSpanConsoleRow : IConsoleRow
 /// </summary>
 public interface IInteractableConsoleRow : IConsoleRow
 {
-    void OnInteraction(ConsolePrinter printer);
+    void OnInteraction();
 }
 
 /// <summary>
@@ -51,7 +52,7 @@ public interface ISwitchableConsoleRow : IConsoleRow
 {
     public bool IsActive { get; protected set; }
 
-    void TurnOn()
+    public void TurnOn()
     {
         if (IsActive)
             return;
@@ -59,7 +60,7 @@ public interface ISwitchableConsoleRow : IConsoleRow
         IsActive = true;
         OnTurningOn();
     }
-    void TurnOff()
+    public void TurnOff()
     {
         if (!IsActive)
             return;
@@ -67,7 +68,7 @@ public interface ISwitchableConsoleRow : IConsoleRow
         IsActive = false;
         OnTurningOff();
     }
-    void Swich()
+    public void Swich()
     {
         if (IsActive)
             TurnOff();
@@ -99,5 +100,5 @@ public interface IHideableConsoleRow : IDeactivableConsoleRow
 /// Delegate for action invoked by ConsoleRow
 /// </summary>
 /// <param name="row">Row invoking action</param>
-/// <param name="printer">Printer owning row</param>
-public delegate void ConsoleRowAction(IConsoleRow row, ConsolePrinter printer);
+/// <param name="rowOwner">Printer owning row</param>
+public delegate void ConsoleRowAction(IConsoleRow row, ConsolePrinter? rowOwner);

@@ -12,6 +12,7 @@ namespace XKOMapp.GUI.ConsoleRows
         private IRenderable unhoveredRenderContent;
         private IRenderable hoveredRenderContent;
         private bool hovered = false;
+        private ConsolePrinter? owner;
 
         public HoveredStylizationConsoleRow(IRenderable unhoveredRenderContent, IRenderable hoveredRenderContent)
         {
@@ -21,7 +22,7 @@ namespace XKOMapp.GUI.ConsoleRows
 
         public IRenderable GetRenderContent()
         {
-            return  hovered ? hoveredRenderContent : unhoveredRenderContent;
+            return hovered ? hoveredRenderContent : unhoveredRenderContent;
         }
 
         public void OnHoverEnd()
@@ -33,7 +34,10 @@ namespace XKOMapp.GUI.ConsoleRows
         {
             hovered = true;
         }
-        public void SetHoveredRenderContent(IRenderable renderContent) => this.hoveredRenderContent = renderContent;
-        public void SetUnhoveredRenderContent(IRenderable renderContent) => this.unhoveredRenderContent = renderContent;
+
+        public void SetOwnership(ConsolePrinter owner)
+        {
+            this.owner = owner;
+        }
     }
 }

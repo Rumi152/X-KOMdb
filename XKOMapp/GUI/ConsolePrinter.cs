@@ -186,7 +186,7 @@ public class ConsolePrinter
     public void Interract()
     {
         if (currentCursorRow is IInteractableConsoleRow converted)
-            converted.OnInteraction(this);
+            converted.OnInteraction();
     }
 
 
@@ -194,7 +194,11 @@ public class ConsolePrinter
     /// Add new row to memory
     /// </summary>
     /// <param name="row">ConsoleRow to add</param>
-    public void AddRow(IConsoleRow row) => rows.Add(row);
+    public void AddRow(IConsoleRow row)
+    {
+        row.SetOwnership(this);
+        rows.Add(row);
+    }
 
     /// <summary>
     /// Ends header section and starts interactible content (resets after clearing memory)

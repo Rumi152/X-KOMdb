@@ -9,21 +9,16 @@ namespace XKOMapp.GUI.ConsoleRows
 {
     internal class MultiLineConsoleRow : BasicConsoleRow, ICustomLineSpanConsoleRow
     {
-        private readonly Func<IConsoleRow, int> heightFunc;
+        private int height;
 
         public MultiLineConsoleRow(IRenderable renderable, int height) : base(renderable)
         {
-            heightFunc = (_) => height;
-        }
-
-        public MultiLineConsoleRow(IRenderable renderable, Func<IConsoleRow, int> height) : base(renderable)
-        {
-            heightFunc = height;
+            this.height = height;
         }
 
         public int GetRenderHeight()
         {
-            return heightFunc.Invoke(this);
+            return height;
         }
     }
 }

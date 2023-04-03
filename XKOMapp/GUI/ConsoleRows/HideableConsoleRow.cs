@@ -7,16 +7,14 @@ using System.Threading.Tasks;
 
 namespace XKOMapp.GUI.ConsoleRows
 {
-    internal class HideableConsoleRow : IHideableConsoleRow
+    public class HideableConsoleRow : BasicConsoleRow, IHideableConsoleRow
     {
-        private IRenderable renderContent;
-        bool isHidden = true;
-        bool ISwitchableConsoleRow.IsActive { get => isHidden; set => isHidden = value; }
+        bool isActive = true;
+        bool ISwitchableConsoleRow.IsActive { get => isActive; set => isActive = value; }
 
-        public HideableConsoleRow(IRenderable renderable) => this.renderContent = renderable;
-
-        public IRenderable GetRenderContent() => renderContent;
-        public void SetRenderContent(IRenderable renderContent) => this.renderContent = renderContent;
+        public HideableConsoleRow(IRenderable renderable) : base(renderable)
+        {
+        }
 
         void ISwitchableConsoleRow.OnTurningOff()
         {
