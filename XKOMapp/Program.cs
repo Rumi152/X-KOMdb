@@ -40,24 +40,14 @@ namespace XKOMapp
             printer.AddRow(new BasicConsoleRow(new Text("Text3")));
             printer.AddRow(new BasicConsoleRow(new Text("Text4")));
 
-            FocusableConsoleRow[] focusableRows = new FocusableConsoleRow[4];
-            focusableRows[0] = new FocusableConsoleRow(new Text("\tFocused1"));
-            focusableRows[1] = new FocusableConsoleRow(new Text("\tFocused2"));
-            focusableRows[2] = new FocusableConsoleRow(new Text("\tFocused3"));
-            focusableRows[3] = new FocusableConsoleRow(new Text("\tFocused4"));
-            printer.AddRow(focusableRows[0]);
-            printer.AddRow(focusableRows[1]);
-            printer.AddRow(focusableRows[2]);
-            printer.AddRow(focusableRows[3]);
-            printer.AddRow(new InteractableConsoleRow(
+            List<IFocusableConsoleRow> focusableRows = new();
+            for(int i = 0; i < 4; i++)
+                focusableRows.Add( new FocusableConsoleRow(new Text("\tFocused" + 1)));
+            printer.AddRow(new FocusableGroupParentConsoleRow(
                 new Text("FocusMode"),
-                (row, _) =>
-                {
-                    ((IFocusableConsoleRow)focusableRows[0]).TurnOn();
-                    ((IFocusableConsoleRow)focusableRows[1]).TurnOn();
-                    ((IFocusableConsoleRow)focusableRows[2]).TurnOn();
-                    ((IFocusableConsoleRow)focusableRows[3]).TurnOn();
-                }));
+                focusableRows
+                ));
+            focusableRows.ForEach(x => printer.AddRow(x));
 
             printer.AddRow(new MultiLineConsoleRow(new Text("Text5\n\tParagrapgh\n\tParagrapgh\n\tParagrapgh\n\tParagrapgh"), 5)); //row that takes more than 1 line
             printer.AddRow(new BasicConsoleRow(new Text("Text6")));
