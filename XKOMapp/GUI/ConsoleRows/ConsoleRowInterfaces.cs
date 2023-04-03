@@ -46,7 +46,7 @@ public interface ICustomCursorConsoleRow : IConsoleRow
 }
 
 /// <summary>
-/// ConsoleRow which switched between two states
+/// ConsoleRow which can be switched between two states
 /// </summary>
 public interface ISwitchableConsoleRow : IConsoleRow
 {
@@ -68,7 +68,7 @@ public interface ISwitchableConsoleRow : IConsoleRow
         IsActive = false;
         OnTurningOff();
     }
-    public void Swich()
+    public void Switch()
     {
         if (IsActive)
             TurnOff();
