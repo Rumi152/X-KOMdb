@@ -197,6 +197,24 @@ public class ConsolePrinter
             converted.OnInteraction();
     }
 
+    /// <summary>
+    /// Switch mode of the row currently hovered right
+    /// </summary>
+    public void ModeSwitchRight()
+    {
+        if (currentCursorRow is IXAxisInteractableConsoleRow converted)
+            converted.MoveRight();
+    }
+
+    /// <summary>
+    /// Switch mode of the row currently hovered left
+    /// </summary>
+    public void ModeSwitchLeft()
+    {
+        if (currentCursorRow is IXAxisInteractableConsoleRow converted)
+            converted.MoveLeft();
+    }
+
 
     /// <summary>
     /// Add new row to memory

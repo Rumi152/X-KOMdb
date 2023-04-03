@@ -45,6 +45,40 @@ public interface ICustomCursorConsoleRow : IConsoleRow
     string GetCustomCursorBackground();
 }
 
+public interface IXAxisInteractableConsoleRow : IConsoleRow
+{
+    void MoveRight();
+    void MoveLeft();
+}
+
+/// <summary>
+/// ConsoleRow that can have multiple modes
+/// </summary>
+public interface IModesConsoleRow : IConsoleRow
+{
+    public int ModeIndex { get; protected set; }
+    public int ModesCount { get;}
+
+    public void IncrementModeIndex()
+    {
+        if (ModeIndex + 1 >= ModesCount)
+            return;
+
+        ModeIndex++;
+        OnModeChange();
+    }
+    public void DecrementModeIndex()
+    {
+        if (ModeIndex <= 0)
+            return;
+
+        ModeIndex--;
+        OnModeChange();
+    }
+
+    protected void OnModeChange();
+}
+
 /// <summary>
 /// ConsoleRow which can be switched between two states
 /// </summary>

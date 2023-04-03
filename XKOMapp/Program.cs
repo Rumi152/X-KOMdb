@@ -36,7 +36,15 @@ namespace XKOMapp
                 (row, _) => printer.AddRow(new BasicConsoleRow(new Text("AddedRow" + ++counter)))));
 
             printer.AddRow(new BasicConsoleRow(new Text("Text1")));
-            printer.AddRow(new MultiLineConsoleRow(new Text("Text2\n\tParagraph1\n\tParagraph2\n\tParagrapgh3"), 4)); //row that takes more than 1 line
+
+            printer.AddRow(
+                new ModesConsoleRow(
+                        new ModesConsoleRow.ConsoleRowModeData { renderContent = new Markup("Modes [bold blue]1[/] 2 3")},
+                        new ModesConsoleRow.ConsoleRowModeData { renderContent = new Markup("Modes 1 [bold blue]2[/] 3") },
+                        new ModesConsoleRow.ConsoleRowModeData { renderContent = new Markup("Modes 1 2 [bold blue]3[/]") }
+                    )
+                );
+
             printer.AddRow(new BasicConsoleRow(new Text("Text3")));
             printer.AddRow(new BasicConsoleRow(new Text("Text4")));
 
@@ -85,6 +93,14 @@ namespace XKOMapp
 
                         case ConsoleKey.Enter:
                             printer.Interract();
+                            break;
+
+                        case ConsoleKey.LeftArrow:
+                            printer.ModeSwitchLeft();
+                            break;
+
+                        case ConsoleKey.RightArrow:
+                            printer.ModeSwitchRight();
                             break;
 
                         default:
