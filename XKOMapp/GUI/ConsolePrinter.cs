@@ -250,7 +250,14 @@ public class ConsolePrinter
 
         int endLineIndex = 0;
         int linesShifted = 0;
-        int linesShiftStartIndex = rows.Take(CursorIndex ?? 0).Where(x => x is not IDeactivableConsoleRow converted || converted.IsActive).Sum(x => (x as ICustomLineSpanConsoleRow)?.GetRenderHeight() ?? 1) - cursorStickyStart;
+        int linesShiftStartIndex = rows
+            .Take(CursorIndex ?? 0)
+            .Where(x => x is not IDeactivableConsoleRow converted || converted.IsActive)
+            .Sum(x => (x as ICustomLineSpanConsoleRow)?.GetRenderHeight() ?? 1)
+            - cursorStickyStart;
+        int linesEndTotalIndex = rows
+            .Where(x => x is not IDeactivableConsoleRow converted || converted.IsActive)
+            .Sum(x => (x as ICustomLineSpanConsoleRow)?.GetRenderHeight() ?? 1);
         for (int index = 0; index < rows.Count; index++)
         {
             IConsoleRow row = rows[index];
@@ -277,11 +284,14 @@ public class ConsolePrinter
 
             if (scrollingEnabled && endLineIndex < linesShiftStartIndex)
             {
-                linesShifted += (row as ICustomLineSpanConsoleRow)?.GetRenderHeight() ?? 1;
-                continue;
+                if(linesEndTotalIndex - linesShifted > Console.WindowHeight - 1 - paddingBottom)
+                {
+                    linesShifted += (row as ICustomLineSpanConsoleRow)?.GetRenderHeight() ?? 1;
+                    continue;
+                }
             }
 
-            if (endLineIndex > Console.WindowHeight - 1 - paddingBottom /*+ Math.Max(0, (CursorIndex ?? 0) - cursorStickyStart - contentStart.Value)*/ + linesShifted)
+            if (endLineIndex - linesShifted > Console.WindowHeight - 1 - paddingBottom)
                 return;
 
             string cursor = ">";
