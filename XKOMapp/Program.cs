@@ -59,7 +59,11 @@ namespace XKOMapp
 
             printer.AddRow(new MultiLineConsoleRow(new Text("Text5\n\tParagrapgh\n\tParagrapgh\n\tParagrapgh\n\tParagrapgh"), 5)); //row that takes more than 1 line
             printer.AddRow(new BasicConsoleRow(new Text("Text6")));
-            printer.AddRow(new MultiLineConsoleRow(new Text("Text7\n\tParagraph1\n\tParagraph2\n\tParagrapgh3"), 4)); //row that takes more than 1 line
+            printer.AddRow(new BasicConsoleRow(new Text("Text6")));
+            printer.AddRow(new BasicConsoleRow(new Text("Text6")));
+            printer.AddRow(new InputConsoleRow());
+            printer.AddRow(new BasicConsoleRow(new Text("Text6")));
+            printer.AddRow(new BasicConsoleRow(new Text("Text6")));
             printer.AddRow(new HideOnClickConsoleRow(new Text("ClickToHide"))); //row that disapears on click
 
             //row that creates new rows on click
