@@ -84,7 +84,7 @@ public class ConsolePrinter
             return;
         }
 
-        CursorIndex = Math.Clamp(CursorIndex ?? 0, 0, rows.Count - 1);
+        CursorIndex = Math.Clamp(CursorIndex ?? 0, 0, memory.Count - 1);
 
         if (availableIndexes.Contains(CursorIndex.Value))
             return;
@@ -116,7 +116,7 @@ public class ConsolePrinter
             return;
         }
 
-        CursorIndex = Math.Clamp(CursorIndex ?? 0, 0, rows.Count - 1);
+        CursorIndex = Math.Clamp(CursorIndex ?? 0, 0, memory.Count - 1);
 
         if (availableIndexes.Contains(CursorIndex.Value))
             return;
@@ -142,7 +142,7 @@ public class ConsolePrinter
         if (CursorIndex is null)
             currentCursorRow = null;
         else
-            currentCursorRow = rows[CursorIndex.Value];
+            currentCursorRow = memory[CursorIndex.Value];
 
         if (previousCursorRow == currentCursorRow)
             return;
@@ -174,11 +174,11 @@ public class ConsolePrinter
         if (contentStart is null)
             return new List<int>();
 
-        var active = Enumerable.Range(0, rows.Count)
-            .Where(index => index >= contentStart && (rows[index] is not IDeactivableConsoleRow converted || converted.IsActive));
+        var active = Enumerable.Range(0, memory.Count)
+            .Where(index => index >= contentStart && (memory[index] is not IDeactivableConsoleRow converted || converted.IsActive));
 
-        var focused = Enumerable.Range(0, rows.Count)
-            .Where(index => rows[index] is IFocusableConsoleRow converted && converted.IsActive)
+        var focused = Enumerable.Range(0, memory.Count)
+            .Where(index => memory[index] is IFocusableConsoleRow converted && converted.IsActive)
             .Intersect(active);
 
         if (focused.Any())
@@ -223,13 +223,13 @@ public class ConsolePrinter
     public void AddRow(IConsoleRow row)
     {
         row.SetOwnership(this);
-        rows.Add(row);
+        memory.Add(row);
     }
 
     /// <summary>
     /// Ends header section and starts interactible content (resets after clearing memory)
     /// </summary>
-    public void StartContent() => contentStart = rows.Count;
+    public void StartContent() => contentStart = memory.Count;
 
     /// <summary>
     /// Enables scrolling for current memory
@@ -244,7 +244,7 @@ public class ConsolePrinter
     /// </summary>
     public void ClearMemory()
     {
-        rows.Clear();
+        memory.Clear();
         ClearBuffer();
         ClearScreen();
 
@@ -276,17 +276,17 @@ public class ConsolePrinter
 
         int endLineIndex = 0;
         int linesShifted = 0;
-        int linesShiftStartIndex = rows
+        int linesShiftStartIndex = memory
             .Take(CursorIndex ?? 0)
             .Where(x => x is not IDeactivableConsoleRow converted || converted.IsActive)
             .Sum(x => (x as ICustomLineSpanConsoleRow)?.GetRenderHeight() ?? 1)
             - cursorStickyStart;
-        int linesEndTotalIndex = rows
+        int linesEndTotalIndex = memory
             .Where(x => x is not IDeactivableConsoleRow converted || converted.IsActive)
             .Sum(x => (x as ICustomLineSpanConsoleRow)?.GetRenderHeight() ?? 1);
-        for (int index = 0; index < rows.Count; index++)
+        for (int index = 0; index < memory.Count; index++)
         {
-            IConsoleRow row = rows[index];
+            IConsoleRow row = memory[index];
 
             bool isHidden = row is IHideableConsoleRow hideableConverted && !hideableConverted.IsActive;
             if (isHidden)
