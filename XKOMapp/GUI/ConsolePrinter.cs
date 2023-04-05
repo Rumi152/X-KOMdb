@@ -17,9 +17,9 @@ public class ConsolePrinter
     /// </summary>
     const int paddingBottom = 0;
 
-    private Grid content;
+    private Grid content = null!;
     private readonly List<IRenderable> preContent = new();
-    private readonly List<IConsoleRow> rows = new List<IConsoleRow>();
+    private readonly List<IConsoleRow> memory = new List<IConsoleRow>();
 
     /// <summary>
     /// Current index of row pointed by cursor
