@@ -17,7 +17,7 @@ public class ConsolePrinter
     /// </summary>
     const int paddingBottom = 0;
 
-    private Grid content;
+    private Grid content = null!;
     private readonly List<IRenderable> preContent = new();
     private readonly List<IConsoleRow> rows = new List<IConsoleRow>();
 
