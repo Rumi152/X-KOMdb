@@ -8,7 +8,7 @@ namespace XKOMapp
 {
     internal class Program
     {
-        static ConsolePrinter printer;
+        static ConsolePrinter printer = null!;
 
         static void Main(string[] args)
         {
