@@ -191,29 +191,13 @@ public class ConsolePrinter
     /// <summary>
     /// Interact with row hovered on right now
     /// </summary>
-    public void Interract()
-    {
-        if (currentCursorRow is IInteractableConsoleRow converted)
-            converted.OnInteraction();
-    }
+    public void Interract() => (currentCursorRow as IInteractableConsoleRow)?.OnInteraction();
 
     /// <summary>
-    /// Switch mode of the row currently hovered right
+    /// Pass non-standard pressed key to process
     /// </summary>
-    public void ModeSwitchRight()
-    {
-        if (currentCursorRow is IXAxisInteractableConsoleRow converted)
-            converted.MoveRight();
-    }
-
-    /// <summary>
-    /// Switch mode of the row currently hovered left
-    /// </summary>
-    public void ModeSwitchLeft()
-    {
-        if (currentCursorRow is IXAxisInteractableConsoleRow converted)
-            converted.MoveLeft();
-    }
+    /// <param name="keystrokeInfo">ConsoleKeyInfo of pressed key</param>
+    public void ProcessCustomKeystroke(ConsoleKeyInfo keystrokeInfo) => (currentCursorRow as IInputConsoleRow)?.ProcessCustomKeystroke(keystrokeInfo);
 
 
     /// <summary>

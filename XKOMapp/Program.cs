@@ -79,7 +79,8 @@ namespace XKOMapp
             {
                 if (Console.KeyAvailable)
                 {
-                    var key = Console.ReadKey(true).Key;
+                    var info = Console.ReadKey(true);
+                    var key = info.Key;
 
                     switch (key)
                     {
@@ -95,15 +96,8 @@ namespace XKOMapp
                             printer.Interract();
                             break;
 
-                        case ConsoleKey.LeftArrow:
-                            printer.ModeSwitchLeft();
-                            break;
-
-                        case ConsoleKey.RightArrow:
-                            printer.ModeSwitchRight();
-                            break;
-
                         default:
+                            printer.ProcessCustomKeystroke(info);
                             break;
                     }
 
