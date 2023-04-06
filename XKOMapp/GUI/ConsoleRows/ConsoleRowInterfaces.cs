@@ -27,6 +27,11 @@ public interface IInteractableConsoleRow : IConsoleRow
     void OnInteraction();
 }
 
+public interface IInputConsoleRow : IConsoleRow
+{
+    void ProcessCustomKeystroke(ConsoleKeyInfo keystrokeInfo);
+}
+
 /// <summary>
 /// ConsoleRow with actions on hovering start and end
 /// </summary>
@@ -43,12 +48,6 @@ public interface ICustomCursorConsoleRow : IConsoleRow
 {
     string GetCustomCursor();
     string GetCustomCursorBackground();
-}
-
-public interface IXAxisInteractableConsoleRow : IConsoleRow
-{
-    void MoveRight();
-    void MoveLeft();
 }
 
 /// <summary>
