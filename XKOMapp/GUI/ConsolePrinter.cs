@@ -204,7 +204,7 @@ public class ConsolePrinter
     /// Pass non-standard pressed key to process
     /// </summary>
     /// <param name="keystrokeInfo">ConsoleKeyInfo of pressed key</param>
-    public void ProcessCustomKeystroke(ConsoleKeyInfo keystrokeInfo) => (currentCursorRow as IInputConsoleRow)?.ProcessCustomKeystroke(keystrokeInfo);
+    public void ProcessCustomKeystroke(ConsoleKeyInfo keystrokeInfo) => (currentCursorRow as ICustomKeystrokeListenerConsoleRow)?.ProcessCustomKeystroke(keystrokeInfo);
 
 
     /// <summary>
