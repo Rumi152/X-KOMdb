@@ -11,11 +11,11 @@ public class ConsolePrinter
     /// <summary>
     /// Number of rows after which screen starts to scroll
     /// </summary>
-    const int cursorStickyStart = 5;
+    private readonly int cursorStickyStart = 5;
     /// <summary>
     /// Number of rows left at bottom of screen
     /// </summary>
-    const int paddingBottom = 0;
+    private readonly int paddingBottom = 0;
 
     private Grid content = null!;
     private readonly List<IRenderable> preContent = new();
@@ -33,6 +33,13 @@ public class ConsolePrinter
 
 
     public ConsolePrinter() => ClearMemory();
+
+    public ConsolePrinter(int cursorStickyStart, int paddingBottom)
+    {
+        this.cursorStickyStart = cursorStickyStart;
+        this.paddingBottom = paddingBottom;
+        ClearMemory();
+    }
 
 
     /// <summary>
@@ -191,29 +198,13 @@ public class ConsolePrinter
     /// <summary>
     /// Interact with row hovered on right now
     /// </summary>
-    public void Interract()
-    {
-        if (currentCursorRow is IInteractableConsoleRow converted)
-            converted.OnInteraction();
-    }
+    public void Interract() => (currentCursorRow as IInteractableConsoleRow)?.OnInteraction();
 
     /// <summary>
-    /// Switch mode of the row currently hovered right
+    /// Pass non-standard pressed key to process
     /// </summary>
-    public void ModeSwitchRight()
-    {
-        if (currentCursorRow is IXAxisInteractableConsoleRow converted)
-            converted.MoveRight();
-    }
-
-    /// <summary>
-    /// Switch mode of the row currently hovered left
-    /// </summary>
-    public void ModeSwitchLeft()
-    {
-        if (currentCursorRow is IXAxisInteractableConsoleRow converted)
-            converted.MoveLeft();
-    }
+    /// <param name="keystrokeInfo">ConsoleKeyInfo of pressed key</param>
+    public void ProcessCustomKeystroke(ConsoleKeyInfo keystrokeInfo) => (currentCursorRow as IInputConsoleRow)?.ProcessCustomKeystroke(keystrokeInfo);
 
 
     /// <summary>

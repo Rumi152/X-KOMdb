@@ -59,7 +59,11 @@ namespace XKOMapp
 
             printer.AddRow(new MultiLineConsoleRow(new Text("Text5\n\tParagrapgh\n\tParagrapgh\n\tParagrapgh\n\tParagrapgh"), 5)); //row that takes more than 1 line
             printer.AddRow(new BasicConsoleRow(new Text("Text6")));
-            printer.AddRow(new MultiLineConsoleRow(new Text("Text7\n\tParagraph1\n\tParagraph2\n\tParagrapgh3"), 4)); //row that takes more than 1 line
+            printer.AddRow(new BasicConsoleRow(new Text("Text6")));
+            printer.AddRow(new BasicConsoleRow(new Text("Text6")));
+            printer.AddRow(new InputConsoleRow());
+            printer.AddRow(new BasicConsoleRow(new Text("Text6")));
+            printer.AddRow(new BasicConsoleRow(new Text("Text6")));
             printer.AddRow(new HideOnClickConsoleRow(new Text("ClickToHide"))); //row that disapears on click
 
             //row that creates new rows on click
@@ -79,7 +83,8 @@ namespace XKOMapp
             {
                 if (Console.KeyAvailable)
                 {
-                    var key = Console.ReadKey(true).Key;
+                    var info = Console.ReadKey(true);
+                    var key = info.Key;
 
                     switch (key)
                     {
@@ -95,15 +100,8 @@ namespace XKOMapp
                             printer.Interract();
                             break;
 
-                        case ConsoleKey.LeftArrow:
-                            printer.ModeSwitchLeft();
-                            break;
-
-                        case ConsoleKey.RightArrow:
-                            printer.ModeSwitchRight();
-                            break;
-
                         default:
+                            printer.ProcessCustomKeystroke(info);
                             break;
                     }
 
