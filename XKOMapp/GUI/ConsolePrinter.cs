@@ -11,11 +11,11 @@ public class ConsolePrinter
     /// <summary>
     /// Number of rows after which screen starts to scroll
     /// </summary>
-    const int cursorStickyStart = 5;
+    private readonly int cursorStickyStart = 5;
     /// <summary>
     /// Number of rows left at bottom of screen
     /// </summary>
-    const int paddingBottom = 0;
+    private readonly int paddingBottom = 0;
 
     private Grid content = null!;
     private readonly List<IRenderable> preContent = new();
@@ -33,6 +33,13 @@ public class ConsolePrinter
 
 
     public ConsolePrinter() => ClearMemory();
+
+    public ConsolePrinter(int cursorStickyStart, int paddingBottom)
+    {
+        this.cursorStickyStart = cursorStickyStart;
+        this.paddingBottom = paddingBottom;
+        ClearMemory();
+    }
 
 
     /// <summary>
