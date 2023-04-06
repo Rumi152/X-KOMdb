@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace XKOMapp.GUI.ConsoleRows
 {
-    public class ModesConsoleRow : IModesConsoleRow, IInputConsoleRow, ICustomCursorConsoleRow
+    public class ModesConsoleRow : IModesConsoleRow, ICustomKeystrokeListenerConsoleRow, ICustomCursorConsoleRow
     {
         public struct ConsoleRowModeData
         {

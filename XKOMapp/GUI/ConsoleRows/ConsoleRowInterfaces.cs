@@ -27,7 +27,7 @@ public interface IInteractableConsoleRow : IConsoleRow
     void OnInteraction();
 }
 
-public interface IInputConsoleRow : IConsoleRow
+public interface ICustomKeystrokeListenerConsoleRow : IConsoleRow
 {
     void ProcessCustomKeystroke(ConsoleKeyInfo keystrokeInfo);
 }
