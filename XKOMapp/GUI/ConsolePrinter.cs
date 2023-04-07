@@ -31,7 +31,8 @@ public class ConsolePrinter
 
     private Grid content = null!;
     private readonly List<IRenderable> preContent = new();
-    private readonly List<IConsoleRow> memory = new List<IConsoleRow>();
+    private readonly List<IConsoleRow> memory = new();
+    private readonly List<string?> memoryGroupingKeys = new();
 
     /// <summary>
     /// Current index of row pointed by cursor
@@ -234,7 +235,56 @@ public class ConsolePrinter
     {
         row.SetOwnership(this);
         memory.Add(row);
+        memoryGroupingKeys.Add(null);
     }
+
+    /// <summary>
+    /// Add new row to memory group
+    /// </summary>
+    /// <param name="row">ConsoleRow to add</param>
+    /// <param name="group">Group to assign row to</param>
+    public void AddRow(IConsoleRow row, string group)
+    {
+        row.SetOwnership(this);
+
+        var index = memoryGroupingKeys.FindLastIndex(x => x == group);
+        if (index == -1)
+        {
+            memory.Add(row);
+            memoryGroupingKeys.Add(group);
+        }
+        else
+        {
+            memory.Insert(index + 1, row);
+            memoryGroupingKeys.Insert(index + 1, group);
+        }
+    }
+
+    /// <summary>
+    /// Clears memory
+    /// </summary>
+    public void ClearMemory()
+    {
+        memory.Clear();
+        memoryGroupingKeys.Clear();
+
+        scrollingEnabled = false;
+        ResetCursor();
+    }
+
+    public void DeleteMemoryGroup(string group)
+    {
+        Enumerable.Range(0, memory.Count)
+            .Where(index => memoryGroupingKeys[index] == group)
+            .Reverse()
+            .ToList()
+            .ForEach(index =>
+            {
+                memory.RemoveAt(index);
+                memoryGroupingKeys.RemoveAt(index);
+            });
+    }
+
 
     /// <summary>
     /// Ends header section and starts interactible content (resets after clearing memory)
@@ -249,18 +299,6 @@ public class ConsolePrinter
         scrollingEnabled = true;
     }
 
-    /// <summary>
-    /// Clears buffer, screen and memory
-    /// </summary>
-    public void ClearMemory()
-    {
-        memory.Clear();
-        ClearBuffer();
-        ClearScreen();
-
-        scrollingEnabled = false;
-        ResetCursor();
-    }
 
 
     /// <summary>
