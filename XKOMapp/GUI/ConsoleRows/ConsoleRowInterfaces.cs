@@ -36,6 +36,14 @@ public interface ICustomKeystrokeListenerConsoleRow : IConsoleRow
 }
 
 /// <summary>
+/// ConsoleRow that has string that can be modified
+/// </summary>
+public interface IInputFieldConsoleRow : ICustomKeystrokeListenerConsoleRow
+{
+    public string CurrentInput { get; protected set; }
+}
+
+/// <summary>
 /// ConsoleRow with actions on hovering start and end
 /// </summary>
 public interface IHoverConsoleRow : IConsoleRow
