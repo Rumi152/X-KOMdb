@@ -17,7 +17,16 @@ public class ConsolePrinter
 
         void ISwitchableConsoleRow.OnTurningOff() { }
         void ISwitchableConsoleRow.OnTurningOn() => throw new Exception("ContentStartMarker should never be turned on");
+    }
+    private class GroupStartMarker : IHideableConsoleRow
+    {
+        bool ISwitchableConsoleRow.IsActive { get => false; set { } }
 
+        public IRenderable GetRenderContent() => throw new Exception("ContentStartMarker should never be asked for RenderContent");
+        public void SetOwnership(ConsolePrinter owner) { }
+
+        void ISwitchableConsoleRow.OnTurningOff() { }
+        void ISwitchableConsoleRow.OnTurningOn() => throw new Exception("ContentStartMarker should never be turned on");
     }
 
     /// <summary>
@@ -272,6 +281,10 @@ public class ConsolePrinter
         ResetCursor();
     }
 
+    /// <summary>
+    /// Deletes memory group and its content
+    /// </summary>
+    /// <param name="group"></param>
     public void DeleteMemoryGroup(string group)
     {
         Enumerable.Range(0, memory.Count)
@@ -283,6 +296,18 @@ public class ConsolePrinter
                 memory.RemoveAt(index);
                 memoryGroupingKeys.RemoveAt(index);
             });
+    }
+
+    /// <summary>
+    /// Clears memory group content without deleting it
+    /// </summary>
+    /// <param name="group"></param>
+    public void ClearMemoryGroup(string group)
+    {
+        var index = memoryGroupingKeys.FindIndex(x => x == group);
+        DeleteMemoryGroup(group);
+        memory.Insert(index, new GroupStartMarker());
+        memoryGroupingKeys.Insert(index, group);
     }
 
 
