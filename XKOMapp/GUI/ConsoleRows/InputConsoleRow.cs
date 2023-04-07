@@ -8,9 +8,11 @@ using System.Threading.Tasks;
 
 namespace XKOMapp.GUI.ConsoleRows
 {
-    public class InputConsoleRow : ICustomKeystrokeListenerConsoleRow
+    public class InputConsoleRow : IInputFieldConsoleRow
     {
-        public string CurrentInput { get; private set; } = "";
+        private string currentInput = "";
+        public string CurrentInput { get => currentInput; set => currentInput = value; }
+
         private ConsolePrinter? owner;
 
         public IRenderable GetRenderContent()
