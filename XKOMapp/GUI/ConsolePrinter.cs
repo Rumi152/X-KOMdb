@@ -8,6 +8,18 @@ namespace XKOMapp.GUI;
 
 public class ConsolePrinter
 {
+    private class ContentStartMarker : IHideableConsoleRow
+    {
+        bool ISwitchableConsoleRow.IsActive { get => false; set { } }
+
+        public IRenderable GetRenderContent() => throw new Exception("ContentStartMarker should never be asked for RenderContent");
+        public void SetOwnership(ConsolePrinter owner) { }
+
+        void ISwitchableConsoleRow.OnTurningOff() { }
+        void ISwitchableConsoleRow.OnTurningOn() => throw new Exception("ContentStartMarker should never be turned on");
+
+    }
+
     /// <summary>
     /// Number of rows after which screen starts to scroll
     /// </summary>
@@ -28,7 +40,14 @@ public class ConsolePrinter
     public int? CursorIndex { get; private set; } = null;
     private IConsoleRow? currentCursorRow = null;
     private IConsoleRow? previousCursorRow = null;
-    private int? contentStart = null;
+    private int? contentStart
+    {
+        get
+        {
+            var x = memory.FindIndex(x => x is ContentStartMarker);
+            return x == -1 ? null : x;
+        }
+    }
     private bool scrollingEnabled = false;
 
 
@@ -220,7 +239,7 @@ public class ConsolePrinter
     /// <summary>
     /// Ends header section and starts interactible content (resets after clearing memory)
     /// </summary>
-    public void StartContent() => contentStart = memory.Count;
+    public void StartContent() => AddRow(new ContentStartMarker());
 
     /// <summary>
     /// Enables scrolling for current memory
@@ -239,7 +258,6 @@ public class ConsolePrinter
         ClearBuffer();
         ClearScreen();
 
-        contentStart = null;
         scrollingEnabled = false;
         ResetCursor();
     }
@@ -301,7 +319,7 @@ public class ConsolePrinter
 
             if (scrollingEnabled && endLineIndex < linesShiftStartIndex)
             {
-                if(linesEndTotalIndex - linesShifted > Console.WindowHeight - 1 - paddingBottom)
+                if (linesEndTotalIndex - linesShifted > Console.WindowHeight - 1 - paddingBottom)
                 {
                     linesShifted += (row as ICustomLineSpanConsoleRow)?.GetRenderHeight() ?? 1;
                     continue;
