@@ -2,6 +2,7 @@
 using Spectre.Console.Rendering;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
+using System.Reflection;
 using XKOMapp.GUI.ConsoleRows;
 
 namespace XKOMapp.GUI;
@@ -37,6 +38,9 @@ public class ConsolePrinter
     /// Number of rows left at bottom of screen
     /// </summary>
     private readonly int paddingBottom = 0;
+    private readonly ConsoleKey interactionKey = ConsoleKey.Enter;
+    private readonly ConsoleKey upKey = ConsoleKey.UpArrow;
+    private readonly ConsoleKey downKey = ConsoleKey.DownArrow;
 
     private Grid content = null!;
     private readonly List<IRenderable> preContent = new();
@@ -222,18 +226,6 @@ public class ConsolePrinter
 
         return active.ToList();
     }
-
-
-    /// <summary>
-    /// Interact with row hovered on right now
-    /// </summary>
-    public void Interract() => (currentCursorRow as IInteractableConsoleRow)?.OnInteraction();
-
-    /// <summary>
-    /// Pass non-standard pressed key to process
-    /// </summary>
-    /// <param name="keystrokeInfo">ConsoleKeyInfo of pressed key</param>
-    public void ProcessCustomKeystroke(ConsoleKeyInfo keystrokeInfo) => (currentCursorRow as ICustomKeystrokeListenerConsoleRow)?.ProcessCustomKeystroke(keystrokeInfo);
 
 
     /// <summary>
@@ -430,4 +422,34 @@ public class ConsolePrinter
     /// Clears console
     /// </summary>
     public void ClearScreen() => AnsiConsole.Clear();
+
+
+    /// <summary>
+    /// Pass pressed key to process
+    /// </summary>
+    /// <param name="keystrokeInfo">ConsoleKeyInfo of pressed key</param>
+    public void PassKeystroke(ConsoleKeyInfo keystrokeInfo)
+    {
+        var key = keystrokeInfo.Key;
+
+        if (key == downKey)
+            CursorDown();
+        else if (key == upKey)
+            CursorUp();
+        else if (key == interactionKey)
+            Interract();
+        else
+            PassCustomKeystroke(keystrokeInfo);
+    }
+
+    /// <summary>
+    /// Interact with row hovered on right now
+    /// </summary>
+    public void Interract() => (currentCursorRow as IInteractableConsoleRow)?.OnInteraction();
+
+    /// <summary>
+    /// Pass non-standard pressed key to process
+    /// </summary>
+    /// <param name="keystrokeInfo">ConsoleKeyInfo of pressed key</param>
+    public void PassCustomKeystroke(ConsoleKeyInfo keystrokeInfo) => (currentCursorRow as ICustomKeystrokeListenerConsoleRow)?.ProcessCustomKeystroke(keystrokeInfo);
 }
