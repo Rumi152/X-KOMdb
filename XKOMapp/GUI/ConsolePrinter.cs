@@ -12,21 +12,21 @@ public class ConsolePrinter
     {
         bool ISwitchableConsoleRow.IsActive { get => false; set { } }
 
-        public IRenderable GetRenderContent() => throw new Exception("ContentStartMarker should never be asked for RenderContent");
+        public IRenderable GetRenderContent() => throw new Exception("Marker should never be asked for RenderContent");
         public void SetOwnership(ConsolePrinter owner) { }
 
         void ISwitchableConsoleRow.OnTurningOff() { }
-        void ISwitchableConsoleRow.OnTurningOn() => throw new Exception("ContentStartMarker should never be turned on");
+        void ISwitchableConsoleRow.OnTurningOn() => throw new Exception("Marker should never be turned on");
     }
     private class GroupStartMarker : IHideableConsoleRow
     {
         bool ISwitchableConsoleRow.IsActive { get => false; set { } }
 
-        public IRenderable GetRenderContent() => throw new Exception("ContentStartMarker should never be asked for RenderContent");
+        public IRenderable GetRenderContent() => throw new Exception("Marker should never be asked for RenderContent");
         public void SetOwnership(ConsolePrinter owner) { }
 
         void ISwitchableConsoleRow.OnTurningOff() { }
-        void ISwitchableConsoleRow.OnTurningOn() => throw new Exception("ContentStartMarker should never be turned on");
+        void ISwitchableConsoleRow.OnTurningOn() => throw new Exception("Marker should never be turned on");
     }
 
     /// <summary>
