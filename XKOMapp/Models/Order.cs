@@ -17,13 +17,15 @@ public partial class Order
 
     public decimal Price { get; set; }
 
-    public string Address { get; set; } = null!;
+    public int ShipmentInfoId { get; set; }
 
     public bool? NeedInstallationAssistance { get; set; }
 
     public virtual Cart Cart { get; set; } = null!;
 
     public virtual PaymentMethod? PaymentMethod { get; set; }
+
+    public virtual ShipmentInfo ShipmentInfo { get; set; } = null!;
 
     public virtual OrderStatus Status { get; set; } = null!;
 }

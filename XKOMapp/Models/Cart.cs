@@ -9,8 +9,6 @@ public partial class Cart
 
     public int? UserId { get; set; }
 
-    public bool IsActive { get; set; }
-
     public int? PromoCodeId { get; set; }
 
     public virtual ICollection<CartProduct> CartProducts { get; } = new List<CartProduct>();
@@ -20,4 +18,6 @@ public partial class Cart
     public virtual PromoCode? PromoCode { get; set; }
 
     public virtual User? User { get; set; }
+
+    public virtual User? UserNavigation { get; set; }
 }
