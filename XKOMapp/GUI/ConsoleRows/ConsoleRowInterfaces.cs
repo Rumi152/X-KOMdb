@@ -28,6 +28,22 @@ public interface IInteractableConsoleRow : IConsoleRow
 }
 
 /// <summary>
+/// ConsoleRow that can listen for pressed keys
+/// </summary>
+public interface ICustomKeystrokeListenerConsoleRow : IConsoleRow
+{
+    void ProcessCustomKeystroke(ConsoleKeyInfo keystrokeInfo);
+}
+
+/// <summary>
+/// ConsoleRow that has string that can be modified
+/// </summary>
+public interface IInputFieldConsoleRow : ICustomKeystrokeListenerConsoleRow
+{
+    public string CurrentInput { get; protected set; }
+}
+
+/// <summary>
 /// ConsoleRow with actions on hovering start and end
 /// </summary>
 public interface IHoverConsoleRow : IConsoleRow
@@ -43,12 +59,6 @@ public interface ICustomCursorConsoleRow : IConsoleRow
 {
     string GetCustomCursor();
     string GetCustomCursorBackground();
-}
-
-public interface IXAxisInteractableConsoleRow : IConsoleRow
-{
-    void MoveRight();
-    void MoveLeft();
 }
 
 /// <summary>

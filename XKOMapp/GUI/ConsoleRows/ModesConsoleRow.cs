@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace XKOMapp.GUI.ConsoleRows
 {
-    public class ModesConsoleRow : IModesConsoleRow, IXAxisInteractableConsoleRow, ICustomCursorConsoleRow, IInteractableConsoleRow
+    public class ModesConsoleRow : IModesConsoleRow, ICustomKeystrokeListenerConsoleRow, ICustomCursorConsoleRow
     {
         public struct ConsoleRowModeData
         {
@@ -37,9 +37,6 @@ namespace XKOMapp.GUI.ConsoleRows
 
         }
 
-        public void MoveRight() => ((IModesConsoleRow)this).IncrementModeIndex();
-        public void MoveLeft() => ((IModesConsoleRow)this).DecrementModeIndex();
-
         public string GetCustomCursor()
         {
             return "\u00BB";
@@ -50,6 +47,17 @@ namespace XKOMapp.GUI.ConsoleRows
             return " ";
         }
 
-        public void OnInteraction() => data[modeIndex].action?.Invoke(this, owner);
+        public void ProcessCustomKeystroke(ConsoleKeyInfo keystrokeInfo)
+        {
+            switch (keystrokeInfo.Key)
+            {
+                case ConsoleKey.RightArrow:
+                    ((IModesConsoleRow)this).IncrementModeIndex();
+                    break;
+                case ConsoleKey.LeftArrow:
+                    ((IModesConsoleRow)this).DecrementModeIndex();
+                    break;
+            }
+        }
     }
 }

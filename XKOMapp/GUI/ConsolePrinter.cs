@@ -2,24 +2,50 @@
 using Spectre.Console.Rendering;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
+using System.Reflection;
 using XKOMapp.GUI.ConsoleRows;
 
 namespace XKOMapp.GUI;
 
 public class ConsolePrinter
 {
+    private class ContentStartMarker : IHideableConsoleRow
+    {
+        bool ISwitchableConsoleRow.IsActive { get => false; set { } }
+
+        public IRenderable GetRenderContent() => throw new Exception("Marker should never be asked for RenderContent");
+        public void SetOwnership(ConsolePrinter owner) { }
+
+        void ISwitchableConsoleRow.OnTurningOff() { }
+        void ISwitchableConsoleRow.OnTurningOn() => throw new Exception("Marker should never be turned on");
+    }
+    private class GroupStartMarker : IHideableConsoleRow
+    {
+        bool ISwitchableConsoleRow.IsActive { get => false; set { } }
+
+        public IRenderable GetRenderContent() => throw new Exception("Marker should never be asked for RenderContent");
+        public void SetOwnership(ConsolePrinter owner) { }
+
+        void ISwitchableConsoleRow.OnTurningOff() { }
+        void ISwitchableConsoleRow.OnTurningOn() => throw new Exception("Marker should never be turned on");
+    }
+
     /// <summary>
     /// Number of rows after which screen starts to scroll
     /// </summary>
-    const int cursorStickyStart = 5;
+    private readonly int cursorStickyStart = 5;
     /// <summary>
     /// Number of rows left at bottom of screen
     /// </summary>
-    const int paddingBottom = 0;
+    private readonly int paddingBottom = 0;
+    private readonly ConsoleKey interactionKey = ConsoleKey.Enter;
+    private readonly ConsoleKey upKey = ConsoleKey.UpArrow;
+    private readonly ConsoleKey downKey = ConsoleKey.DownArrow;
 
     private Grid content = null!;
     private readonly List<IRenderable> preContent = new();
-    private readonly List<IConsoleRow> memory = new List<IConsoleRow>();
+    private readonly List<IConsoleRow> memory = new();
+    private readonly List<string?> memoryGroupingKeys = new();
 
     /// <summary>
     /// Current index of row pointed by cursor
@@ -28,11 +54,25 @@ public class ConsolePrinter
     public int? CursorIndex { get; private set; } = null;
     private IConsoleRow? currentCursorRow = null;
     private IConsoleRow? previousCursorRow = null;
-    private int? contentStart = null;
+    private int? contentStart
+    {
+        get
+        {
+            var x = memory.FindIndex(x => x is ContentStartMarker);
+            return x == -1 ? null : x;
+        }
+    }
     private bool scrollingEnabled = false;
 
 
     public ConsolePrinter() => ClearMemory();
+
+    public ConsolePrinter(int cursorStickyStart, int paddingBottom)
+    {
+        this.cursorStickyStart = cursorStickyStart;
+        this.paddingBottom = paddingBottom;
+        ClearMemory();
+    }
 
 
     /// <summary>
@@ -189,34 +229,6 @@ public class ConsolePrinter
 
 
     /// <summary>
-    /// Interact with row hovered on right now
-    /// </summary>
-    public void Interract()
-    {
-        if (currentCursorRow is IInteractableConsoleRow converted)
-            converted.OnInteraction();
-    }
-
-    /// <summary>
-    /// Switch mode of the row currently hovered right
-    /// </summary>
-    public void ModeSwitchRight()
-    {
-        if (currentCursorRow is IXAxisInteractableConsoleRow converted)
-            converted.MoveRight();
-    }
-
-    /// <summary>
-    /// Switch mode of the row currently hovered left
-    /// </summary>
-    public void ModeSwitchLeft()
-    {
-        if (currentCursorRow is IXAxisInteractableConsoleRow converted)
-            converted.MoveLeft();
-    }
-
-
-    /// <summary>
     /// Add new row to memory
     /// </summary>
     /// <param name="row">ConsoleRow to add</param>
@@ -224,12 +236,77 @@ public class ConsolePrinter
     {
         row.SetOwnership(this);
         memory.Add(row);
+        memoryGroupingKeys.Add(null);
     }
+
+    /// <summary>
+    /// Add new row to memory group
+    /// </summary>
+    /// <param name="row">ConsoleRow to add</param>
+    /// <param name="group">Group to assign row to</param>
+    public void AddRow(IConsoleRow row, string group)
+    {
+        row.SetOwnership(this);
+
+        var index = memoryGroupingKeys.FindLastIndex(x => x == group);
+        if (index == -1)
+        {
+            memory.Add(row);
+            memoryGroupingKeys.Add(group);
+        }
+        else
+        {
+            memory.Insert(index + 1, row);
+            memoryGroupingKeys.Insert(index + 1, group);
+        }
+    }
+
+    /// <summary>
+    /// Clears memory
+    /// </summary>
+    public void ClearMemory()
+    {
+        memory.Clear();
+        memoryGroupingKeys.Clear();
+
+        scrollingEnabled = false;
+        ResetCursor();
+    }
+
+    /// <summary>
+    /// Deletes memory group and its content
+    /// </summary>
+    /// <param name="group"></param>
+    public void DeleteMemoryGroup(string group)
+    {
+        Enumerable.Range(0, memory.Count)
+            .Where(index => memoryGroupingKeys[index] == group)
+            .Reverse()
+            .ToList()
+            .ForEach(index =>
+            {
+                memory.RemoveAt(index);
+                memoryGroupingKeys.RemoveAt(index);
+            });
+    }
+
+    /// <summary>
+    /// Clears memory group content without deleting it
+    /// </summary>
+    /// <param name="group"></param>
+    public void ClearMemoryGroup(string group)
+    {
+        var index = memoryGroupingKeys.FindIndex(x => x == group);
+        DeleteMemoryGroup(group);
+        memory.Insert(index, new GroupStartMarker());
+        memoryGroupingKeys.Insert(index, group);
+    }
+
 
     /// <summary>
     /// Ends header section and starts interactible content (resets after clearing memory)
     /// </summary>
-    public void StartContent() => contentStart = memory.Count;
+    public void StartContent() => AddRow(new ContentStartMarker());
 
     /// <summary>
     /// Enables scrolling for current memory
@@ -239,19 +316,6 @@ public class ConsolePrinter
         scrollingEnabled = true;
     }
 
-    /// <summary>
-    /// Clears buffer, screen and memory
-    /// </summary>
-    public void ClearMemory()
-    {
-        memory.Clear();
-        ClearBuffer();
-        ClearScreen();
-
-        contentStart = null;
-        scrollingEnabled = false;
-        ResetCursor();
-    }
 
 
     /// <summary>
@@ -310,7 +374,7 @@ public class ConsolePrinter
 
             if (scrollingEnabled && endLineIndex < linesShiftStartIndex)
             {
-                if(linesEndTotalIndex - linesShifted > Console.WindowHeight - 1 - paddingBottom)
+                if (linesEndTotalIndex - linesShifted > Console.WindowHeight - 1 - paddingBottom)
                 {
                     linesShifted += (row as ICustomLineSpanConsoleRow)?.GetRenderHeight() ?? 1;
                     continue;
@@ -358,4 +422,34 @@ public class ConsolePrinter
     /// Clears console
     /// </summary>
     public void ClearScreen() => AnsiConsole.Clear();
+
+
+    /// <summary>
+    /// Pass pressed key to process
+    /// </summary>
+    /// <param name="keystrokeInfo">ConsoleKeyInfo of pressed key</param>
+    public void PassKeystroke(ConsoleKeyInfo keystrokeInfo)
+    {
+        var key = keystrokeInfo.Key;
+
+        if (key == downKey)
+            CursorDown();
+        else if (key == upKey)
+            CursorUp();
+        else if (key == interactionKey)
+            Interract();
+        else
+            PassCustomKeystroke(keystrokeInfo);
+    }
+
+    /// <summary>
+    /// Interact with row hovered on right now
+    /// </summary>
+    public void Interract() => (currentCursorRow as IInteractableConsoleRow)?.OnInteraction();
+
+    /// <summary>
+    /// Pass non-standard pressed key to process
+    /// </summary>
+    /// <param name="keystrokeInfo">ConsoleKeyInfo of pressed key</param>
+    public void PassCustomKeystroke(ConsoleKeyInfo keystrokeInfo) => (currentCursorRow as ICustomKeystrokeListenerConsoleRow)?.ProcessCustomKeystroke(keystrokeInfo);
 }
