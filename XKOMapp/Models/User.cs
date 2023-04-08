@@ -15,6 +15,10 @@ public partial class User
 
     public string Email { get; set; } = null!;
 
+    public int ActiveCartId { get; set; }
+
+    public virtual Cart ActiveCart { get; set; } = null!;
+
     public virtual ICollection<Cart> Carts { get; } = new List<Cart>();
 
     public virtual ICollection<FavouriteProduct> FavouriteProducts { get; } = new List<FavouriteProduct>();
