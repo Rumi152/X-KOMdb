@@ -245,6 +245,17 @@ BEGIN
 	WHERE ID = (SELECT ActiveCartID FROM deleted);
 END;
 
+GO
+
+CREATE TRIGGER [createActiveCart]
+ON [User]
+AFTER INSERT
+AS
+BEGIN
+    INSERT INTO [Cart](UserID,PromoCodeID)
+    VALUES
+    ((SELECT ID FROM inserted),NULL);
+END;
 
 GO
 USE master;
