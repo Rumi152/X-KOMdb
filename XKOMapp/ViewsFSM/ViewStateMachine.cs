@@ -2,13 +2,17 @@
 {
     public class ViewStateMachine
     {
-        private ViewState? currentState;
+        public ViewState? CurrentState { get; private set; }
 
-        public void Checkout(ViewState newState)
+        public void Checkout(string stateID)
         {
-            currentState?.OnExit();
-            currentState = newState;
-            currentState?.OnEnter();
+            CurrentState?.OnExit();
+            CurrentState = states[stateID];
+            CurrentState.OnEnter();
         }
+
+        public void AddState(string stateID, ViewState state) => states.Add(stateID, state);
+
+        private readonly Dictionary<string, ViewState> states = new();
     }
 }

@@ -9,7 +9,7 @@ namespace XKOMapp.ViewsFSM
 {
     public abstract class ViewState
     {
-        protected ConsolePrinter? printer = null;
+        protected ConsolePrinter printer = null!;
         protected ViewStateMachine stateMachine { get; private set; }
 
         protected ViewState(ViewStateMachine stateMachine)
@@ -20,7 +20,7 @@ namespace XKOMapp.ViewsFSM
         public virtual void OnEnter() { }
         public virtual void OnExit() { }
 
-        public virtual void Print() { }
-        public virtual void PassKeystroke(ConsoleKeyInfo info) { }
+        public abstract void Display();
+        public abstract void PassKeystroke(ConsoleKeyInfo info);
     }
 }
