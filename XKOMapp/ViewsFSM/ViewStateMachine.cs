@@ -2,14 +2,16 @@
 {
     public class ViewStateMachine
     {
-        public ViewState? CurrentState { get; private set; }
+        private ViewState? currentState;
 
         public void Checkout(string stateID)
         {
-            CurrentState?.OnExit();
-            CurrentState = states[stateID];
-            CurrentState.OnEnter();
+            currentState?.OnExit();
+            currentState = states[stateID];
+            currentState.OnEnter();
         }
+
+        public void PassKeystroke(ConsoleKeyInfo info) => currentState?.PassKeystroke(info);
 
         public void AddState(string stateID, ViewState state) => states.Add(stateID, state);
 
