@@ -69,8 +69,12 @@ CREATE TABLE [User]
 	[LastName] NVARCHAR(32) NOT NULL,
 	[Password] VARCHAR(32) NOT NULL,
 	[Email] VARCHAR(256) NOT NULL,
-	[ActiveCartID] INT NOT NULL UNIQUE
+	[ActiveCartID] INT NULL
 );
+
+CREATE UNIQUE NONCLUSTERED INDEX idx_User_NullableUnique
+ON [User](ActiveCartID)
+WHERE ActiveCartID IS NOT NULL;
 
 CREATE TABLE [FavouriteProduct]
 (
@@ -235,7 +239,7 @@ ON UPDATE NO ACTION
 ON DELETE NO ACTION;
 
 GO
-
+/*
 CREATE TRIGGER [deleteActiveCart]
 ON [User]
 AFTER DELETE
@@ -246,16 +250,7 @@ BEGIN
 END;
 
 GO
-
-CREATE TRIGGER [createActiveCart]
-ON [User]
-AFTER INSERT
-AS
-BEGIN
-    INSERT INTO [Cart](UserID,PromoCodeID)
-    VALUES
-    ((SELECT ID FROM inserted),NULL);
-END;
+*/
 
 GO
 USE master;
