@@ -239,18 +239,15 @@ ON UPDATE NO ACTION
 ON DELETE NO ACTION;
 
 GO
-/*
-CREATE TRIGGER [deleteActiveCart]
-ON [User]
-AFTER DELETE
-AS
-BEGIN
-	DELETE FROM [Cart]
-	WHERE ID = (SELECT ActiveCartID FROM deleted);
-END;
 
-GO
-*/
+CREATE TRIGGER [deleteActiveCart]
+		ON [User]
+			AFTER DELETE
+		AS
+		BEGIN
+			DELETE FROM [Cart] 
+			WHERE ID IN (SELECT ActiveCartID FROM deleted)
+		END;
 
 GO
 USE master;
