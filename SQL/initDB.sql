@@ -7,9 +7,8 @@ CREATE TABLE [Product]
 (
 	[ID] INT PRIMARY KEY IDENTITY(1,1) NOT NULL,
 	[Name] VARCHAR(32) NOT NULL,
-	[Price] MONEY NOT NULL,
+	[Price] DECIMAL(8,2) NOT NULL,
 	[Description] VARCHAR(512) NOT NULL,
-	[Picture] IMAGE NULL,
 	[CategoryID] INT NULL,
 	[CompanyID] INT NULL,
 	[IsAvailable] BIT NOT NULL,
@@ -86,9 +85,13 @@ CREATE TABLE [FavouriteProduct]
 CREATE TABLE [List]
 (
 	[ID] INT PRIMARY KEY IDENTITY(1,1) NOT NULL,
-	[Link] VARCHAR(128) NULL UNIQUE,
+	[Link] VARCHAR(128) NULL,
 	[Name] VARCHAR(32) NOT NULL
 );
+
+CREATE UNIQUE NONCLUSTERED INDEX idx_List_NullableUnique
+ON [List](Link)
+WHERE Link IS NOT NULL;
 
 CREATE TABLE [List_Product]
 (
