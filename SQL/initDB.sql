@@ -33,7 +33,7 @@ CREATE TABLE [Review]
 	[ID] INT PRIMARY KEY IDENTITY(1,1) NOT NULL,
 	[ProductID] INT NOT NULL,
 	[Description] NVARCHAR(256) NOT NULL,
-	[StarRating] INT NULL, CHECK(StarRating >= 1 AND StarRating <= 5),
+	[StarRating] INT NULL, CHECK(StarRating >= 1 AND StarRating <= 6),
 	[UserID] INT NULL
 );
 
@@ -86,7 +86,7 @@ CREATE TABLE [List]
 (
 	[ID] INT PRIMARY KEY IDENTITY(1,1) NOT NULL,
 	[Link] VARCHAR(128) NULL,
-	[Name] VARCHAR(32) NOT NULL DEFAULT 'newlist1'
+	[Name] VARCHAR(32) NOT NULL DEFAULT 'newlist'
 );
 
 CREATE UNIQUE NONCLUSTERED INDEX idx_List_NullableUnique
