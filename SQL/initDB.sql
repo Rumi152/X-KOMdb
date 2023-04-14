@@ -7,9 +7,8 @@ CREATE TABLE [Product]
 (
 	[ID] INT PRIMARY KEY IDENTITY(1,1) NOT NULL,
 	[Name] VARCHAR(32) NOT NULL,
-	[Price] MONEY NOT NULL,
+	[Price] DECIMAL(8,2) NOT NULL,
 	[Description] VARCHAR(512) NOT NULL,
-	[Picture] IMAGE NULL,
 	[CategoryID] INT NULL,
 	[CompanyID] INT NULL,
 	[IsAvailable] BIT NOT NULL,
@@ -69,8 +68,12 @@ CREATE TABLE [User]
 	[LastName] NVARCHAR(32) NOT NULL,
 	[Password] VARCHAR(32) NOT NULL,
 	[Email] VARCHAR(256) NOT NULL,
-	[ActiveCartID] INT NOT NULL UNIQUE
+	[ActiveCartID] INT NULL
 );
+
+CREATE UNIQUE NONCLUSTERED INDEX idx_User_NullableUnique
+ON [User](ActiveCartID)
+WHERE ActiveCartID IS NOT NULL;
 
 CREATE TABLE [FavouriteProduct]
 (
@@ -82,9 +85,13 @@ CREATE TABLE [FavouriteProduct]
 CREATE TABLE [List]
 (
 	[ID] INT PRIMARY KEY IDENTITY(1,1) NOT NULL,
-	[Link] VARCHAR(128) NULL UNIQUE,
+	[Link] VARCHAR(128) NULL,
 	[Name] VARCHAR(32) NOT NULL
 );
+
+CREATE UNIQUE NONCLUSTERED INDEX idx_List_NullableUnique
+ON [List](Link)
+WHERE Link IS NOT NULL;
 
 CREATE TABLE [List_Product]
 (
@@ -237,14 +244,13 @@ ON DELETE NO ACTION;
 GO
 
 CREATE TRIGGER [deleteActiveCart]
-ON [User]
-AFTER DELETE
-AS
-BEGIN
-	DELETE FROM [Cart]
-	WHERE ID = (SELECT ActiveCartID FROM deleted);
-END;
-
+		ON [User]
+			AFTER DELETE
+		AS
+		BEGIN
+			DELETE FROM [Cart] 
+			WHERE ID IN (SELECT ActiveCartID FROM deleted)
+		END;
 
 GO
 USE master;
