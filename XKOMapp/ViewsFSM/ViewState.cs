@@ -27,7 +27,7 @@ namespace XKOMapp.ViewsFSM
             printer.PrintMemory();
         }
 
-        protected virtual void OnKeystrokePassed(ConsoleKeyInfo info) { };
+        protected virtual void OnKeystrokePassed(ConsoleKeyInfo info) { }
         protected virtual void OnKeystrokePassedFinally(ConsoleKeyInfo info) { }
 
         public void PassKeystroke(ConsoleKeyInfo info)
