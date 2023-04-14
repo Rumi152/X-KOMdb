@@ -17,7 +17,7 @@ internal class Program
             if (Console.KeyAvailable)
             {
                 var info = Console.ReadKey(true);
-                fsm.CurrentState?.PassKeystroke(info);
+                fsm?.PassKeystroke(info);
             }
         }
     }
