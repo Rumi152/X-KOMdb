@@ -11,7 +11,7 @@ CREATE TABLE [Product]
 	[Description] VARCHAR(512) NOT NULL,
 	[CategoryID] INT NULL,
 	[CompanyID] INT NULL,
-	[IsAvailable] BIT NOT NULL,
+	[NumberAvailable] INT NOT NULL,
 	[IntroductionDate] DATE NULL,
 	[Properties] VARCHAR(MAX) NULL
 );
@@ -33,7 +33,7 @@ CREATE TABLE [Review]
 	[ID] INT PRIMARY KEY IDENTITY(1,1) NOT NULL,
 	[ProductID] INT NOT NULL,
 	[Description] NVARCHAR(256) NOT NULL,
-	[RatingID] INT NOT NULL,
+	[StarRating] INT NULL, CHECK(StarRating >= 1 AND StarRating <= 5),
 	[UserID] INT NULL
 );
 
@@ -86,7 +86,7 @@ CREATE TABLE [List]
 (
 	[ID] INT PRIMARY KEY IDENTITY(1,1) NOT NULL,
 	[Link] VARCHAR(128) NULL,
-	[Name] VARCHAR(32) NOT NULL
+	[Name] VARCHAR(32) NOT NULL DEFAULT 'newlist1'
 );
 
 CREATE UNIQUE NONCLUSTERED INDEX idx_List_NullableUnique
@@ -109,7 +109,7 @@ CREATE TABLE [Order]
 	[PaymentMethodID] INT NULL,
 	[Price] MONEY NOT NULL,
 	[ShipmentInfoID] INT NOT NULL UNIQUE,
-	[NeedInstallationAssistance] BIT DEFAULT(0)
+	[NeedInstallationAssistance] BIT NOT NULL DEFAULT(0)
 );
 
 CREATE TABLE [ShipmentInfo]
@@ -139,11 +139,6 @@ CREATE TABLE [PaymentMethod]
 	[Name] VARCHAR(32) NOT NULL
 );
 
-CREATE TABLE [ReviewRating]
-(
-	[ID] INT PRIMARY KEY IDENTITY(1,1) NOT NULL,
-	[Name] VARCHAR(16) NOT NULL
-);
 
 
 ALTER TABLE Product
@@ -158,11 +153,6 @@ ON DELETE SET NULL;
 
 ALTER TABLE Review
 ADD FOREIGN KEY (ProductID) REFERENCES Product (ID)
-ON UPDATE CASCADE
-ON DELETE CASCADE;
-
-ALTER TABLE Review
-ADD FOREIGN KEY (RatingID) REFERENCES ReviewRating (ID)
 ON UPDATE CASCADE
 ON DELETE CASCADE;
 
