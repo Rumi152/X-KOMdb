@@ -28,11 +28,11 @@ namespace XKOMapp.ViewsFSM.States
             printer.AddRow(new Rule("Click to refresh").RuleStyle(Style.Parse("#0e8f75")).ToBasicConsoleRow());
 
             //[lime]{Price}[/] or "[red]Unavailable[/]"
-            printer.AddRow(new Markup($"{text.EscapeMarkup(),-32} | {company} | [lime]{price,-12}[/] PLN").ToBasicConsoleRow(), "product");
-            printer.AddRow(new Markup($"{text.EscapeMarkup(),-32} | {company} | [lime]{price,-12}[/] PLN").ToBasicConsoleRow(), "product");
-            printer.AddRow(new Markup($"{text.EscapeMarkup(),-32} | {company} | [lime]{price,-12}[/] PLN").ToBasicConsoleRow(), "product");
-            printer.AddRow(new Markup($"{text.EscapeMarkup(),-32} | {company} | [lime]{price,-12}[/] PLN").ToBasicConsoleRow(), "product");
-            printer.AddRow(new Markup($"{text.EscapeMarkup(),-32} | {company} | [lime]{price,-12}[/] PLN").ToBasicConsoleRow(), "product");
+            printer.AddRow(new Markup($"{text.EscapeMarkup(),-32} | {company} | [lime]{price,-10}[/] PLN").ToBasicConsoleRow(), "product");
+            printer.AddRow(new Markup($"{text.EscapeMarkup(),-32} | {company} | [lime]{price,-10}[/] PLN").ToBasicConsoleRow(), "product");
+            printer.AddRow(new Markup($"{text.EscapeMarkup(),-32} | {company} | [lime]{price,-10}[/] PLN").ToBasicConsoleRow(), "product");
+            printer.AddRow(new Markup($"{text.EscapeMarkup(),-32} | {company} | [lime]{price,-10}[/] PLN").ToBasicConsoleRow(), "product");
+            printer.AddRow(new Markup($"{text.EscapeMarkup(),-32} | {company} | [lime]{1000000.99,-10}[/] PLN").ToBasicConsoleRow(), "product");
         }
 
         public override void OnEnter()

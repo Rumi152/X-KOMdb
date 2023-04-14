@@ -10,6 +10,8 @@ internal class Program
     static void Main(string[] args)
     {
         Console.CursorVisible = false;
+        Console.Title = "X-KOMapp";
+
         var fsm = new ViewStateMachine();
         fsm.AddState("productsSearch", new ProductSearchViewState(fsm, "Laptop 15s AMD ryzen", 9870000.99m, "HP"));
         fsm.Checkout("productsSearch");
