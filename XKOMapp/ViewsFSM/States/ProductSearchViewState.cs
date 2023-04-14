@@ -1,22 +1,36 @@
-﻿using Spectre.Console;
+﻿using Microsoft.EntityFrameworkCore;
+using Spectre.Console;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using XKOMapp.GUI;
+using XKOMapp.GUI.ConsoleRows;
+using XKOMapp.Models;
 
 namespace XKOMapp.ViewsFSM.States
 {
     public class ProductSearchViewState : ViewState
     {
-        public ProductSearchViewState(ViewStateMachine stateMachine, string text, decimal price, string company) : base(stateMachine)
+        public ProductSearchViewState(ViewStateMachine stateMachine) : base(stateMachine)
         {
+            //using var context = new XkomContext();
+            //var newProduct = new Product();
+            //newProduct.Name = "Logitech G402 Mouse";
+            //newProduct.Description = "";
+            //newProduct.Price = 250.5m;
+            //newProduct.IsAvailable = true;
+            //context.Add(newProduct);
+            //context.SaveChanges();
+
             printer = new ConsolePrinter();
+            printer.EnableScrolling();
 
             printer.AddRow(StandardRenderables.StandardHeader.ToBasicConsoleRow());
             printer.StartContent();
 
+            //TODO
             //Company search
             //Price range
             //Name search
@@ -24,21 +38,19 @@ namespace XKOMapp.ViewsFSM.States
             //reset filters unavailable
             //orderby: newest, highest ratings, cheapest, most expensive
 
-            //refresh products
-            printer.AddRow(new Rule("Click to refresh").RuleStyle(Style.Parse("#0e8f75")).ToBasicConsoleRow());
+            printer.AddRow(new InteractableConsoleRow(new Text("Placeholder"), (row, printer) => RefreshProducts()));
 
-            //[lime]{Price}[/] or "[red]Unavailable[/]"
-            printer.AddRow(new Markup($"{text.EscapeMarkup(),-32} | {company} | [lime]{price,-10}[/] PLN").ToBasicConsoleRow(), "product");
-            printer.AddRow(new Markup($"{text.EscapeMarkup(),-32} | {company} | [lime]{price,-10}[/] PLN").ToBasicConsoleRow(), "product");
-            printer.AddRow(new Markup($"{text.EscapeMarkup(),-32} | {company} | [lime]{price,-10}[/] PLN").ToBasicConsoleRow(), "product");
-            printer.AddRow(new Markup($"{text.EscapeMarkup(),-32} | {company} | [lime]{price,-10}[/] PLN").ToBasicConsoleRow(), "product");
-            printer.AddRow(new Markup($"{text.EscapeMarkup(),-32} | {company} | [lime]{1000000.99,-10}[/] PLN").ToBasicConsoleRow(), "product");
+            printer.AddRow(StandardRenderables.StandardSeparator.ToBasicConsoleRow());
+
+            printer.AddRow(new Text("Placeholder").ToBasicConsoleRow(), "products");
+            printer.ClearMemoryGroup("products");
         }
 
         public override void OnEnter()
         {
             base.OnEnter();
 
+            RefreshProducts();
             Display();
         }
 
@@ -54,6 +66,22 @@ namespace XKOMapp.ViewsFSM.States
             base.OnKeystrokePassedFinally(info);
 
             Display();
+        }
+
+        private void RefreshProducts()
+        {
+            printer?.ClearMemoryGroup("products");
+
+            using var context = new XkomContext();
+
+            //TODO constraints and ordering
+            var products = context.Products.ToList();
+
+            products.ForEach(x =>
+            {
+                var priceString = x.IsAvailable ? $"[lime]{x.Price.ToString("0.00"),-9}[/] PLN" : "[red]Unavailable[/]";
+                printer?.AddRow(new Markup($"{x.Name.EscapeMarkup(),-32} | {priceString}").ToBasicConsoleRow(), "products");
+            });
         }
     }
 }

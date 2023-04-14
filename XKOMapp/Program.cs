@@ -13,7 +13,7 @@ internal class Program
         Console.Title = "X-KOMapp";
 
         var fsm = new ViewStateMachine();
-        fsm.AddState("productsSearch", new ProductSearchViewState(fsm, "Laptop 15s AMD ryzen", 9870000.99m, "HP"));
+        fsm.AddState("productsSearch", new ProductSearchViewState(fsm));
         fsm.Checkout("productsSearch");
 
         //checking for input in loop
