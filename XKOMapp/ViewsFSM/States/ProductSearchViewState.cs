@@ -39,11 +39,8 @@ namespace XKOMapp.ViewsFSM.States
             //orderby: newest, highest ratings, cheapest, most expensive
 
             printer.AddRow(new InteractableConsoleRow(new Text("Placeholder"), (row, printer) => RefreshProducts()));
-
             printer.AddRow(StandardRenderables.StandardSeparator.ToBasicConsoleRow());
-
-            printer.AddRow(new Text("Placeholder").ToBasicConsoleRow(), "products");
-            printer.ClearMemoryGroup("products");
+            printer.StartGroup("products");
         }
 
         public override void OnEnter()
