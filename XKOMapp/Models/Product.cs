@@ -13,13 +13,11 @@ public partial class Product
 
     public string Description { get; set; } = null!;
 
-    public byte[]? Picture { get; set; }
-
     public int? CategoryId { get; set; }
 
     public int? CompanyId { get; set; }
 
-    public bool IsAvailable { get; set; }
+    public int NumberAvailable { get; set; }
 
     public DateTime? IntroductionDate { get; set; }
 
