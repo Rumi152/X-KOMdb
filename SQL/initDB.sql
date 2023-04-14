@@ -7,7 +7,7 @@ CREATE TABLE [Product]
 (
 	[ID] INT PRIMARY KEY IDENTITY(1,1) NOT NULL,
 	[Name] VARCHAR(32) NOT NULL,
-	[Price] MONEY NOT NULL,
+	[Price] DECIMAL(8,2) NOT NULL,
 	[Description] VARCHAR(512) NOT NULL,
 	[CategoryID] INT NULL,
 	[CompanyID] INT NULL,
