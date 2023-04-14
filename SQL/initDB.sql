@@ -109,7 +109,7 @@ CREATE TABLE [Order]
 	[PaymentMethodID] INT NULL,
 	[Price] MONEY NOT NULL,
 	[ShipmentInfoID] INT NOT NULL UNIQUE,
-	[NeedInstallationAssistance] BIT DEFAULT(0)
+	[NeedInstallationAssistance] BIT NOT NULL DEFAULT(0)
 );
 
 CREATE TABLE [ShipmentInfo]
