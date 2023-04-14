@@ -9,7 +9,6 @@ CREATE TABLE [Product]
 	[Name] VARCHAR(32) NOT NULL,
 	[Price] MONEY NOT NULL,
 	[Description] VARCHAR(512) NOT NULL,
-	[Picture] IMAGE NULL,
 	[CategoryID] INT NULL,
 	[CompanyID] INT NULL,
 	[IsAvailable] BIT NOT NULL,
