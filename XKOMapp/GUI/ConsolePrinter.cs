@@ -262,6 +262,20 @@ public class ConsolePrinter
     }
 
     /// <summary>
+    /// Starts new group without any content
+    /// </summary>
+    /// <param name="id">Id of group</param>
+    /// <exception cref="Exception">If group already exists</exception>
+    public void StartGroup(string id)
+    {
+        if (memoryGroupingKeys.Contains(id))
+            throw new Exception("Row group already exists");
+
+        memory.Add(new GroupStartMarker());
+        memoryGroupingKeys.Add(id);
+    }
+
+    /// <summary>
     /// Clears memory
     /// </summary>
     public void ClearMemory()
@@ -296,10 +310,16 @@ public class ConsolePrinter
     /// <param name="group"></param>
     public void ClearMemoryGroup(string group)
     {
-        var index = memoryGroupingKeys.FindIndex(x => x == group);
-        DeleteMemoryGroup(group);
-        memory.Insert(index, new GroupStartMarker());
-        memoryGroupingKeys.Insert(index, group);
+        Enumerable.Range(0, memory.Count)
+            .Where(index => memoryGroupingKeys[index] == group)
+            .Where(index => memory[index] is not GroupStartMarker)
+            .Reverse()
+            .ToList()
+            .ForEach(index =>
+            {
+                memory.RemoveAt(index);
+                memoryGroupingKeys.RemoveAt(index);
+            });
     }
 
 
