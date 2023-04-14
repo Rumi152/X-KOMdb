@@ -19,7 +19,7 @@ public partial class Order
 
     public int ShipmentInfoId { get; set; }
 
-    public bool? NeedInstallationAssistance { get; set; }
+    public bool NeedInstallationAssistance { get; set; }
 
     public virtual Cart Cart { get; set; } = null!;
 
