@@ -1,10 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
-using Spectre.Console;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using Spectre.Console;
 using XKOMapp.GUI;
 using XKOMapp.GUI.ConsoleRows;
 using XKOMapp.Models;
@@ -13,6 +7,8 @@ namespace XKOMapp.ViewsFSM.States;
 
 public class ProductSearchViewState : ViewState
 {
+    private readonly PriceRangeInputConsoleRow priceRangeInputConsoleRow;
+
     public ProductSearchViewState(ViewStateMachine stateMachine) : base(stateMachine)
     {
         //using var context = new XkomContext();
@@ -55,6 +51,8 @@ public class ProductSearchViewState : ViewState
         //orderby: newest, highest ratings, cheapest, most expensive
 
         printer.AddRow(new InteractableConsoleRow(new Text("Placeholder"), (row, printer) => RefreshProducts()));
+        priceRangeInputConsoleRow = new PriceRangeInputConsoleRow((row, printer) => RefreshProducts(), (row, printer) => RefreshProducts());
+        printer.AddRow(priceRangeInputConsoleRow);
         printer.AddRow(StandardRenderables.StandardSeparator.ToBasicConsoleRow());
         printer.StartGroup("products");
     }
@@ -87,13 +85,21 @@ public class ProductSearchViewState : ViewState
 
         using var context = new XkomContext();
 
+        var noPriceContraints = priceRangeInputConsoleRow.LowestPrice.Length == 0 && priceRangeInputConsoleRow.HighestPrice.Length == 0;
         //TODO constraints and ordering
-        var products = context.Products.ToList();
+        var products = context.Products
+            .Where(x => noPriceContraints || (x.Price >= ((priceRangeInputConsoleRow.LowestPrice.Length == 0) ? 0 : int.Parse(priceRangeInputConsoleRow.LowestPrice)) && x.Price <= ((priceRangeInputConsoleRow.HighestPrice.Length == 0) ? 999999 : int.Parse(priceRangeInputConsoleRow.HighestPrice))))
+            .ToList();
 
-        products.ForEach(x =>
+        if (products.Any())
         {
-            var priceString = x.NumberAvailable > 0 ? $"[lime]{x.Price.ToString("0.00"),-9}[/] PLN" : "[red]Unavailable[/]";
-            printer?.AddRow(new Markup($"{x.Name.EscapeMarkup(),-32} | {priceString}").ToBasicConsoleRow(), "products");
-        });
+            products.ForEach(x =>
+            {
+                var priceString = x.NumberAvailable > 0 ? $"[lime]{x.Price,-9:0.00}[/] PLN" : "[red]Unavailable[/]";
+                printer?.AddRow(new Markup($"{x.Name.EscapeMarkup(),-32} | {priceString}").ToBasicConsoleRow(), "products");
+            });
+        }
+        else
+            printer?.AddRow(new Text("No products matching your criteria were found").ToBasicConsoleRow(), "products");
     }
 }
