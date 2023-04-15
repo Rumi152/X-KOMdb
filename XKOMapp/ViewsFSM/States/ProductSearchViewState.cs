@@ -44,7 +44,6 @@ public class ProductSearchViewState : ViewState
 
         //TODO
         //Company search
-        //Price range
         //Name search
         //Category search
         //reset filters

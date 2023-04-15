@@ -27,7 +27,7 @@ internal class PriceRangeInputConsoleRow : IModesConsoleRow, ICustomKeystrokeLis
 
     public string GetCustomCursor()
     {
-        return isHovered ? "[blink]\u00BB[/]" : "\u00BB";
+        return "[blink]\u00BB[/]";
     }
 
     public string GetCustomCursorBackground()
