@@ -47,15 +47,14 @@ public class ProductSearchViewState : ViewState
         printer.StartContent();
 
         //TODO
-        //Company search
         //Category search
         //reset filters
         //orderby: newest, highest ratings, cheapest, most expensive
 
-        int namePadding = 9;
-        priceRangeInputConsoleRow = new PriceRangeInputConsoleRow("Price: ".PadRight(namePadding), (row, printer) => RefreshProducts(), (row, printer) => RefreshProducts());
-        nameSearchInputRow = new SearchContraintInputConsoleRow("Name: ".PadRight(namePadding), (row, printer) => RefreshProducts(), (row, printer) => RefreshProducts());
-        companySearchInputRow = new SearchContraintInputConsoleRow("Company: ".PadRight(namePadding), (row, printer) => RefreshProducts(), (row, printer) => RefreshProducts());
+        const int namePadding = 8;
+        priceRangeInputConsoleRow = new PriceRangeInputConsoleRow($"{"Price", -namePadding}: ", (row, printer) => RefreshProducts(), (row, printer) => RefreshProducts());
+        nameSearchInputRow = new SearchContraintInputConsoleRow($"{"Name", -namePadding}: ", 32, (row, printer) => RefreshProducts(), (row, printer) => RefreshProducts());
+        companySearchInputRow = new SearchContraintInputConsoleRow($"{"Company", -namePadding}: ", 64, (row, printer) => RefreshProducts(), (row, printer) => RefreshProducts());
         printer.AddRow(priceRangeInputConsoleRow);
         printer.AddRow(nameSearchInputRow);
         printer.AddRow(companySearchInputRow);
@@ -109,7 +108,8 @@ public class ProductSearchViewState : ViewState
         products.ForEach(x =>
         {
             var priceString = x.NumberAvailable > 0 ? $"[lime]{x.Price,-9:0.00}[/] PLN" : "[red]Unavailable[/]";
-            printer?.AddRow(new Markup($"{x.Name.EscapeMarkup(),-32} | {priceString + new string(' ', 13 - priceString.RemoveMarkup().Length)} | {x.Company?.Name,-64}").ToBasicConsoleRow(), "products");
+            var companyString = x.Company is null ? new string(' ', 32) : ((x.Company.Name.Length <= 29) ? $"{x.Company.Name,-29}" : $"{x.Company.Name[..30]}...");
+            printer?.AddRow(new Markup($"{x.Name.EscapeMarkup(),-32} | {priceString + new string(' ', 13 - priceString.RemoveMarkup().Length)} | {companyString}").ToBasicConsoleRow(), "products");
         });
     }
 }
