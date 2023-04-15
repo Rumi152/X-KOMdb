@@ -50,7 +50,7 @@ namespace XKOMapp.GUI.ConsoleRows.ProductSearching
         {
             if (keystrokeInfo.Key == ConsoleKey.Backspace && currentInput.Length > 0)
                 currentInput = currentInput[..^1];
-            else if (currentInput.Length < inputMaxLength && char.IsLetterOrDigit(keystrokeInfo.KeyChar))
+            else if (currentInput.Length < inputMaxLength && (char.IsLetterOrDigit(keystrokeInfo.KeyChar) || keystrokeInfo.Key == ConsoleKey.Spacebar))
                 currentInput += keystrokeInfo.KeyChar;
         }
 
