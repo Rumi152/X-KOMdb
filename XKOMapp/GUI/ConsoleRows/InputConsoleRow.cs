@@ -8,11 +8,10 @@ using System.Threading.Tasks;
 
 namespace XKOMapp.GUI.ConsoleRows
 {
-    public class InputConsoleRow : IInputFieldConsoleRow
+    public class InputConsoleRow : ICustomKeystrokeListenerConsoleRow
     {
-        private string currentInput = "";
-        public string CurrentInput { get => currentInput; set => currentInput = value; }
-
+        public string CurrentInput { get; private set; } = "";
+        
         private ConsolePrinter? owner;
 
         public IRenderable GetRenderContent()
@@ -23,7 +22,7 @@ namespace XKOMapp.GUI.ConsoleRows
         public void ProcessCustomKeystroke(ConsoleKeyInfo keystrokeInfo)
         {
             var letter = keystrokeInfo.KeyChar;
-            if (Char.IsLetterOrDigit(letter))
+            if (char.IsLetterOrDigit(letter))
                 CurrentInput += letter;
 
             if (keystrokeInfo.Key == ConsoleKey.Backspace && CurrentInput.Length > 0)
