@@ -92,6 +92,10 @@ internal class PriceRangeInputConsoleRow : IModesConsoleRow, ICustomKeystrokeLis
 
     public void OnInteraction()
     {
+        if(modeIndex == 0)
+            ((IModesConsoleRow)this).IncrementModeIndex();
+        else
+            ((IModesConsoleRow)this).DecrementModeIndex();
         onInteraction?.Invoke(this, owner);
     }
 }
