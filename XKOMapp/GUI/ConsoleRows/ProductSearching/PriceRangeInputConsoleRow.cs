@@ -2,7 +2,7 @@
 using Spectre.Console.Rendering;
 using XKOMapp.GUI;
 
-namespace XKOMapp.GUI.ConsoleRows;
+namespace XKOMapp.GUI.ConsoleRows.ProductSearching;
 
 internal class PriceRangeInputConsoleRow : IModesConsoleRow, ICustomKeystrokeListenerConsoleRow, ICustomCursorConsoleRow, IHoverConsoleRow, IInteractableConsoleRow
 {
@@ -16,11 +16,13 @@ internal class PriceRangeInputConsoleRow : IModesConsoleRow, ICustomKeystrokeLis
     private ConsolePrinter? owner;
     private bool isHovered = false;
 
+    private readonly string preTextMarkup;
     private readonly ConsoleRowAction? onHoverEnd;
     private readonly ConsoleRowAction? onInteraction;
 
-    public PriceRangeInputConsoleRow(ConsoleRowAction? onHoverEnd, ConsoleRowAction? onInteraction)
+    public PriceRangeInputConsoleRow(string preTextMarkup, ConsoleRowAction? onHoverEnd, ConsoleRowAction? onInteraction)
     {
+        this.preTextMarkup = preTextMarkup;
         this.onHoverEnd = onHoverEnd;
         this.onInteraction = onInteraction;
     }
@@ -37,9 +39,11 @@ internal class PriceRangeInputConsoleRow : IModesConsoleRow, ICustomKeystrokeLis
 
     public IRenderable GetRenderContent()
     {
-        var style1 = modeIndex == 0 && isHovered ? " underline" : "";
-        var style2 = modeIndex == 1 && isHovered ? " underline" : "";
-        return new Markup($"[lime{style1}]{LowestPrice,-6}[/] - [lime{style2}]{HighestPrice,-6}[/] PLN");
+        var style1 = modeIndex == 0 && isHovered ? "[underline]" : "";
+        var styleEnd1 = modeIndex == 0 && isHovered ? "[/]" : "";
+        var style2 = modeIndex == 1 && isHovered ? "[underline]" : "";
+        var styleEnd2 = modeIndex == 1 && isHovered ? "[/]" : "";
+        return new Markup($"{preTextMarkup}{style1}{LowestPrice,-6}{styleEnd1} - {style2}{HighestPrice,-6}{styleEnd2} PLN");
     }
 
     public void ProcessCustomKeystroke(ConsoleKeyInfo keystrokeInfo)
@@ -82,6 +86,7 @@ internal class PriceRangeInputConsoleRow : IModesConsoleRow, ICustomKeystrokeLis
     public void OnHoverEnd()
     {
         isHovered = false;
+        modeIndex = 0;
         onHoverEnd?.Invoke(this, owner);
     }
 
