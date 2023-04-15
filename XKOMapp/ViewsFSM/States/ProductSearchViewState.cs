@@ -1,4 +1,5 @@
-﻿using Spectre.Console;
+﻿using Microsoft.EntityFrameworkCore;
+using Spectre.Console;
 using XKOMapp.GUI;
 using XKOMapp.GUI.ConsoleRows;
 using XKOMapp.GUI.ConsoleRows.ProductSearching;
@@ -10,6 +11,7 @@ public class ProductSearchViewState : ViewState
 {
     private readonly PriceRangeInputConsoleRow priceRangeInputConsoleRow;
     private readonly SearchContraintInputConsoleRow nameSearchInputRow;
+    private readonly SearchContraintInputConsoleRow companySearchInputRow;
 
     public ProductSearchViewState(ViewStateMachine stateMachine) : base(stateMachine)
     {
@@ -46,15 +48,17 @@ public class ProductSearchViewState : ViewState
 
         //TODO
         //Company search
-        //Name search
         //Category search
         //reset filters
         //orderby: newest, highest ratings, cheapest, most expensive
 
-        priceRangeInputConsoleRow = new PriceRangeInputConsoleRow("Price: ".PadRight(8), (row, printer) => RefreshProducts(), (row, printer) => RefreshProducts());
-        nameSearchInputRow = new SearchContraintInputConsoleRow("Name: ".PadRight(8), (row, printer) => RefreshProducts(), (row, printer) => RefreshProducts());
+        int namePadding = 9;
+        priceRangeInputConsoleRow = new PriceRangeInputConsoleRow("Price: ".PadRight(namePadding), (row, printer) => RefreshProducts(), (row, printer) => RefreshProducts());
+        nameSearchInputRow = new SearchContraintInputConsoleRow("Name: ".PadRight(namePadding), (row, printer) => RefreshProducts(), (row, printer) => RefreshProducts());
+        companySearchInputRow = new SearchContraintInputConsoleRow("Company: ".PadRight(namePadding), (row, printer) => RefreshProducts(), (row, printer) => RefreshProducts());
         printer.AddRow(priceRangeInputConsoleRow);
         printer.AddRow(nameSearchInputRow);
+        printer.AddRow(companySearchInputRow);
 
         printer.AddRow(StandardRenderables.StandardSeparator.ToBasicConsoleRow());
         printer.StartGroup("products");
@@ -89,9 +93,13 @@ public class ProductSearchViewState : ViewState
         using var context = new XkomContext();
 
         var noPriceContraints = priceRangeInputConsoleRow.LowestPrice.Length == 0 && priceRangeInputConsoleRow.HighestPrice.Length == 0;
+        var noCompanyConstraints = companySearchInputRow.currentInput.Length == 0;
+
         //TODO constraints and ordering
         var products = context.Products
             .Where(x => x.Name.Contains(nameSearchInputRow.currentInput))
+            .Include(x => x.Company)
+            .Where(x => noCompanyConstraints || (x.Company != null && x.Company.Name.Contains(companySearchInputRow.currentInput)))
             .Where(x => noPriceContraints || (x.Price >= ((priceRangeInputConsoleRow.LowestPrice.Length == 0) ? 0 : int.Parse(priceRangeInputConsoleRow.LowestPrice)) && x.Price <= ((priceRangeInputConsoleRow.HighestPrice.Length == 0) ? 999999 : int.Parse(priceRangeInputConsoleRow.HighestPrice))))
             .ToList();
 
@@ -101,7 +109,7 @@ public class ProductSearchViewState : ViewState
         products.ForEach(x =>
         {
             var priceString = x.NumberAvailable > 0 ? $"[lime]{x.Price,-9:0.00}[/] PLN" : "[red]Unavailable[/]";
-            printer?.AddRow(new Markup($"{x.Name.EscapeMarkup(),-32} | {priceString}").ToBasicConsoleRow(), "products");
+            printer?.AddRow(new Markup($"{x.Name.EscapeMarkup(),-32} | {priceString + new string(' ', 13 - priceString.RemoveMarkup().Length)} | {x.Company?.Name,-64}").ToBasicConsoleRow(), "products");
         });
     }
 }
