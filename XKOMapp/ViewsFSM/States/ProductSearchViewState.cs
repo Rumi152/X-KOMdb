@@ -52,12 +52,33 @@ public class ProductSearchViewState : ViewState
         //orderby: newest, highest ratings, cheapest, most expensive
 
         const int namePadding = 8;
-        priceRangeInputConsoleRow = new PriceRangeInputConsoleRow($"{"Price", -namePadding}: ", (row, printer) => RefreshProducts(), (row, printer) => RefreshProducts());
-        nameSearchInputRow = new SearchContraintInputConsoleRow($"{"Name", -namePadding}: ", 32, (row, printer) => RefreshProducts(), (row, printer) => RefreshProducts());
-        companySearchInputRow = new SearchContraintInputConsoleRow($"{"Company", -namePadding}: ", 64, (row, printer) => RefreshProducts(), (row, printer) => RefreshProducts());
+        priceRangeInputConsoleRow = new PriceRangeInputConsoleRow($"{"Price",-namePadding}: ", (row, printer) => RefreshProducts(), (row, printer) => RefreshProducts());
+        nameSearchInputRow = new SearchContraintInputConsoleRow($"{"Name",-namePadding}: ", 32, (row, printer) => RefreshProducts(), (row, printer) => RefreshProducts());
+        companySearchInputRow = new SearchContraintInputConsoleRow($"{"Company",-namePadding}: ", 64, (row, printer) => RefreshProducts(), (row, printer) => RefreshProducts());
+
+        var temp = new CategorySearchParentConsoleRow("placeholder: ", 4, 2, (row, printer) => RefreshProducts());
+        var x1 = new CategorySearchChildConsoleRow("PlaceholderCategory1");
+        var x2 = new CategorySearchChildConsoleRow("PlaceholderCategory2");
+        var x3 = new CategorySearchChildConsoleRow("PlaceholderCategory3");
+        var x4 = new CategorySearchChildConsoleRow("PlaceholderCategory4");
+        var x5 = new CategorySearchChildConsoleRow("PlaceholderCategory5");
+        var x6 = new CategorySearchChildConsoleRow("PlaceholderCategory6");
+        var x7 = new CategorySearchChildConsoleRow("PlaceholderCategory7");
+        var x8 = new CategorySearchChildConsoleRow("PlaceholderCategory8");
         printer.AddRow(priceRangeInputConsoleRow);
         printer.AddRow(nameSearchInputRow);
         printer.AddRow(companySearchInputRow);
+        printer.AddRow(temp);
+        printer.StartGroup("categorySearch");
+        printer.AddRow(x1, "categorySearch");
+        printer.AddRow(x2, "categorySearch");
+        printer.AddRow(x3, "categorySearch");
+        printer.AddRow(x4, "categorySearch");
+        printer.AddRow(x5, "categorySearch");
+        printer.AddRow(x6, "categorySearch");
+        printer.AddRow(x7, "categorySearch");
+        printer.AddRow(x8, "categorySearch");
+        temp.SetChildren(new() { x1, x2, x3, x4, x5, x6, x7, x8 });
 
         printer.AddRow(StandardRenderables.StandardSeparator.ToBasicConsoleRow());
         printer.StartGroup("products");
