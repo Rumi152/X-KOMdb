@@ -32,7 +32,12 @@ public interface IInteractableConsoleRow : IConsoleRow
 /// </summary>
 public interface IStandardKeystrokeOverrideConsoleRow : IConsoleRow
 {
-    void ProcessStandardKeystroke(ConsoleKeyInfo keystrokeInfo);
+    /// <summary>
+    /// Processes user's standard pressed key
+    /// </summary>
+    /// <param name="keystrokeInfo">ConsoleKeyInfo of pressed key</param>
+    /// <returns>Whether keystroke was processed specifically or it should use standard processing</returns>
+    bool ProcessStandardKeystroke(ConsoleKeyInfo keystrokeInfo);
 }
 
 /// <summary>
