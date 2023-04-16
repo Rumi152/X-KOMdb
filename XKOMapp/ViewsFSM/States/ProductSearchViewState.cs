@@ -98,7 +98,7 @@ public class ProductSearchViewState : ViewState
                 .Where(x => noCompanyConstraints || (x.Company != null && x.Company.Name.Contains(companySearchInputRow.currentInput)))
             .Include(x => x.Category)
                 .Where(x => noCategoryConstraints || (x.Category != null && x.Category.Name.Contains(categorySearchChoiceParent.GetCurrentCategory())))
-            .Where(x => noPriceContraints || (x.Price >= ((priceRangeInputConsoleRow.LowestPrice.Length == 0) ? 0 : int.Parse(priceRangeInputConsoleRow.LowestPrice)) && x.Price <= ((priceRangeInputConsoleRow.HighestPrice.Length == 0) ? 1_000_000 : int.Parse(priceRangeInputConsoleRow.HighestPrice))));
+            .Where(x => noPriceContraints || (x.Price >= ((priceRangeInputConsoleRow.LowestPrice.Length == 0) ? 0 : int.Parse(priceRangeInputConsoleRow.LowestPrice)) && x.Price <= ((priceRangeInputConsoleRow.HighestPrice.Length == 0) ? 999_999 : int.Parse(priceRangeInputConsoleRow.HighestPrice))));
 
         products = orderbyChoiceParent.GetCurrentCategory() switch
         {
