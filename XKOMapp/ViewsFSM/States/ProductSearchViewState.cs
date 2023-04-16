@@ -99,7 +99,7 @@ public class ProductSearchViewState : ViewState
             .Where(x => x.Name.Contains(nameSearchInputRow.currentInput))
             .Include(x => x.Company)
             .Where(x => noCompanyConstraints || (x.Company != null && x.Company.Name.Contains(companySearchInputRow.currentInput)))
-            .Where(x => noPriceContraints || (x.Price >= ((priceRangeInputConsoleRow.LowestPrice.Length == 0) ? 0 : int.Parse(priceRangeInputConsoleRow.LowestPrice)) && x.Price <= ((priceRangeInputConsoleRow.HighestPrice.Length == 0) ? 999999 : int.Parse(priceRangeInputConsoleRow.HighestPrice))))
+            .Where(x => noPriceContraints || (x.Price >= ((priceRangeInputConsoleRow.LowestPrice.Length == 0) ? 0 : int.Parse(priceRangeInputConsoleRow.LowestPrice)) && x.Price <= ((priceRangeInputConsoleRow.HighestPrice.Length == 0) ? int.MaxValue : int.Parse(priceRangeInputConsoleRow.HighestPrice))))
             .ToList();
 
         if (products.Count == 0)
@@ -107,7 +107,7 @@ public class ProductSearchViewState : ViewState
 
         products.ForEach(x =>
         {
-            var priceString = x.NumberAvailable > 0 ? $"[lime]{x.Price,-9:0.00}[/] PLN" : "[red]Unavailable[/]";
+            var priceString = x.NumberAvailable > 0 ? $"[lime]{x.Price,-9:F2}[/] PLN" : "[red]Unavailable[/]";
             var companyString = x.Company is null ? new string(' ', 32) : ((x.Company.Name.Length <= 29) ? $"{x.Company.Name,-29}" : $"{x.Company.Name[..30]}...");
             printer?.AddRow(new Markup($"{x.Name.EscapeMarkup(),-32} | {priceString + new string(' ', 13 - priceString.RemoveMarkup().Length)} | {companyString}").ToBasicConsoleRow(), "products");
         });
