@@ -464,10 +464,10 @@ public class ConsolePrinter
             return;
         }
 
-        if(currentCursorRow is IStandardKeystrokeOverrideConsoleRow converted)
+        if (currentCursorRow is IStandardKeystrokeOverrideConsoleRow converted)
         {
-            converted.ProcessStandardKeystroke(keystrokeInfo);
-            return;
+            if (!converted.ProcessStandardKeystroke(keystrokeInfo))
+                return;
         }
 
         if (key == DownKey)
