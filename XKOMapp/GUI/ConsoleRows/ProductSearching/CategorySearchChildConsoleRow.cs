@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace XKOMapp.GUI.ConsoleRows.ProductSearching
 {
-    public class CategorySearchChildConsoleRow : IHideableConsoleRow, IFocusableConsoleRow, ICustomCursorConsoleRow, IStandardKeystrokeOverrideConsoleRow
+    public class CategorySearchChildConsoleRow : IHideableConsoleRow, IFocusableConsoleRow, ICustomCursorConsoleRow, IStandardKeystrokeOverrideConsoleRow, ICustomKeystrokeListenerConsoleRow
     {
         public readonly string category;
         private ConsolePrinter owner = null!;
@@ -33,6 +33,14 @@ namespace XKOMapp.GUI.ConsoleRows.ProductSearching
         public string GetCustomCursorBackground() => "|";
 
 
-        public bool ProcessStandardKeystroke(ConsoleKeyInfo keystrokeInfo) => parent.ProcessChildrenStandardKeystroke(keystrokeInfo);
+        public bool ProcessStandardKeystroke(ConsoleKeyInfo keystrokeInfo)
+        {
+            parent.ProcessChildrenStandardKeystroke(keystrokeInfo);
+            return false;
+        }
+        public void ProcessCustomKeystroke(ConsoleKeyInfo keystrokeInfo)
+        {
+            parent.ProcessChildrenCustomKeystroke(keystrokeInfo);
+        }
     }
 }

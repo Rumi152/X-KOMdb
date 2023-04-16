@@ -64,14 +64,14 @@ public class CategorySearchParentConsoleRow : ICustomCursorConsoleRow, ISwitchab
             ((ISwitchableConsoleRow)this).TurnOn();
         }
     }
-    public bool ProcessChildrenStandardKeystroke(ConsoleKeyInfo keystrokeInfo)
+    public void ProcessChildrenStandardKeystroke(ConsoleKeyInfo keystrokeInfo)
     {
         if (keystrokeInfo.Key == owner.InteractionKey)
         {
             appliedChoiceIndex = choiceIndex;
             ((ISwitchableConsoleRow)this).TurnOff();
             onAccept?.Invoke(this, owner);
-            return false;
+            return;
         }
 
         if (keystrokeInfo.Key == owner.UpKey && choiceIndex > 0)
@@ -86,8 +86,27 @@ public class CategorySearchParentConsoleRow : ICustomCursorConsoleRow, ISwitchab
         }
 
         RefreshNeededDisplay();
+    }
+    public void ProcessChildrenCustomKeystroke(ConsoleKeyInfo keystrokeInfo)
+    {
+        if(!char.IsLetterOrDigit(keystrokeInfo.KeyChar))
+            return;
 
-        return false;
+        var x = children.FindIndex(x => x.category.StartsWith((keystrokeInfo.KeyChar.ToString()), true, null));
+
+        if (x == -1)
+            return;
+
+        if(x == choiceIndex)
+            return;
+
+        for (int i = x; i < choiceIndex; i++)
+            owner.CursorUp();
+        for (int i = x; i > choiceIndex; i--)
+            owner.CursorDown();
+
+        choiceIndex = x;
+        RefreshNeededDisplay();
     }
 
 
