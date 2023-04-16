@@ -458,7 +458,13 @@ public class ConsolePrinter
     {
         var key = keystrokeInfo.Key;
 
-        if (currentCursorRow is IStandardKeystrokeOverrideConsoleRow converted)
+        if (key != DownKey && key != UpKey && key != InteractionKey)
+        {
+            PassCustomKeystroke(keystrokeInfo);
+            return;
+        }
+
+        if(currentCursorRow is IStandardKeystrokeOverrideConsoleRow converted)
         {
             converted.ProcessStandardKeystroke(keystrokeInfo);
             return;
@@ -470,8 +476,6 @@ public class ConsolePrinter
             CursorUp();
         else if (key == InteractionKey)
             Interract();
-        else
-            PassCustomKeystroke(keystrokeInfo);
     }
 
     /// <summary>
