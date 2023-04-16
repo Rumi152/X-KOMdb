@@ -12,7 +12,8 @@ public class ProductSearchViewState : ViewState
     private readonly PriceRangeInputConsoleRow priceRangeInputConsoleRow;
     private readonly SearchContraintInputConsoleRow nameSearchInputRow;
     private readonly SearchContraintInputConsoleRow companySearchInputRow;
-    private readonly CategorySearchParentConsoleRow categorySearchChoiceParent;
+    private readonly ChoiceMenuParentConsoleRow categorySearchChoiceParent;
+    private readonly ChoiceMenuParentConsoleRow orderbyChoiceParent;
 
     public ProductSearchViewState(ViewStateMachine stateMachine) : base(stateMachine)
     {
@@ -22,18 +23,27 @@ public class ProductSearchViewState : ViewState
         printer.AddRow(StandardRenderables.StandardHeader.ToBasicConsoleRow());
         printer.StartContent();
 
-        //TODO
-        //orderby: newest, highest ratings, cheapest, most expensive
-
-        const int namePadding = 9;
+        const int namePadding = 11;
         priceRangeInputConsoleRow = new PriceRangeInputConsoleRow($"{"Price",-namePadding}: ", (row, printer) => RefreshProducts(), (row, printer) => RefreshProducts());
         nameSearchInputRow = new SearchContraintInputConsoleRow($"{"Name",-namePadding}: ", 32, (row, printer) => RefreshProducts(), (row, printer) => RefreshProducts());
         companySearchInputRow = new SearchContraintInputConsoleRow($"{"Company",-namePadding}: ", 64, (row, printer) => RefreshProducts(), (row, printer) => RefreshProducts());
-        categorySearchChoiceParent = new CategorySearchParentConsoleRow($"{"Category",-namePadding}: ", 4, 2, (row, printer) => RefreshProducts(), (row, printer) => RefreshCategories());
+        categorySearchChoiceParent = new ChoiceMenuParentConsoleRow($"{"Category",-namePadding}: ", 4, 2, (row, printer) => RefreshProducts(), (row, printer) => RefreshCategories());
+        List<ChoiceMenuChildConsoleRow> sortingOptions = new()
+        {
+            new ChoiceMenuChildConsoleRow("Newest"),
+            new ChoiceMenuChildConsoleRow("Best rated"),
+            new ChoiceMenuChildConsoleRow("Cheapest"),
+            new ChoiceMenuChildConsoleRow("Most expensive")
+        };
+        orderbyChoiceParent = new ChoiceMenuParentConsoleRow($"{"Sorting by",-namePadding}: ", sortingOptions.Count, 2, (row, printer) => RefreshProducts(), null);
+        orderbyChoiceParent.SetChildren(sortingOptions);
+
         printer.AddRow(priceRangeInputConsoleRow);
         printer.AddRow(nameSearchInputRow);
         printer.AddRow(companySearchInputRow);
         printer.AddRow(categorySearchChoiceParent); printer.StartGroup("categorySearch");
+        printer.AddRow(orderbyChoiceParent);
+        sortingOptions.ForEach(x => printer.AddRow(x));
 
         printer.AddRow(new InteractableConsoleRow(new Rule("Click to reset filters").RuleStyle(Style.Parse("#0e8f75")), (row, printer) =>
         {
@@ -41,6 +51,7 @@ public class ProductSearchViewState : ViewState
             nameSearchInputRow.ResetInput();
             companySearchInputRow.ResetInput();
             categorySearchChoiceParent.ResetCategory();
+            orderbyChoiceParent.ResetCategory();
             RefreshProducts();
         }
         ));
@@ -87,13 +98,20 @@ public class ProductSearchViewState : ViewState
                 .Where(x => noCompanyConstraints || (x.Company != null && x.Company.Name.Contains(companySearchInputRow.currentInput)))
             .Include(x => x.Category)
                 .Where(x => noCategoryConstraints || (x.Category != null && x.Category.Name.Contains(categorySearchChoiceParent.GetCurrentCategory())))
-            .Where(x => noPriceContraints || (x.Price >= ((priceRangeInputConsoleRow.LowestPrice.Length == 0) ? 0 : int.Parse(priceRangeInputConsoleRow.LowestPrice)) && x.Price <= ((priceRangeInputConsoleRow.HighestPrice.Length == 0) ? int.MaxValue : int.Parse(priceRangeInputConsoleRow.HighestPrice))))
-            .ToList();
+            .Where(x => noPriceContraints || (x.Price >= ((priceRangeInputConsoleRow.LowestPrice.Length == 0) ? 0 : int.Parse(priceRangeInputConsoleRow.LowestPrice)) && x.Price <= ((priceRangeInputConsoleRow.HighestPrice.Length == 0) ? 1_000_000 : int.Parse(priceRangeInputConsoleRow.HighestPrice))));
 
-        if (products.Count == 0)
+        products = orderbyChoiceParent.GetCurrentCategory() switch
+        {
+            "Cheapest" => products.OrderBy(x => x.Price).ThenBy(x => x.Name),
+            "Most expensive" => products.OrderByDescending(x => x.Price).ThenBy(x => x.Name),
+            "Best rated" => products.Include(x => x.Reviews).OrderByDescending(x => x.Reviews.Average(x => x.StarRating)).ThenBy(x => x.Name),
+            "Newest" or _ => products.OrderByDescending(x => x.IntroductionDate).ThenBy(x => x.Name)
+        };
+
+        if (!products.Any())
             printer.AddRow(new Text("No products matching your criteria were found").ToBasicConsoleRow(), "products");
 
-        products.ForEach(x =>
+        products.ToList().ForEach(x =>
         {
             var priceString = x.NumberAvailable > 0 ? $"[lime]{x.Price,-9:F2}[/] PLN" : "[red]Unavailable[/]";
             var companyString = x.Company is null ? new string(' ', 32) : ((x.Company.Name.Length <= 29) ? $"{x.Company.Name,-29}" : $"{x.Company.Name[..30]}...");
@@ -107,14 +125,14 @@ public class ProductSearchViewState : ViewState
 
         using var context = new XkomContext();
 
-        List<CategorySearchChildConsoleRow> toAdd = context
+        List<ChoiceMenuChildConsoleRow> toAdd = context
             .ProductCategories
             .Select(x => x.Name)
             .OrderBy(x => x)
-            .Select(x => new CategorySearchChildConsoleRow(x))
+            .Select(x => new ChoiceMenuChildConsoleRow(x))
             .ToList();
 
-        toAdd.Insert(0, new CategorySearchChildConsoleRow("All"));
+        toAdd.Insert(0, new ChoiceMenuChildConsoleRow("All"));
 
         toAdd.ForEach(x => printer.AddRow(x, "categorySearch"));
         categorySearchChoiceParent.SetChildren(toAdd);

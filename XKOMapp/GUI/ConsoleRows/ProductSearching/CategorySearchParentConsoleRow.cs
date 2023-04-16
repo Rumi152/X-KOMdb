@@ -9,7 +9,7 @@ using XKOMapp.Models;
 
 namespace XKOMapp.GUI.ConsoleRows.ProductSearching;
 
-public class CategorySearchParentConsoleRow : ICustomCursorConsoleRow, ISwitchableConsoleRow, IInteractableConsoleRow
+public class ChoiceMenuParentConsoleRow : ICustomCursorConsoleRow, ISwitchableConsoleRow, IInteractableConsoleRow
 {
     private int childrenDisplaySize;
     private int childrenStickyStart;
@@ -17,7 +17,7 @@ public class CategorySearchParentConsoleRow : ICustomCursorConsoleRow, ISwitchab
     private readonly ConsoleRowAction? preEnter;
     private ConsolePrinter owner = null!;
     private readonly string markupPreText;
-    private List<CategorySearchChildConsoleRow> children = new List<CategorySearchChildConsoleRow>();
+    private List<ChoiceMenuChildConsoleRow> children = new List<ChoiceMenuChildConsoleRow>();
 
     private bool isActive = false;
     bool ISwitchableConsoleRow.IsActive { get => isActive; set => isActive = value; }
@@ -26,7 +26,7 @@ public class CategorySearchParentConsoleRow : ICustomCursorConsoleRow, ISwitchab
     private int appliedChoiceIndex = 0;
 
 
-    public CategorySearchParentConsoleRow(string markupPreText, int childrenDisplaySize, int childrenStickyStart, ConsoleRowAction? onAccept, ConsoleRowAction? preEnter)
+    public ChoiceMenuParentConsoleRow(string markupPreText, int childrenDisplaySize, int childrenStickyStart, ConsoleRowAction? onAccept, ConsoleRowAction? preEnter)
     {
         this.markupPreText = markupPreText;
         this.childrenDisplaySize = childrenDisplaySize;
@@ -35,7 +35,7 @@ public class CategorySearchParentConsoleRow : ICustomCursorConsoleRow, ISwitchab
         this.preEnter = preEnter;
     }
 
-    public void SetChildren(List<CategorySearchChildConsoleRow> newChildren)
+    public void SetChildren(List<ChoiceMenuChildConsoleRow> newChildren)
     {
         this.children = newChildren;
         children.ForEach(x => x.SetParent(this));
