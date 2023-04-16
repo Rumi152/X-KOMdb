@@ -98,4 +98,10 @@ internal class PriceRangeInputConsoleRow : IModesConsoleRow, ICustomKeystrokeLis
             ((IModesConsoleRow)this).DecrementModeIndex();
         onInteraction?.Invoke(this, owner);
     }
+
+    public void ResetRange()
+    {
+        LowestPrice = "";
+        HighestPrice = "";
+    }
 }

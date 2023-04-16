@@ -47,7 +47,7 @@ public class CategorySearchParentConsoleRow : ICustomCursorConsoleRow, ISwitchab
     }
 
 
-    public string GetCustomCursor() => isActive ? ">" : ">";
+    public string GetCustomCursor() => "\u00BB";
     public string GetCustomCursorBackground() => isActive ? "_" : " ";
 
 
@@ -133,5 +133,11 @@ public class CategorySearchParentConsoleRow : ICustomCursorConsoleRow, ISwitchab
             .Take(childrenDisplaySize)
             .ToList()
             .ForEach(x => ((IHideableConsoleRow)x).TurnOn());
+    }
+
+    public void ResetCategory()
+    {
+        choiceIndex = 0;
+        appliedChoiceIndex = 0;
     }
 }

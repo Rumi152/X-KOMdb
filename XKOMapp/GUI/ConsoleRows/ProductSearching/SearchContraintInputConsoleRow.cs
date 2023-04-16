@@ -58,5 +58,10 @@ namespace XKOMapp.GUI.ConsoleRows.ProductSearching
 
         string ICustomCursorConsoleRow.GetCustomCursor() => "[blink]\u00BB[/]";
         string ICustomCursorConsoleRow.GetCustomCursorBackground() => " ";
+
+        public void ResetInput()
+        {
+            currentInput = "";
+        }
     }
 }

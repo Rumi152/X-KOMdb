@@ -23,21 +23,27 @@ public class ProductSearchViewState : ViewState
         printer.StartContent();
 
         //TODO
-        //Category search
-        //reset filters
         //orderby: newest, highest ratings, cheapest, most expensive
 
         const int namePadding = 9;
         priceRangeInputConsoleRow = new PriceRangeInputConsoleRow($"{"Price",-namePadding}: ", (row, printer) => RefreshProducts(), (row, printer) => RefreshProducts());
         nameSearchInputRow = new SearchContraintInputConsoleRow($"{"Name",-namePadding}: ", 32, (row, printer) => RefreshProducts(), (row, printer) => RefreshProducts());
         companySearchInputRow = new SearchContraintInputConsoleRow($"{"Company",-namePadding}: ", 64, (row, printer) => RefreshProducts(), (row, printer) => RefreshProducts());
-        categorySearchChoiceParent = new CategorySearchParentConsoleRow($"{"Category", -namePadding}: ", 4, 2, (row, printer) => RefreshProducts(), (row, printer) => RefreshCategories());
+        categorySearchChoiceParent = new CategorySearchParentConsoleRow($"{"Category",-namePadding}: ", 4, 2, (row, printer) => RefreshProducts(), (row, printer) => RefreshCategories());
         printer.AddRow(priceRangeInputConsoleRow);
         printer.AddRow(nameSearchInputRow);
         printer.AddRow(companySearchInputRow);
         printer.AddRow(categorySearchChoiceParent); printer.StartGroup("categorySearch");
 
-        printer.AddRow(StandardRenderables.StandardSeparator.ToBasicConsoleRow());
+        printer.AddRow(new InteractableConsoleRow(new Rule("Click to reset filters").RuleStyle(Style.Parse("#0e8f75")), (row, printer) =>
+        {
+            priceRangeInputConsoleRow.ResetRange();
+            nameSearchInputRow.ResetInput();
+            companySearchInputRow.ResetInput();
+            categorySearchChoiceParent.ResetCategory();
+            RefreshProducts();
+        }
+        ));
         printer.StartGroup("products");
     }
 
