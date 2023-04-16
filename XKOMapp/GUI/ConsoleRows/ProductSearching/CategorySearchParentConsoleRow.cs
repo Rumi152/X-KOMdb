@@ -14,6 +14,7 @@ public class CategorySearchParentConsoleRow : ICustomCursorConsoleRow, ISwitchab
     private int childrenDisplaySize;
     private int childrenStickyStart;
     private readonly ConsoleRowAction? onAccept;
+    private readonly ConsoleRowAction? preEnter;
     private ConsolePrinter owner = null!;
     private readonly string markupPreText;
     private List<CategorySearchChildConsoleRow> children = new List<CategorySearchChildConsoleRow>();
@@ -25,23 +26,24 @@ public class CategorySearchParentConsoleRow : ICustomCursorConsoleRow, ISwitchab
     private int appliedChoiceIndex = 0;
 
 
-    public CategorySearchParentConsoleRow(string markupPreText, int childrenDisplaySize, int childrenStickyStart, ConsoleRowAction? onAccept)
+    public CategorySearchParentConsoleRow(string markupPreText, int childrenDisplaySize, int childrenStickyStart, ConsoleRowAction? onAccept, ConsoleRowAction? preEnter)
     {
         this.markupPreText = markupPreText;
         this.childrenDisplaySize = childrenDisplaySize;
         this.childrenStickyStart = childrenStickyStart;
         this.onAccept = onAccept;
+        this.preEnter = preEnter;
     }
 
-    public void SetChildren(List<CategorySearchChildConsoleRow> children)
+    public void SetChildren(List<CategorySearchChildConsoleRow> newChildren)
     {
-        this.children = children;
+        this.children = newChildren;
         children.ForEach(x => x.SetParent(this));
         choiceIndex = Math.Clamp(choiceIndex, 0, children.Count);
     }
     public string GetCurrentCategory()
     {
-        return children[appliedChoiceIndex].category;
+        return children.ElementAtOrDefault(appliedChoiceIndex)?.category ?? "All";
     }
 
 
@@ -55,8 +57,12 @@ public class CategorySearchParentConsoleRow : ICustomCursorConsoleRow, ISwitchab
 
     public void OnInteraction()
     {
+        preEnter?.Invoke(this, owner);
+
         if (children.Count > 0)
+        {
             ((ISwitchableConsoleRow)this).TurnOn();
+        }
     }
     public bool ProcessChildrenStandardKeystroke(ConsoleKeyInfo keystrokeInfo)
     {
@@ -97,9 +103,6 @@ public class CategorySearchParentConsoleRow : ICustomCursorConsoleRow, ISwitchab
 
     private void RefreshNeededDisplay()
     {
-        if (children.Count <= childrenDisplaySize)
-            return;
-
         children.ForEach(x => ((IHideableConsoleRow)x).TurnOff());
 
         var firstIndex = Enumerable.Range(0, children.Count)
