@@ -33,7 +33,7 @@ public class ProductSearchViewState : ViewState
             new ChoiceMenuChildConsoleRow("Newest"),
             new ChoiceMenuChildConsoleRow("Best rated"),
             new ChoiceMenuChildConsoleRow("Cheapest"),
-            new ChoiceMenuChildConsoleRow("Most expensive")
+            new ChoiceMenuChildConsoleRow("Most expensive", true)
         };
         orderbyChoiceParent = new ChoiceMenuParentConsoleRow($"{"Sorting by",-namePadding}: ", sortingOptions.Count, 2, (row, printer) => RefreshProducts(), null);
         orderbyChoiceParent.SetChildren(sortingOptions);
@@ -129,10 +129,11 @@ public class ProductSearchViewState : ViewState
             .ProductCategories
             .Select(x => x.Name)
             .OrderBy(x => x)
-            .Select(x => new ChoiceMenuChildConsoleRow(x))
+            .Select(x => new ChoiceMenuChildConsoleRow(x, false))
             .ToList();
 
         toAdd.Insert(0, new ChoiceMenuChildConsoleRow("All"));
+        toAdd.Last().IsOnEnd = true;
 
         toAdd.ForEach(x => printer.AddRow(x, "categorySearch"));
         categorySearchChoiceParent.SetChildren(toAdd);
