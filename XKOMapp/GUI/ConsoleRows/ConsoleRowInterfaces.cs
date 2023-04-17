@@ -28,19 +28,24 @@ public interface IInteractableConsoleRow : IConsoleRow
 }
 
 /// <summary>
-/// ConsoleRow that can listen for pressed keys
+/// ConsoleRow that can override action on press of standard keys
+/// </summary>
+public interface IStandardKeystrokeOverrideConsoleRow : IConsoleRow
+{
+    /// <summary>
+    /// Processes user's standard pressed key
+    /// </summary>
+    /// <param name="keystrokeInfo">ConsoleKeyInfo of pressed key</param>
+    /// <returns>Whether keystroke was processed specifically or it should use standard processing</returns>
+    bool ProcessStandardKeystroke(ConsoleKeyInfo keystrokeInfo);
+}
+
+/// <summary>
+/// ConsoleRow that can listen for pressed keys, other than standard ones
 /// </summary>
 public interface ICustomKeystrokeListenerConsoleRow : IConsoleRow
 {
     void ProcessCustomKeystroke(ConsoleKeyInfo keystrokeInfo);
-}
-
-/// <summary>
-/// ConsoleRow that has string that can be modified
-/// </summary>
-public interface IInputFieldConsoleRow : ICustomKeystrokeListenerConsoleRow
-{
-    public string CurrentInput { get; protected set; }
 }
 
 /// <summary>

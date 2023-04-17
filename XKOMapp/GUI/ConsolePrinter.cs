@@ -19,6 +19,16 @@ public class ConsolePrinter
         void ISwitchableConsoleRow.OnTurningOff() { }
         void ISwitchableConsoleRow.OnTurningOn() => throw new Exception("Marker should never be turned on");
     }
+    private class ScrollerStartMarker : IHideableConsoleRow
+    {
+        bool ISwitchableConsoleRow.IsActive { get => false; set { } }
+
+        public IRenderable GetRenderContent() => throw new Exception("Marker should never be asked for RenderContent");
+        public void SetOwnership(ConsolePrinter owner) { }
+
+        void ISwitchableConsoleRow.OnTurningOff() { }
+        void ISwitchableConsoleRow.OnTurningOn() => throw new Exception("Marker should never be turned on");
+    }
     private class GroupStartMarker : IHideableConsoleRow
     {
         bool ISwitchableConsoleRow.IsActive { get => false; set { } }
@@ -38,9 +48,10 @@ public class ConsolePrinter
     /// Number of rows left at bottom of screen
     /// </summary>
     private readonly int paddingBottom = 0;
-    private readonly ConsoleKey interactionKey = ConsoleKey.Enter;
-    private readonly ConsoleKey upKey = ConsoleKey.UpArrow;
-    private readonly ConsoleKey downKey = ConsoleKey.DownArrow;
+
+    public readonly ConsoleKey InteractionKey = ConsoleKey.Enter;
+    public readonly ConsoleKey UpKey = ConsoleKey.UpArrow;
+    public readonly ConsoleKey DownKey = ConsoleKey.DownArrow;
 
     private Grid content = null!;
     private readonly List<IRenderable> preContent = new();
@@ -62,7 +73,14 @@ public class ConsolePrinter
             return x == -1 ? null : x;
         }
     }
-    private bool scrollingEnabled = false;
+    private int? scrollingStart
+    {
+        get
+        {
+            var x = memory.FindIndex(x => x is ScrollerStartMarker);
+            return x == -1 ? null : x;
+        }
+    }
 
 
     public ConsolePrinter() => ClearMemory();
@@ -262,14 +280,26 @@ public class ConsolePrinter
     }
 
     /// <summary>
+    /// Starts new group without any content
+    /// </summary>
+    /// <param name="id">Id of group</param>
+    /// <exception cref="Exception">If group already exists</exception>
+    public void StartGroup(string id)
+    {
+        if (memoryGroupingKeys.Contains(id))
+            throw new Exception("Row group already exists");
+
+        memory.Add(new GroupStartMarker());
+        memoryGroupingKeys.Add(id);
+    }
+
+    /// <summary>
     /// Clears memory
     /// </summary>
     public void ClearMemory()
     {
         memory.Clear();
         memoryGroupingKeys.Clear();
-
-        scrollingEnabled = false;
         ResetCursor();
     }
 
@@ -296,10 +326,16 @@ public class ConsolePrinter
     /// <param name="group"></param>
     public void ClearMemoryGroup(string group)
     {
-        var index = memoryGroupingKeys.FindIndex(x => x == group);
-        DeleteMemoryGroup(group);
-        memory.Insert(index, new GroupStartMarker());
-        memoryGroupingKeys.Insert(index, group);
+        Enumerable.Range(0, memory.Count)
+            .Where(index => memoryGroupingKeys[index] == group)
+            .Where(index => memory[index] is not GroupStartMarker)
+            .Reverse()
+            .ToList()
+            .ForEach(index =>
+            {
+                memory.RemoveAt(index);
+                memoryGroupingKeys.RemoveAt(index);
+            });
     }
 
 
@@ -309,12 +345,9 @@ public class ConsolePrinter
     public void StartContent() => AddRow(new ContentStartMarker());
 
     /// <summary>
-    /// Enables scrolling for current memory
+    /// Enables scrolling for current memory starting from this row
     /// </summary>
-    public void EnableScrolling()
-    {
-        scrollingEnabled = true;
-    }
+    public void EnableScrolling() => AddRow(new ScrollerStartMarker());
 
 
 
@@ -357,11 +390,21 @@ public class ConsolePrinter
                 continue;
 
             bool isContent = contentStart is not null && index >= contentStart;
+            bool isScrollable = scrollingStart is not null && index >= scrollingStart;
             int lineSpan = (row as ICustomLineSpanConsoleRow)?.GetRenderHeight() ?? 1;
             bool isHovered = (row == currentCursorRow);
 
             int startLineIndex = endLineIndex;
             endLineIndex = lineSpan + startLineIndex;
+
+            if (isScrollable && endLineIndex < linesShiftStartIndex)
+            {
+                if (linesEndTotalIndex - linesShifted > Console.WindowHeight - 1 - paddingBottom)
+                {
+                    linesShifted += (row as ICustomLineSpanConsoleRow)?.GetRenderHeight() ?? 1;
+                    continue;
+                }
+            }
 
             if (!isContent)
             {
@@ -370,15 +413,6 @@ public class ConsolePrinter
 
                 preContent.Add(row.GetRenderContent());
                 continue;
-            }
-
-            if (scrollingEnabled && endLineIndex < linesShiftStartIndex)
-            {
-                if (linesEndTotalIndex - linesShifted > Console.WindowHeight - 1 - paddingBottom)
-                {
-                    linesShifted += (row as ICustomLineSpanConsoleRow)?.GetRenderHeight() ?? 1;
-                    continue;
-                }
             }
 
             if (endLineIndex - linesShifted > Console.WindowHeight - 1 - paddingBottom)
@@ -425,6 +459,11 @@ public class ConsolePrinter
 
 
     /// <summary>
+    /// Interact with row hovered on right now
+    /// </summary>
+    public void Interract() => (currentCursorRow as IInteractableConsoleRow)?.OnInteraction();
+
+    /// <summary>
     /// Pass pressed key to process
     /// </summary>
     /// <param name="keystrokeInfo">ConsoleKeyInfo of pressed key</param>
@@ -432,24 +471,29 @@ public class ConsolePrinter
     {
         var key = keystrokeInfo.Key;
 
-        if (key == downKey)
-            CursorDown();
-        else if (key == upKey)
-            CursorUp();
-        else if (key == interactionKey)
-            Interract();
-        else
+        if (key != DownKey && key != UpKey && key != InteractionKey)
+        {
             PassCustomKeystroke(keystrokeInfo);
-    }
+            return;
+        }
 
-    /// <summary>
-    /// Interact with row hovered on right now
-    /// </summary>
-    public void Interract() => (currentCursorRow as IInteractableConsoleRow)?.OnInteraction();
+        if (currentCursorRow is IStandardKeystrokeOverrideConsoleRow converted)
+        {
+            if (!converted.ProcessStandardKeystroke(keystrokeInfo))
+                return;
+        }
+
+        if (key == DownKey)
+            CursorDown();
+        else if (key == UpKey)
+            CursorUp();
+        else if (key == InteractionKey)
+            Interract();
+    }
 
     /// <summary>
     /// Pass non-standard pressed key to process
     /// </summary>
     /// <param name="keystrokeInfo">ConsoleKeyInfo of pressed key</param>
-    public void PassCustomKeystroke(ConsoleKeyInfo keystrokeInfo) => (currentCursorRow as ICustomKeystrokeListenerConsoleRow)?.ProcessCustomKeystroke(keystrokeInfo);
+    private void PassCustomKeystroke(ConsoleKeyInfo keystrokeInfo) => (currentCursorRow as ICustomKeystrokeListenerConsoleRow)?.ProcessCustomKeystroke(keystrokeInfo);
 }
