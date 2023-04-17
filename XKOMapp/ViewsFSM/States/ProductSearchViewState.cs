@@ -17,8 +17,7 @@ public class ProductSearchViewState : ViewState
 
     public ProductSearchViewState(ViewStateMachine stateMachine) : base(stateMachine)
     {
-        printer = new ConsolePrinter();
-        printer.EnableScrolling();
+        printer = new ConsolePrinter(5, 0);
 
         printer.AddRow(StandardRenderables.StandardHeader.ToBasicConsoleRow());
         printer.StartContent();
@@ -55,6 +54,7 @@ public class ProductSearchViewState : ViewState
             RefreshProducts();
         }
         ));
+        printer.EnableScrolling();
         printer.StartGroup("products");
     }
 
