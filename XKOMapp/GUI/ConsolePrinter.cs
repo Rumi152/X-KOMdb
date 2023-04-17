@@ -19,6 +19,16 @@ public class ConsolePrinter
         void ISwitchableConsoleRow.OnTurningOff() { }
         void ISwitchableConsoleRow.OnTurningOn() => throw new Exception("Marker should never be turned on");
     }
+    private class ScrollerStartMarker : IHideableConsoleRow
+    {
+        bool ISwitchableConsoleRow.IsActive { get => false; set { } }
+
+        public IRenderable GetRenderContent() => throw new Exception("Marker should never be asked for RenderContent");
+        public void SetOwnership(ConsolePrinter owner) { }
+
+        void ISwitchableConsoleRow.OnTurningOff() { }
+        void ISwitchableConsoleRow.OnTurningOn() => throw new Exception("Marker should never be turned on");
+    }
     private class GroupStartMarker : IHideableConsoleRow
     {
         bool ISwitchableConsoleRow.IsActive { get => false; set { } }
@@ -63,7 +73,14 @@ public class ConsolePrinter
             return x == -1 ? null : x;
         }
     }
-    private bool scrollingEnabled = false;
+    private int? scrollingStart
+    {
+        get
+        {
+            var x = memory.FindIndex(x => x is ScrollerStartMarker);
+            return x == -1 ? null : x;
+        }
+    }
 
 
     public ConsolePrinter() => ClearMemory();
@@ -283,8 +300,6 @@ public class ConsolePrinter
     {
         memory.Clear();
         memoryGroupingKeys.Clear();
-
-        scrollingEnabled = false;
         ResetCursor();
     }
 
@@ -330,12 +345,9 @@ public class ConsolePrinter
     public void StartContent() => AddRow(new ContentStartMarker());
 
     /// <summary>
-    /// Enables scrolling for current memory
+    /// Enables scrolling for current memory starting from this row
     /// </summary>
-    public void EnableScrolling()
-    {
-        scrollingEnabled = true;
-    }
+    public void EnableScrolling() => AddRow(new ScrollerStartMarker());
 
 
 
@@ -378,11 +390,21 @@ public class ConsolePrinter
                 continue;
 
             bool isContent = contentStart is not null && index >= contentStart;
+            bool isScrollable = scrollingStart is not null && index >= scrollingStart;
             int lineSpan = (row as ICustomLineSpanConsoleRow)?.GetRenderHeight() ?? 1;
             bool isHovered = (row == currentCursorRow);
 
             int startLineIndex = endLineIndex;
             endLineIndex = lineSpan + startLineIndex;
+
+            if (isScrollable && endLineIndex < linesShiftStartIndex)
+            {
+                if (linesEndTotalIndex - linesShifted > Console.WindowHeight - 1 - paddingBottom)
+                {
+                    linesShifted += (row as ICustomLineSpanConsoleRow)?.GetRenderHeight() ?? 1;
+                    continue;
+                }
+            }
 
             if (!isContent)
             {
@@ -391,15 +413,6 @@ public class ConsolePrinter
 
                 preContent.Add(row.GetRenderContent());
                 continue;
-            }
-
-            if (scrollingEnabled && endLineIndex < linesShiftStartIndex)
-            {
-                if (linesEndTotalIndex - linesShifted > Console.WindowHeight - 1 - paddingBottom)
-                {
-                    linesShifted += (row as ICustomLineSpanConsoleRow)?.GetRenderHeight() ?? 1;
-                    continue;
-                }
             }
 
             if (endLineIndex - linesShifted > Console.WindowHeight - 1 - paddingBottom)
