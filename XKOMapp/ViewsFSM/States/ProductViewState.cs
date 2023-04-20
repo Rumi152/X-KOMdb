@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Spectre.Console;
+using System.Text.Json;
 using XKOMapp.GUI;
 using XKOMapp.GUI.ConsoleRows;
 using XKOMapp.GUI.ConsoleRows.ProductSearching;
@@ -18,15 +19,36 @@ public class ProductViewState : ViewState
 
         printer.AddRow(StandardRenderables.StandardHeader.ToBasicConsoleRow());
         printer.StartContent();
-        printer.EnableScrolling();
+
+        printer.AddRow(new InteractableConsoleRow(new Text("Back to searching"), (row, owner) => fsm.RollbackOrDefault(this)));
+        printer.AddRow(new InteractableConsoleRow(new Text("Add to favourites"), (row, owner) => throw new NotImplementedException()));//TODO
+
+        printer.AddRow(new Rule($"{product.Category?.Name} category").HeavyBorder().LeftJustified().RuleStyle(Style.Parse("#0e8f75")).ToBasicConsoleRow());
 
         printer.AddRow(new Text(product.Name).ToBasicConsoleRow());
-        printer.AddRow(new Markup($"[lime]{product.Price, -9:F2}[/] PLN").ToBasicConsoleRow());
-        var panel = new Panel(product.Description).Header("Description").Expand().DoubleBorder();
-        panel.Height = 7;
-        printer.AddRow(new MultiLineConsoleRow(panel, 7));
+        printer.AddRow(new Markup($"[lime]{product.Price:F2}[/] PLN").ToBasicConsoleRow());
+        printer.AddRow(new Markup($"Made by {("[#96fa96]" + product.Company?.Name.EscapeMarkup() + "[/]") ?? "Unknown company"}").ToBasicConsoleRow());
+        printer.AddRow(new Markup($"[#96fa96]{product.NumberAvailable}[/] left in magazine").ToBasicConsoleRow());
 
-        printer.AddRow(StandardRenderables.StandardSeparator.ToBasicConsoleRow());
+        printer.AddRow(new Rule("Properties").HeavyBorder().LeftJustified().RuleStyle(Style.Parse("#0e8f75")).ToBasicConsoleRow());
+        printer.EnableScrolling();
+
+        if (product.Properties is not null)
+        {
+            try
+            {
+                Dictionary<string, object> properties = JsonSerializer.Deserialize<Dictionary<string, object>>(product.Properties)!;
+                var longestKey = properties.Keys.Max(x => x.Length);
+                properties.ToList().ForEach(x =>
+                {
+                    printer.AddRow(new Text($"{x.Key.PadRight(longestKey)} : {x.Value}").ToBasicConsoleRow());
+                });
+            }
+            catch
+            {
+                printer.AddRow(new Text("Failed to load product's properties").ToBasicConsoleRow());
+            }
+        }
     }
 
     public override void OnEnter()

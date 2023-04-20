@@ -91,7 +91,6 @@ public class ProductSearchViewState : ViewState
         var noCompanyConstraints = companySearchInputRow.currentInput.Length == 0;
         var noCategoryConstraints = categorySearchChoiceParent.GetCurrentCategory() == "All";
 
-        //TODO constraints and ordering
         var products = context.Products
             .Where(x => x.Name.Contains(nameSearchInputRow.currentInput))
             .Include(x => x.Company)
