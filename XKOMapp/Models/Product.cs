@@ -11,8 +11,6 @@ public partial class Product
 
     public decimal Price { get; set; }
 
-    public string Description { get; set; } = null!;
-
     public int? CategoryId { get; set; }
 
     public int? CompanyId { get; set; }
