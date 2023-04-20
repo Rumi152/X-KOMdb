@@ -8,7 +8,6 @@ CREATE TABLE [Product]
 	[ID] INT PRIMARY KEY IDENTITY(1,1) NOT NULL,
 	[Name] VARCHAR(32) NOT NULL,
 	[Price] DECIMAL(8,2) NOT NULL,
-	[Description] VARCHAR(512) NOT NULL,
 	[CategoryID] INT NULL,
 	[CompanyID] INT NULL,
 	[NumberAvailable] INT NOT NULL,
@@ -67,7 +66,7 @@ CREATE TABLE [User]
 	[Name] NVARCHAR(32) NOT NULL,
 	[LastName] NVARCHAR(32) NOT NULL,
 	[Password] VARCHAR(32) NOT NULL,
-	[Email] VARCHAR(256) NOT NULL,
+	[Email] VARCHAR(256) NOT NULL UNIQUE,
 	[ActiveCartID] INT NULL
 );
 
