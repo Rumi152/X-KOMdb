@@ -17,8 +17,7 @@ public class ProductSearchViewState : ViewState
 
     public ProductSearchViewState(ViewStateMachine stateMachine) : base(stateMachine)
     {
-        printer = new ConsolePrinter();
-        printer.EnableScrolling();
+        printer = new ConsolePrinter(5, 0);
 
         printer.AddRow(StandardRenderables.StandardHeader.ToBasicConsoleRow());
         printer.StartContent();
@@ -33,7 +32,7 @@ public class ProductSearchViewState : ViewState
             new ChoiceMenuChildConsoleRow("Newest"),
             new ChoiceMenuChildConsoleRow("Best rated"),
             new ChoiceMenuChildConsoleRow("Cheapest"),
-            new ChoiceMenuChildConsoleRow("Most expensive")
+            new ChoiceMenuChildConsoleRow("Most expensive", true)
         };
         orderbyChoiceParent = new ChoiceMenuParentConsoleRow($"{"Sorting by",-namePadding}: ", sortingOptions.Count, 2, (row, printer) => RefreshProducts(), null);
         orderbyChoiceParent.SetChildren(sortingOptions);
@@ -55,6 +54,7 @@ public class ProductSearchViewState : ViewState
             RefreshProducts();
         }
         ));
+        printer.EnableScrolling();
         printer.StartGroup("products");
     }
 
@@ -91,7 +91,6 @@ public class ProductSearchViewState : ViewState
         var noCompanyConstraints = companySearchInputRow.currentInput.Length == 0;
         var noCategoryConstraints = categorySearchChoiceParent.GetCurrentCategory() == "All";
 
-        //TODO constraints and ordering
         var products = context.Products
             .Where(x => x.Name.Contains(nameSearchInputRow.currentInput))
             .Include(x => x.Company)
@@ -115,7 +114,8 @@ public class ProductSearchViewState : ViewState
         {
             var priceString = x.NumberAvailable > 0 ? $"[lime]{x.Price,-9:F2}[/] PLN" : "[red]Unavailable[/]";
             var companyString = x.Company is null ? new string(' ', 32) : ((x.Company.Name.Length <= 29) ? $"{x.Company.Name,-29}" : $"{x.Company.Name[..30]}...");
-            printer.AddRow(new Markup($"{x.Name.EscapeMarkup(),-32} | {priceString + new string(' ', 13 - priceString.RemoveMarkup().Length)} | {companyString}").ToBasicConsoleRow(), "products");
+            var displayString = $"{x.Name.EscapeMarkup(),-32} | {priceString + new string(' ', 13 - priceString.RemoveMarkup().Length)} | {companyString}";
+            printer.AddRow(new InteractableConsoleRow(new Markup(displayString), (row, printer) => fsm.Checkout(new ProductViewState(fsm, x))), "products");
         });
     }
 
@@ -129,10 +129,11 @@ public class ProductSearchViewState : ViewState
             .ProductCategories
             .Select(x => x.Name)
             .OrderBy(x => x)
-            .Select(x => new ChoiceMenuChildConsoleRow(x))
+            .Select(x => new ChoiceMenuChildConsoleRow(x, false))
             .ToList();
 
         toAdd.Insert(0, new ChoiceMenuChildConsoleRow("All"));
+        toAdd.Last().IsOnEnd = true;
 
         toAdd.ForEach(x => printer.AddRow(x, "categorySearch"));
         categorySearchChoiceParent.SetChildren(toAdd);
