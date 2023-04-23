@@ -34,6 +34,19 @@ public class ProductViewState : ViewState
         printer.AddRow(new Markup($"Made by {("[#96fa96]" + product.Company?.Name.EscapeMarkup() + "[/]") ?? "Unknown company"}").ToBasicConsoleRow());
         printer.AddRow(new Markup($"[#96fa96]{product.NumberAvailable}[/] left in magazine").ToBasicConsoleRow());
 
+        using (var context = new XkomContext())
+        {
+            var avgStars = context.Products
+                .Where(x => x.Id == product.Id)
+                .Include(x => x.Reviews)
+                .Select(x => x.Reviews)
+                .First()
+                .Where(x => x.StarRating != null)
+                .Average(x => x.StarRating);
+            int avgStarsRounded = (int)Math.Round(avgStars ?? 0);
+            printer.AddRow(new Markup("Average " + $"[yellow]{new string('*', avgStarsRounded)}[/][dim]{new string('*', 6 - avgStarsRounded)}[/]").ToBasicConsoleRow());
+        };
+
         printer.AddRow(new ReviewsAndPropertiesModeConsoleRow(ShowProperties, ShowReviews));
         printer.EnableScrolling();
 
@@ -141,7 +154,7 @@ public class ProductViewState : ViewState
             int descriptionHeight = (int)Math.Ceiling(description.Length / 60f);
 
             var panel = new Panel(description).HeavyBorder();
-            panel.Header =  new PanelHeader(header);
+            panel.Header = new PanelHeader(header);
             panel.Height = descriptionHeight + 2;
             panel.Width = 64;
             printer.AddRow(new MultiLineConsoleRow(panel, descriptionHeight + 2), "reviews");
