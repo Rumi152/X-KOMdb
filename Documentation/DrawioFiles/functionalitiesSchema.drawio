@@ -1,6 +1,6 @@
-<mxfile host="app.diagrams.net" modified="2023-04-01T16:20:27.885Z" agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:109.0) Gecko/20100101 Firefox/111.0" etag="OtQYkiYAdF3fwtshWuL1" version="21.1.2" type="github">
+<mxfile host="Electron" modified="2023-04-24T19:13:45.114Z" agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) draw.io/21.2.1 Chrome/112.0.5615.87 Electron/24.1.2 Safari/537.36" etag="lfd2SEgjtGwpiU360ycS" version="21.2.1" type="device">
   <diagram name="Strona-1" id="DpiKnfvnMf119dL31PfI">
-    <mxGraphModel dx="463" dy="530" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
+    <mxGraphModel dx="831" dy="828" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
       <root>
         <mxCell id="0" />
         <mxCell id="1" parent="0" />
@@ -197,13 +197,13 @@
             </Array>
           </mxGeometry>
         </mxCell>
-        <mxCell id="tu-g_7TpIbmg7pbgviE7-35" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;fontFamily=Helvetica;fontSize=12;fontColor=#000000;" parent="1" source="tu-g_7TpIbmg7pbgviE7-39" target="tu-g_7TpIbmg7pbgviE7-87" edge="1">
+        <mxCell id="tu-g_7TpIbmg7pbgviE7-35" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;fontFamily=Helvetica;fontSize=12;fontColor=#000000;exitPerimeter=0;" parent="1" source="btTpmAtazuo6H9hWQEnr-2" target="tu-g_7TpIbmg7pbgviE7-87" edge="1">
           <mxGeometry relative="1" as="geometry">
             <Array as="points">
-              <mxPoint x="2320" y="650" />
-              <mxPoint x="2320" y="700" />
-              <mxPoint x="2480" y="700" />
-              <mxPoint x="2480" y="650" />
+              <mxPoint x="2400" y="750" />
+              <mxPoint x="2400" y="800" />
+              <mxPoint x="2560" y="800" />
+              <mxPoint x="2560" y="850" />
             </Array>
           </mxGeometry>
         </mxCell>
@@ -212,8 +212,8 @@
             <Array as="points">
               <mxPoint x="2320" y="650" />
               <mxPoint x="2320" y="700" />
-              <mxPoint x="2640" y="700" />
-              <mxPoint x="2640" y="650" />
+              <mxPoint x="2480" y="700" />
+              <mxPoint x="2480" y="650" />
             </Array>
           </mxGeometry>
         </mxCell>
@@ -415,7 +415,7 @@
           <mxGeometry x="2340" y="620" width="120" height="60" as="geometry" />
         </mxCell>
         <mxCell id="tu-g_7TpIbmg7pbgviE7-87" value="Add to cart" style="rounded=1;whiteSpace=wrap;html=1;strokeColor=#d6b656;fontFamily=Helvetica;fontSize=12;fontColor=#000000;fillColor=#fff2cc;" parent="1" vertex="1">
-          <mxGeometry x="2500" y="620" width="120" height="60" as="geometry" />
+          <mxGeometry x="2580" y="820" width="120" height="60" as="geometry" />
         </mxCell>
         <mxCell id="tu-g_7TpIbmg7pbgviE7-89" value="Give feedback about product" style="rounded=1;whiteSpace=wrap;html=1;strokeColor=#d6b656;fontFamily=Helvetica;fontSize=12;fontColor=#000000;fillColor=#fff2cc;" parent="1" vertex="1">
           <mxGeometry x="2420" y="720" width="120" height="60" as="geometry" />
@@ -430,7 +430,7 @@
           <mxGeometry x="2660" y="900" width="120" height="60" as="geometry" />
         </mxCell>
         <mxCell id="tu-g_7TpIbmg7pbgviE7-95" value="Add to compare" style="rounded=1;whiteSpace=wrap;html=1;strokeColor=#d6b656;fontFamily=Helvetica;fontSize=12;fontColor=#000000;fillColor=#fff2cc;" parent="1" vertex="1">
-          <mxGeometry x="2660" y="620" width="120" height="60" as="geometry" />
+          <mxGeometry x="2500" y="620" width="120" height="60" as="geometry" />
         </mxCell>
         <mxCell id="tu-g_7TpIbmg7pbgviE7-96" value="Select star rating" style="rounded=1;whiteSpace=wrap;html=1;strokeColor=#d6b656;fontFamily=Helvetica;fontSize=12;fontColor=#000000;fillColor=#fff2cc;" parent="1" vertex="1">
           <mxGeometry x="2660" y="1000" width="120" height="60" as="geometry" />
