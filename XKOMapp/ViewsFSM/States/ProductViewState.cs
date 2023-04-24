@@ -151,7 +151,7 @@ public class ProductViewState : ViewState
                 header = $"| [[{x.User.Name} {x.User.LastName}]] {stars} |";
 
             string description = x.Description.ReplaceLineEndings(" ");
-            int descriptionHeight = (int)Math.Ceiling(description.Length / 60f);
+            int descriptionHeight = (int)Math.Ceiling(description.Length / (Console.WindowWidth - 10f));
 
             var panel = new Panel(description).HeavyBorder();
             panel.Header = new PanelHeader(header);
