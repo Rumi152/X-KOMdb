@@ -44,7 +44,7 @@ public class ProductViewState : ViewState
                 .Where(x => x.StarRating != null)
                 .Average(x => x.StarRating);
             int avgStarsRounded = (int)Math.Round(avgStars ?? 0);
-            printer.AddRow(new Markup("Average " + $"[yellow]{new string('*', avgStarsRounded)}[/][dim]{new string('*', 6 - avgStarsRounded)}[/]").ToBasicConsoleRow());
+            printer.AddRow(new Markup("Average " + $"[yellow]{new string('*', avgStarsRounded)}[/][dim]{new string('*', 6 - avgStarsRounded)}[/] {avgStars}").ToBasicConsoleRow());
         };
 
         printer.AddRow(new ReviewsAndPropertiesModeConsoleRow(ShowProperties, ShowReviews));
