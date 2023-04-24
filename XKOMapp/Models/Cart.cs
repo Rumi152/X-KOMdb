@@ -9,13 +9,11 @@ public partial class Cart
 
     public int? UserId { get; set; }
 
-    public int? PromoCodeId { get; set; }
+    public decimal? Discount { get; set; }
 
     public virtual ICollection<CartProduct> CartProducts { get; } = new List<CartProduct>();
 
     public virtual ICollection<Order> Orders { get; } = new List<Order>();
-
-    public virtual PromoCode? PromoCode { get; set; }
 
     public virtual User? User { get; set; }
 

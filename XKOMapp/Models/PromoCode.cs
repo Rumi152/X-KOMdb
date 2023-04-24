@@ -16,6 +16,4 @@ public partial class PromoCode
     public int Percentage { get; set; }
 
     public decimal? MaximumMoney { get; set; }
-
-    public virtual ICollection<Cart> Carts { get; } = new List<Cart>();
 }
