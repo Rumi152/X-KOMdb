@@ -11,7 +11,7 @@ public partial class Review
 
     public string Description { get; set; } = null!;
 
-    public int? StarRating { get; set; }
+    public int StarRating { get; set; }
 
     public int? UserId { get; set; }
 
