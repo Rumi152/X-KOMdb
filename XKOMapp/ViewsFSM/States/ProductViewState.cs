@@ -40,8 +40,9 @@ public class ProductViewState : ViewState
                 .Where(x => x.Id == product.Id)
                 .Include(x => x.Reviews)
                 .Select(x => x.Reviews)
-                .First()
-                .Average(x => x.StarRating);
+                .FirstOrDefault()
+                ?.DefaultIfEmpty()
+                ?.Average(x => x?.StarRating) ?? 0;
             int avgStarsRounded = (int)Math.Round(avgStars);
             printer.AddRow(new Markup("Average " + $"[yellow]{new string('*', avgStarsRounded)}[/][dim]{new string('*', 6 - avgStarsRounded)}[/] {avgStars}").ToBasicConsoleRow());
         };
