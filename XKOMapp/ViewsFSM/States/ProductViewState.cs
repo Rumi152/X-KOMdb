@@ -41,9 +41,8 @@ public class ProductViewState : ViewState
                 .Include(x => x.Reviews)
                 .Select(x => x.Reviews)
                 .First()
-                .Where(x => x.StarRating != null)
                 .Average(x => x.StarRating);
-            int avgStarsRounded = (int)Math.Round(avgStars ?? 0);
+            int avgStarsRounded = (int)Math.Round(avgStars);
             printer.AddRow(new Markup("Average " + $"[yellow]{new string('*', avgStarsRounded)}[/][dim]{new string('*', 6 - avgStarsRounded)}[/] {avgStars}").ToBasicConsoleRow());
         };
 
@@ -146,10 +145,12 @@ public class ProductViewState : ViewState
         {
             printer.AddRow(new Text("").ToBasicConsoleRow(), "reviews");
 
-            var stars = $"[yellow]{new string('*', x.StarRating ?? 0)}[/][dim]{new string('*', 6 - x.StarRating ?? 0)}[/]";
+            var stars = $"[yellow]{new string('*', x.StarRating)}[/][dim]{new string('*', 6 - x.StarRating)}[/]";
             string header;
             if (x.User is null)
                 header = $"| [[deleted user]] {stars} |";
+            //else if(x.User == loggedUser)
+            //    header = $"| [lime]{$"[{x.User.Name} {x.User.LastName}]".EscapeMarkup()}[/] {stars} |";
             else
                 header = $"| [[{x.User.Name} {x.User.LastName}]] {stars} |";
 
@@ -169,6 +170,30 @@ public class ProductViewState : ViewState
         ReviewInputPanelConsoleRow panel = new ReviewInputPanelConsoleRow();
         printer.AddRow(panel, "reviews");
 
-        //TODO button accept
+        printer.AddRow(new InteractableDynamicConsoleRow("Click to post review", (row, owner) =>
+        {
+            var converted = (InteractableDynamicConsoleRow)row;
+
+            if(panel.StarRating == 0)
+            {
+                converted.SetMarkupText("Click to post review [red]Please select star rating[/]");
+                return;
+            }
+
+            converted.SetMarkupText("Click to post review");
+
+            using var context = new XkomContext();
+            var review = new Review()
+            {
+                Product = context.Products.Where(x => x.Id == product.Id).First(),
+                Description = panel.Description,
+                StarRating = panel.StarRating,
+                User = null//TODO logged user
+            };
+            context.Reviews.Add(review);
+            context.SaveChanges();
+            ShowReviews();
+        }
+        ), "reviews");
     }
 }
