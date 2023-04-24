@@ -32,7 +32,7 @@ CREATE TABLE [Review]
 	[ID] INT PRIMARY KEY IDENTITY(1,1) NOT NULL,
 	[ProductID] INT NOT NULL,
 	[Description] NVARCHAR(256) NOT NULL,
-	[StarRating] INT NULL, CHECK(StarRating >= 1 AND StarRating <= 6),
+	[StarRating] INT NOT NULL, CHECK(StarRating >= 1 AND StarRating <= 6),
 	[UserID] INT NULL
 );
 
