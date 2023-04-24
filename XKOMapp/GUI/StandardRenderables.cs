@@ -15,7 +15,7 @@ public static class StandardRenderables
     /// <summary>
     /// Standard line separator IRenderable
     /// </summary>
-    public static IRenderable StandardSeparator => new Rule().HeavyBorder().RuleStyle(Style.Parse("#0e8f75"));
+    public static IRenderable StandardSeparator => new Rule().HeavyBorder().RuleStyle(Style.Parse(AquamarineColorHex));
 
     /// <summary>
     /// Converts IRenderable to simplest form of Console row
@@ -26,4 +26,10 @@ public static class StandardRenderables
     {
         return new BasicConsoleRow(renderable);
     }
+
+    public static Color GoldColor => new Color(0xFF, 0xA6, 0x00);
+    public static string GoldColorHex => "#FFA600";
+
+    public static Color AquamarineColor => new Color(0x0E, 0x8F, 0x75);
+    public static string AquamarineColorHex => "#0E8F75";
 }
