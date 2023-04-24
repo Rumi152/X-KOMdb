@@ -92,14 +92,11 @@ public class ProductViewState : ViewState
                 var longestKey = properties.Keys.Max(x => x.Length);
                 properties.ToList().ForEach(x =>
                 {
-                    string valueToPrint;
-                    if (x.Value is bool)
+                    string valueToPrint = x.Value switch
                     {
-                        valueToPrint = ((bool)x.Value) ? "Yes" : "No";
-                    }
-                    else
-                        valueToPrint = x.Value.ToString() ?? "";
-
+                        bool => ((bool)x.Value) ? "Yes" : "No",
+                        _ => x.Value.ToString() ?? "",
+                    };
                     printer.AddRow(new Text($"{x.Key.PadRight(longestKey)} : {valueToPrint}").ToBasicConsoleRow(), "properties");
                 });
             }
@@ -128,7 +125,7 @@ public class ProductViewState : ViewState
             .Include(x => x.Product)
             .Include(x => x.User)
             .Where(x => x.ProductId == product.Id)
-            //.OrderBy(x => x.UserId == loggedInUser) //TODO
+            .OrderBy(x => x.User != null && x.User.Email == SessionData.LoggedEmail)
             .ToList();
 
         if (reviews.IsNullOrEmpty())
@@ -157,8 +154,8 @@ public class ProductViewState : ViewState
             string header;
             if (x.User is null)
                 header = $"| [[deleted user]] {stars} |";
-            //else if(x.User == loggedUser)
-            //    header = $"| [lime]{$"[{x.User.Name} {x.User.LastName}]".EscapeMarkup()}[/] {stars} |";
+            else if (x.User.Email == SessionData.LoggedEmail)
+                header = $"| [lime][[You]][/] {stars} |";
             else
                 header = $"| [[{x.User.Name} {x.User.LastName}]] {stars} |";
 
@@ -181,6 +178,20 @@ public class ProductViewState : ViewState
         printer.AddRow(new InteractableDynamicConsoleRow("Click to post review", (row, owner) =>
         {
             var converted = (InteractableDynamicConsoleRow)row;
+            using var context = new XkomContext();
+
+            if (SessionData.LoggedEmail is null)
+            {
+                //TODO log in
+                return;
+            }
+
+            User? dbUser = context.Users.Where(x => x.Email == SessionData.LoggedEmail).FirstOrDefault();
+            if (dbUser is null || dbUser.Password != SessionData.HashedPassword)
+            {
+                //TODO  session closed
+                return;
+            }
 
             if(panel.StarRating == 0)
             {
@@ -190,13 +201,12 @@ public class ProductViewState : ViewState
 
             converted.SetMarkupText("Click to post review");
 
-            using var context = new XkomContext();
             var review = new Review()
             {
                 Product = context.Products.Where(x => x.Id == product.Id).First(),
                 Description = panel.Description,
                 StarRating = panel.StarRating,
-                User = null//TODO logged user
+                User = dbUser
             };
             context.Reviews.Add(review);
             context.SaveChanges();
