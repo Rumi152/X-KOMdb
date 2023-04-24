@@ -113,6 +113,9 @@ public class ProductViewState : ViewState
         printer.ClearMemoryGroup("reviews");
 
         using var context = new XkomContext();
+
+        DisplayReviewInput();
+
         var reviews = context
             .Reviews
             .Include(x => x.Product)
@@ -159,5 +162,13 @@ public class ProductViewState : ViewState
             panel.Width = 64;
             printer.AddRow(new MultiLineConsoleRow(panel, descriptionHeight + 2), "reviews");
         });
+    }
+
+    private void DisplayReviewInput()
+    {
+        ReviewInputPanelConsoleRow panel = new ReviewInputPanelConsoleRow();
+        printer.AddRow(panel, "reviews");
+
+        //TODO button accept
     }
 }
