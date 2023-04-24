@@ -92,7 +92,15 @@ public class ProductViewState : ViewState
                 var longestKey = properties.Keys.Max(x => x.Length);
                 properties.ToList().ForEach(x =>
                 {
-                    printer.AddRow(new Text($"{x.Key.PadRight(longestKey)} : {x.Value}").ToBasicConsoleRow(), "properties");
+                    string valueToPrint;
+                    if (x.Value is bool)
+                    {
+                        valueToPrint = ((bool)x.Value) ? "Yes" : "No";
+                    }
+                    else
+                        valueToPrint = x.Value.ToString() ?? "";
+
+                    printer.AddRow(new Text($"{x.Key.PadRight(longestKey)} : {valueToPrint}").ToBasicConsoleRow(), "properties");
                 });
             }
             catch
