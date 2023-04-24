@@ -34,18 +34,8 @@ public class ProductViewState : ViewState
         printer.AddRow(new Markup($"Made by {("[#96fa96]" + product.Company?.Name.EscapeMarkup() + "[/]") ?? "Unknown company"}").ToBasicConsoleRow());
         printer.AddRow(new Markup($"[#96fa96]{product.NumberAvailable}[/] left in magazine").ToBasicConsoleRow());
 
-        using (var context = new XkomContext())
-        {
-            var avgStars = context.Products
-                .Where(x => x.Id == product.Id)
-                .Include(x => x.Reviews)
-                .Select(x => x.Reviews)
-                .FirstOrDefault()
-                ?.DefaultIfEmpty()
-                ?.Average(x => x?.StarRating) ?? 0;
-            int avgStarsRounded = (int)Math.Round(avgStars);
-            printer.AddRow(new Markup("Average " + $"[yellow]{new string('*', avgStarsRounded)}[/][dim]{new string('*', 6 - avgStarsRounded)}[/] {avgStars}").ToBasicConsoleRow());
-        };
+        printer.StartGroup("averageStars");
+        ShowAverageStars();
 
         printer.AddRow(new ReviewsAndPropertiesModeConsoleRow(ShowProperties, ShowReviews));
         printer.EnableScrolling();
@@ -212,7 +202,26 @@ public class ProductViewState : ViewState
             context.Reviews.Add(review);
             context.SaveChanges();
             ShowReviews();
+            ShowAverageStars();
         }
         ), "reviews");
+    }
+
+    private void ShowAverageStars()
+    {
+        printer.ClearMemoryGroup("averageStars");
+
+        using (var context = new XkomContext())
+        {
+            var avgStars = context.Products
+                .Where(x => x.Id == product.Id)
+                .Include(x => x.Reviews)
+                .Select(x => x.Reviews)
+                .FirstOrDefault()
+                ?.DefaultIfEmpty()
+                ?.Average(x => x?.StarRating) ?? 0;
+            int avgStarsRounded = (int)Math.Round(avgStars);
+            printer.AddRow(new Markup("Average " + $"[yellow]{new string('*', avgStarsRounded)}[/][dim]{new string('*', 6 - avgStarsRounded)}[/] {avgStars}").ToBasicConsoleRow());
+        };
     }
 }
