@@ -194,7 +194,13 @@ public class ProductViewState : ViewState
                 return;
             }
 
-            if(panel.StarRating == 0)
+            if (context.Reviews.Include(x => x.Product).Include(x => x.User).Where(x => x.ProductId == product.Id).Where(x => x.UserId == dbUser.Id).Any())
+            {
+                //TODO cant write more than 1 review
+                return;
+            }
+
+            if (panel.StarRating == 0)
             {
                 converted.SetMarkupText("Click to post review [red]Please select star rating[/]");
                 return;
