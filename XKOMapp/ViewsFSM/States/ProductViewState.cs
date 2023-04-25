@@ -122,7 +122,9 @@ public class ProductViewState : ViewState
 
         using var context = new XkomContext();
 
-        DisplayReviewInput();
+        User? dbUser = context.Users.Where(x => x.Email == SessionData.LoggedEmail).FirstOrDefault();
+        if (dbUser is null || !context.Reviews.Include(x => x.Product).Include(x => x.User).Where(x => x.ProductId == product.Id).Where(x => x.UserId == dbUser.Id).Any())
+            DisplayReviewInput();
 
         var reviews = context
             .Reviews
