@@ -21,12 +21,25 @@ namespace XKOMapp.GUI.ConsoleRows.ProductDetails
 
         public IRenderable GetRenderContent()
         {
-            int descriptionHeight = (int)Math.Ceiling(Description.Length / (Console.WindowWidth - 10f));
             var stars = $"[yellow]{new string('*', StarRating)}[/][dim]{new string('*', 6 - StarRating)}[/]";
 
-            var panel = new Panel(Description).HeavyBorder().Header($"| [[You]] {stars} |");
+            int descriptionHeight;
+            string panelText;
+            if (Description.Length == 0)
+            {
+                descriptionHeight = 1;
+                panelText = "[dim]Write something about product[/]";
+            }
+            else
+            {
+                descriptionHeight = (int)Math.Ceiling(Description.Length / (Console.WindowWidth - 10f));
+                panelText = Description;
+            }
+
+            var panel = new Panel(panelText).HeavyBorder().Header($"| [[You]] {stars} |");
             panel.Height = descriptionHeight + 2;
             panel.Width = 64;
+
             return panel;
         }
 

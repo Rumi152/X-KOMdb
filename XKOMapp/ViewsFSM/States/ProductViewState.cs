@@ -201,7 +201,7 @@ public class ProductViewState : ViewState
 
             if (context.Reviews.Include(x => x.Product).Include(x => x.User).Where(x => x.ProductId == product.Id).Where(x => x.UserId == dbUser.Id).Any())
             {
-                //TODO cant write more than 1 review
+                converted.SetMarkupText("Click to post review [red]You can't write more then one review[/]");
                 return;
             }
 
