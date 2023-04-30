@@ -100,10 +100,20 @@ public class ChoiceMenuParentConsoleRow : ICustomCursorConsoleRow, ISwitchableCo
         if(x == choiceIndex)
             return;
 
-        for (int i = x; i < choiceIndex; i++)
+        var temp = choiceIndex;
+        for (int i = x; i < temp; i++)
+        {
             owner.CursorUp();
-        for (int i = x; i > choiceIndex; i--)
+            choiceIndex--;
+            RefreshNeededDisplay();
+        }
+
+        for (int i = x; i > temp; i--)
+        {
             owner.CursorDown();
+            choiceIndex++;
+            RefreshNeededDisplay();
+        }
 
         choiceIndex = x;
         RefreshNeededDisplay();
