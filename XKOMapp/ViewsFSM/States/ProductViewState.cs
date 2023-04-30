@@ -52,6 +52,7 @@ public class ProductViewState : ViewState
 
         printer.ResetCursor();
         ShowProperties();
+        ShowAverageStars();
         Display();
     }
 
