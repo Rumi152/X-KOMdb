@@ -36,7 +36,7 @@ namespace XKOMapp.GUI.ConsoleRows.ProductDetails
                 panelText = Description;
             }
 
-            var panel = new Panel(panelText).HeavyBorder().Header($"| [{StandardRenderables.GoldColorHex}][[You]][/] {stars} |");
+            var panel = new Panel(panelText).HeavyBorder().Header($"| {stars} |");
             panel.Height = descriptionHeight + 2;
             panel.Width = 64;
 

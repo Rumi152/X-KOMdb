@@ -141,12 +141,17 @@ public class ProductViewState : ViewState
             string header;
             if (x.User is null)
                 header = $"| [[deleted user]] {stars} |";
-            else if (x.User.Id == SessionData.LoggedUserID)
+            else if (x.UserId == SessionData.LoggedUserID)
                 header = $"| [{StandardRenderables.GoldColorHex}][[You]][/] {stars} |";
             else
                 header = $"| [[{x.User.Name} {x.User.LastName}]] {stars} |";
 
-            string description = x.Description.ReplaceLineEndings(" ");
+            string description;
+            if (x.Description.Length == 0)
+                description = "[dim]No description provided[/]";
+            else
+                description = x.Description.ReplaceLineEndings(" ");
+
             int descriptionHeight = (int)Math.Ceiling(description.Length / (Console.WindowWidth - 10f));
 
             var panel = new Panel(description).HeavyBorder();
