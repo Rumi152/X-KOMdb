@@ -12,11 +12,11 @@ internal class Program
         Console.CursorVisible = false;
         Console.Title = "X-KOMapp";
 
-        SessionData.TryLogIn("emailtymek", "rogo123");
-
         var fsm = new ViewStateMachine();
         fsm.SaveState("productsSearch", new ProductSearchViewState(fsm));
         fsm.Checkout("productsSearch");
+
+        fsm.Checkout(new RegisteringViewState(fsm));
 
         //checking for input in loop
         while (true)
