@@ -1,4 +1,5 @@
-﻿using Spectre.Console;
+﻿using Microsoft.EntityFrameworkCore.Metadata.Internal;
+using Spectre.Console;
 using Spectre.Console.Rendering;
 
 namespace XKOMapp.GUI.ConsoleRows.User
@@ -6,17 +7,15 @@ namespace XKOMapp.GUI.ConsoleRows.User
     internal class NameInputConsoleRow : ICustomCursorConsoleRow, ICustomKeystrokeListenerConsoleRow, IHoverConsoleRow, IInteractableConsoleRow
     {
         private readonly string markupLabel;
-        private readonly Func<char, bool> inputCheckPredicate;
         private readonly int maxLength;
         ConsolePrinter owner = null!;
 
         public string CurrentInput { get; private set; } = "";
         private bool isHovered;
 
-        public NameInputConsoleRow(string markupLabel, int maxLength, Func<char, bool> inputCheckPredicate)
+        public NameInputConsoleRow(string markupLabel, int maxLength)
         {
             this.markupLabel = markupLabel;
-            this.inputCheckPredicate = inputCheckPredicate;
             this.maxLength = maxLength;
         }
 
@@ -26,7 +25,9 @@ namespace XKOMapp.GUI.ConsoleRows.User
 
         public void ProcessCustomKeystroke(ConsoleKeyInfo keystrokeInfo)
         {
-            if(keystrokeInfo.Key == ConsoleKey.Backspace)
+            char letter = keystrokeInfo.KeyChar;
+
+            if (keystrokeInfo.Key == ConsoleKey.Backspace)
             {
                 if (CurrentInput.Length > 0)
                     CurrentInput = CurrentInput[..^1];
@@ -36,11 +37,19 @@ namespace XKOMapp.GUI.ConsoleRows.User
             if (CurrentInput.Length >= maxLength)
                 return;
 
-            if (inputCheckPredicate(keystrokeInfo.KeyChar))
-            {
-                CurrentInput += keystrokeInfo.KeyChar;
+            if (char.IsPunctuation(letter))
                 return;
-            }
+
+            if (char.IsWhiteSpace(letter))
+                return;
+
+            if (char.IsSeparator(letter))
+                return;
+
+            if (char.IsSymbol(letter))
+                return;
+
+            CurrentInput += letter;
         }
 
 

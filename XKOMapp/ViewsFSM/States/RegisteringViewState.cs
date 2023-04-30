@@ -32,43 +32,13 @@ namespace XKOMapp.ViewsFSM.States
             printer.EnableScrolling();
 
             const int labelPad = 16;
-            nameRow = new NameInputConsoleRow($"{"Name",-labelPad} : ", 32, (key) =>
-                {
-                    if (char.IsPunctuation(key))
-                        return false;
-
-                    if (char.IsWhiteSpace(key))
-                        return false;
-
-                    if (char.IsSeparator(key))
-                        return false;
-
-                    if (char.IsSymbol(key))
-                        return false;
-
-                    return true;
-                });
+            nameRow = new NameInputConsoleRow($"{"Name",-labelPad} : ", 32);
             printer.AddRow(nameRow);
 
-            surnameRow = new NameInputConsoleRow($"{"Last name",-labelPad} : ", 32, (key) =>
-            {
-                if (char.IsPunctuation(key))
-                    return false;
-
-                if (char.IsWhiteSpace(key))
-                    return false;
-
-                if (char.IsSeparator(key))
-                    return false;
-
-                if (char.IsSymbol(key))
-                    return false;
-
-                return true;
-            });
+            surnameRow = new NameInputConsoleRow($"{"Last name",-labelPad} : ", 32);
             printer.AddRow(surnameRow);
 
-            emailRow = new EmailInputConsoleRow($"{"Email",-labelPad} : ", 256);//TODO
+            emailRow = new EmailInputConsoleRow($"{"Email",-labelPad} : ", 256);
             printer.AddRow(emailRow);
 
             passwordRow = new PasswordInputConsoleRow($"{"Password",-labelPad} : ", 32);
@@ -79,7 +49,7 @@ namespace XKOMapp.ViewsFSM.States
 
             printer.AddRow(StandardRenderables.StandardSeparator.ToBasicConsoleRow());
 
-            printer.AddRow(new InteractableConsoleRow(new Text("Log in"), (row, owner) => throw new NotImplementedException())); //TODO
+            printer.AddRow(new InteractableConsoleRow(new Text("Log in"), (row, owner) => fsm.Checkout(new LoginViewState(fsm))));
             printer.AddRow(new InteractableConsoleRow(new Text("Create account"), (row, owner) =>
             {
                 if (!ValidateInput())
@@ -96,7 +66,7 @@ namespace XKOMapp.ViewsFSM.States
                 context.Add(newUser);
                 context.SaveChanges();
 
-                //TODO checkout
+                //TODO checkout user view state
             }));
             printer.StartGroup("errors");
         }
