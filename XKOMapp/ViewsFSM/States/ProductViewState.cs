@@ -123,16 +123,18 @@ public class ProductViewState : ViewState
         using var context = new XkomContext();
 
         User? dbUser = context.Users.Where(x => x.Email == SessionData.LoggedEmail).FirstOrDefault();
-        if (dbUser is null || !context.Reviews.Include(x => x.Product).Include(x => x.User).Where(x => x.ProductId == product.Id).Where(x => x.UserId == dbUser.Id).Any())
-            DisplayReviewInput();
-
         var reviews = context
             .Reviews
             .Include(x => x.Product)
             .Include(x => x.User)
             .Where(x => x.ProductId == product.Id)
-            .OrderBy(x => x.User != null && x.User.Email == SessionData.LoggedEmail)
+            .OrderBy(x => x.User != null && dbUser != null && x.User.Id == dbUser.Id)
             .ToList();
+
+        if (dbUser is null)
+            printer.AddRow(new InteractableConsoleRow(new Text("Log in to write review"), (row, owner) => throw new NotImplementedException()), "reviews"); //TODO logging in checkout
+        else if (!reviews.Any(x => x.UserId == dbUser.Id))
+            DisplayReviewInput();
 
         if (reviews.IsNullOrEmpty())
         {
@@ -142,16 +144,13 @@ public class ProductViewState : ViewState
 
         printer.AddRow(new Text("").ToBasicConsoleRow(), "reviews");
 
-        var barChart = new BarChart()
-            .Width(64)
-            .AddItem($"[yellow]{new string('*', 6)}[/][dim]{new string('*', 0)}[/]", reviews.Where(x => x.StarRating == 6).Count(), new Color(0xFF, 0xFF, 0x00))
-            .AddItem($"[yellow]{new string('*', 5)}[/][dim]{new string('*', 1)}[/]", reviews.Where(x => x.StarRating == 5).Count(), new Color(0xFF, 0xED, 0x4B))
-            .AddItem($"[yellow]{new string('*', 4)}[/][dim]{new string('*', 2)}[/]", reviews.Where(x => x.StarRating == 4).Count(), new Color(0xFC, 0xD1, 0x2A))
-            .AddItem($"[yellow]{new string('*', 3)}[/][dim]{new string('*', 3)}[/]", reviews.Where(x => x.StarRating == 3).Count(), new Color(0xFF, 0xC3, 0x00))
-            .AddItem($"[yellow]{new string('*', 2)}[/][dim]{new string('*', 4)}[/]", reviews.Where(x => x.StarRating == 2).Count(), new Color(0xF8, 0xB4, 0x12))
-            .AddItem($"[yellow]{new string('*', 1)}[/][dim]{new string('*', 5)}[/]", reviews.Where(x => x.StarRating == 1).Count(), new Color(0xFF, 0xA6, 0x00));
-        printer.AddRow(new MultiLineConsoleRow(barChart, 6), "reviews");
+        DisplayReviewChart(reviews);
 
+        DisplayAllReviews(reviews);
+    }
+
+    private void DisplayAllReviews(List<Review> reviews)
+    {
         reviews.ForEach(x =>
         {
             printer.AddRow(new Text("").ToBasicConsoleRow(), "reviews");
@@ -176,12 +175,25 @@ public class ProductViewState : ViewState
         });
     }
 
+    private void DisplayReviewChart(List<Review> reviews)
+    {
+        var barChart = new BarChart()
+            .Width(32)
+            .AddItem($"[yellow]{new string('*', 6)}[/][dim]{new string('*', 0)}[/]", reviews.Where(x => x.StarRating == 6).Count(), new Color(0xFF, 0xFF, 0x00))
+            .AddItem($"[yellow]{new string('*', 5)}[/][dim]{new string('*', 1)}[/]", reviews.Where(x => x.StarRating == 5).Count(), new Color(0xFF, 0xED, 0x4B))
+            .AddItem($"[yellow]{new string('*', 4)}[/][dim]{new string('*', 2)}[/]", reviews.Where(x => x.StarRating == 4).Count(), new Color(0xFC, 0xD1, 0x2A))
+            .AddItem($"[yellow]{new string('*', 3)}[/][dim]{new string('*', 3)}[/]", reviews.Where(x => x.StarRating == 3).Count(), new Color(0xFF, 0xC3, 0x00))
+            .AddItem($"[yellow]{new string('*', 2)}[/][dim]{new string('*', 4)}[/]", reviews.Where(x => x.StarRating == 2).Count(), new Color(0xF8, 0xB4, 0x12))
+            .AddItem($"[yellow]{new string('*', 1)}[/][dim]{new string('*', 5)}[/]", reviews.Where(x => x.StarRating == 1).Count(), new Color(0xFF, 0xA6, 0x00));
+        printer.AddRow(new MultiLineConsoleRow(barChart, 6), "reviews");
+    }
+
     private void DisplayReviewInput()
     {
         ReviewInputPanelConsoleRow panel = new ReviewInputPanelConsoleRow();
         printer.AddRow(panel, "reviews");
 
-        printer.AddRow(new InteractableDynamicConsoleRow("Click to post review", (row, owner) =>
+        ConsoleRowAction onClick = (row, owner) =>
         {
             var converted = (InteractableDynamicConsoleRow)row;
             using var context = new XkomContext();
@@ -223,7 +235,8 @@ public class ProductViewState : ViewState
             context.Reviews.Add(review);
             context.SaveChanges();
             ShowReviews();
-        }
-        ), "reviews");
+        };
+
+        printer.AddRow(new InteractableDynamicConsoleRow("Click to post review",  onClick), "reviews");
     }
 }
