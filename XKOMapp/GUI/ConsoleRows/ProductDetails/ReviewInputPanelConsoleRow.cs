@@ -36,14 +36,20 @@ namespace XKOMapp.GUI.ConsoleRows.ProductDetails
                 panelText = Description;
             }
 
-            var panel = new Panel(panelText).HeavyBorder().Header($"| [[You]] {stars} |");
+            var panel = new Panel(panelText).HeavyBorder().Header($"| [{StandardRenderables.GoldColorHex}][[You]][/] {stars} |");
             panel.Height = descriptionHeight + 2;
             panel.Width = 64;
 
             return panel;
         }
 
-        public int GetRenderHeight() => (int)(Math.Ceiling(Description.Length / (Console.WindowWidth - 5f)) + 2);
+        public int GetRenderHeight()
+        {
+            if (Description.Length == 0)
+                return 3;
+
+            return (int)(Math.Ceiling(Description.Length / (Console.WindowWidth - 10f)) + 2);
+        }
 
         public void ProcessCustomKeystroke(ConsoleKeyInfo keystrokeInfo)
         {

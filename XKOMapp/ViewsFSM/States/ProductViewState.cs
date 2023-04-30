@@ -34,21 +34,8 @@ public class ProductViewState : ViewState
         printer.AddRow(new Markup($"Made by {("[#96fa96]" + product.Company?.Name.EscapeMarkup() + "[/]") ?? "Unknown company"}").ToBasicConsoleRow());
         printer.AddRow(new Markup($"[#96fa96]{product.NumberAvailable}[/] left in magazine").ToBasicConsoleRow());
 
-        printer.AddRow(new DynamicRenderableConsoleRow(() =>
-        {
-            using var context = new XkomContext();
-
-            var avgStars = context.Products
-                .Where(x => x.Id == product.Id)
-                .Include(x => x.Reviews)
-                .Select(x => x.Reviews)
-                .FirstOrDefault()
-                ?.DefaultIfEmpty()
-                ?.Average(x => x?.StarRating) ?? 0;
-            int avgStarsRounded = (int)Math.Round(avgStars);
-
-            return new Markup("Average " + $"[yellow]{new string('*', avgStarsRounded)}[/][dim]{new string('*', 6 - avgStarsRounded)}[/] {avgStars:0.0}");
-        }));
+        printer.StartGroup("averageStars");
+        ShowAverageStars();
 
         printer.AddRow(new ReviewsAndPropertiesModeConsoleRow(ShowProperties, ShowReviews));
         printer.EnableScrolling();
@@ -121,30 +108,25 @@ public class ProductViewState : ViewState
         printer.ClearMemoryGroup("reviews");
 
         using var context = new XkomContext();
-
-        User? dbUser = context.Users.Where(x => x.Email == SessionData.LoggedEmail).FirstOrDefault();
         var reviews = context
             .Reviews
             .Include(x => x.Product)
             .Include(x => x.User)
             .Where(x => x.ProductId == product.Id)
-            .OrderByDescending(x => x.User != null && dbUser != null && x.User.Id == dbUser.Id)
+            .OrderByDescending(x => x.User != null && x.User.Id == SessionData.LoggedUserID)
             .ToList();
-
-        if (dbUser is null)
-            printer.AddRow(new InteractableConsoleRow(new Text("Log in to write review"), (row, owner) => throw new NotImplementedException()), "reviews"); //TODO logging in checkout
-        else if (!reviews.Any(x => x.UserId == dbUser.Id))
-            DisplayReviewInput();
 
         if (reviews.IsNullOrEmpty())
         {
-            printer.AddRow(new Text("No reviews").ToBasicConsoleRow(), "reviews");
+            printer.AddRow(new Text("No reviews, share some thought about this product").ToBasicConsoleRow(), "reviews");
+            DisplayReviewInput();
             return;
         }
 
-        printer.AddRow(new Text("").ToBasicConsoleRow(), "reviews");
-
         DisplayReviewChart(reviews);
+
+        printer.AddRow(new Text("").ToBasicConsoleRow(), "reviews");
+        DisplayReviewInput();
 
         DisplayAllReviews(reviews);
     }
@@ -159,7 +141,7 @@ public class ProductViewState : ViewState
             string header;
             if (x.User is null)
                 header = $"| [[deleted user]] {stars} |";
-            else if (x.User.Email == SessionData.LoggedEmail)
+            else if (x.User.Id == SessionData.LoggedUserID)
                 header = $"| [{StandardRenderables.GoldColorHex}][[You]][/] {stars} |";
             else
                 header = $"| [[{x.User.Name} {x.User.LastName}]] {stars} |";
@@ -196,24 +178,24 @@ public class ProductViewState : ViewState
         ConsoleRowAction onClick = (row, owner) =>
         {
             var converted = (InteractableDynamicConsoleRow)row;
+
+            if (!SessionData.IsLoggedIn())
+            {
+                converted.SetMarkupText("Click to post review [red]Placeholder.NotLoggedIn[/]");
+                return;
+            }
+
+            if (SessionData.HasSessionExpired(out User dbUser))
+            {
+                converted.SetMarkupText("Click to post review [red]Placeholder.SessionExpired[/]");
+                return;
+            }
+
             using var context = new XkomContext();
 
-            if (SessionData.LoggedEmail is null)
+            if (context.Reviews.Include(x => x.User).Include(x => x.Product).Any(x => x.UserId == dbUser.Id && x.ProductId == product.Id))
             {
-                //TODO log in
-                return;
-            }
-
-            User? dbUser = context.Users.Where(x => x.Email == SessionData.LoggedEmail).FirstOrDefault();
-            if (dbUser is null || dbUser.Password != SessionData.HashedPassword)
-            {
-                //TODO  session closed
-                return;
-            }
-
-            if (context.Reviews.Include(x => x.Product).Include(x => x.User).Where(x => x.ProductId == product.Id).Where(x => x.UserId == dbUser.Id).Any())
-            {
-                converted.SetMarkupText("Click to post review [red]You can't write more then one review[/]");
+                converted.SetMarkupText("Click to post review [red]Placeholder.ReviewAlreadyWritten[/]");
                 return;
             }
 
@@ -223,20 +205,40 @@ public class ProductViewState : ViewState
                 return;
             }
 
-            converted.SetMarkupText("Click to post review");
-
+            context.Attach(dbUser);
+            context.Attach(product);
             var review = new Review()
             {
-                Product = context.Products.Where(x => x.Id == product.Id).First(),
+                Product = product,
                 Description = panel.Description,
                 StarRating = panel.StarRating,
                 User = dbUser
             };
             context.Reviews.Add(review);
             context.SaveChanges();
+
             ShowReviews();
+            ShowAverageStars();
         };
 
-        printer.AddRow(new InteractableDynamicConsoleRow("Click to post review",  onClick), "reviews");
+        printer.AddRow(new InteractableDynamicConsoleRow("Click to post review", onClick), "reviews");
+    }
+
+    private void ShowAverageStars()
+    {
+        printer.ClearMemoryGroup("averageStars");
+
+        using (var context = new XkomContext())
+        {
+            var avgStars = context.Products
+                .Where(x => x.Id == product.Id)
+                .Include(x => x.Reviews)
+                .Select(x => x.Reviews)
+                .FirstOrDefault()
+                ?.DefaultIfEmpty()
+                ?.Average(x => x?.StarRating) ?? 0;
+            int avgStarsRounded = (int)Math.Round(avgStars);
+            printer.AddRow(new Markup("Average " + $"[yellow]{new string('*', avgStarsRounded)}[/][dim]{new string('*', 6 - avgStarsRounded)}[/] {avgStars:0.0}").ToBasicConsoleRow(), "averageStars");
+        };
     }
 }
