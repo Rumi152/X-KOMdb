@@ -3,12 +3,14 @@ using Spectre.Console.Rendering;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.Http.Headers;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using XKOMapp.GUI;
 using XKOMapp.GUI.ConsoleRows;
 using XKOMapp.GUI.ConsoleRows.User;
+using XKOMapp.Models;
 
 namespace XKOMapp.ViewsFSM.States
 {
@@ -66,7 +68,7 @@ namespace XKOMapp.ViewsFSM.States
             });
             printer.AddRow(surnameRow);
 
-            emailRow = new EmailInputConsoleRow($"{"Email",-labelPad} : ", 256);
+            emailRow = new EmailInputConsoleRow($"{"Email",-labelPad} : ", 256);//TODO
             printer.AddRow(emailRow);
 
             passwordRow = new PasswordInputConsoleRow($"{"Password",-labelPad} : ", 32);
@@ -75,9 +77,24 @@ namespace XKOMapp.ViewsFSM.States
             passwordConfirmRow = new PasswordInputConsoleRow($"{"Confirm password",-labelPad} : ", 32);
             printer.AddRow(passwordConfirmRow);
 
+            printer.AddRow(StandardRenderables.StandardSeparator.ToBasicConsoleRow());
+
+            printer.AddRow(new InteractableConsoleRow(new Text("Log in"), (row, owner) => throw new NotImplementedException())); //TODO
             printer.AddRow(new InteractableConsoleRow(new Text("Create account"), (row, owner) =>
             {
-                ValidateInput();
+                if (!ValidateInput())
+                    return;
+
+                using var context = new XkomContext();
+                var newUser = new User()
+                {
+                    Name = nameRow.CurrentInput,
+                    LastName = surnameRow.CurrentInput,
+                    Email = emailRow.CurrentInput,
+                    Password = passwordRow.CurrentInput
+                };
+                context.Add(newUser);
+                context.SaveChanges();
             }));
             printer.StartGroup("errors");
         }
@@ -131,6 +148,17 @@ namespace XKOMapp.ViewsFSM.States
             {
                 printer.AddRow(new Markup("[red]Email has wrong characters or is formatted wrong[/]").ToBasicConsoleRow(), "errors");
                 isValid = false;
+            }
+            else
+            {
+                using (var context = new XkomContext())
+                {
+                    if (context.Users.Any(x => x.Email == email))
+                    {
+                        printer.AddRow(new Markup("[red]Email is already used[/]").ToBasicConsoleRow(), "errors");
+                        isValid = false;
+                    }
+                }
             }
 
             if(password.Length < 6)
