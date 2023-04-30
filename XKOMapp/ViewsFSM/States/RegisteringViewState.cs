@@ -165,6 +165,28 @@ namespace XKOMapp.ViewsFSM.States
                 isValid = false;
             }
 
+            if (name.Length < 1)
+            {
+                printer.AddRow(new Markup("[red]Please input your name[/]").ToBasicConsoleRow(), "errors");
+                isValid = false;
+            }
+            else if (name.Length > 32)
+            {
+                printer.AddRow(new Markup("[red]Name is too long[/]").ToBasicConsoleRow(), "errors");
+                isValid = false;
+            }
+
+            if (lastName.Length < 1)
+            {
+                printer.AddRow(new Markup("[red]Please input your last name[/]").ToBasicConsoleRow(), "errors");
+                isValid = false;
+            }
+            else if (lastName.Length > 32)
+            {
+                printer.AddRow(new Markup("[red]Last name is too long[/]").ToBasicConsoleRow(), "errors");
+                isValid = false;
+            }
+
             return isValid;
         }
     }
