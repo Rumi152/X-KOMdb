@@ -128,7 +128,7 @@ public class ProductViewState : ViewState
             .Include(x => x.Product)
             .Include(x => x.User)
             .Where(x => x.ProductId == product.Id)
-            .OrderBy(x => x.User != null && dbUser != null && x.User.Id == dbUser.Id)
+            .OrderByDescending(x => x.User != null && dbUser != null && x.User.Id == dbUser.Id)
             .ToList();
 
         if (dbUser is null)
