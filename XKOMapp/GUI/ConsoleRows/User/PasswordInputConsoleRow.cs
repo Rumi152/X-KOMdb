@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using Spectre.Console;
 using Spectre.Console.Rendering;
+using System.Diagnostics.Metrics;
 
 namespace XKOMapp.GUI.ConsoleRows.User
 {
@@ -25,7 +26,9 @@ namespace XKOMapp.GUI.ConsoleRows.User
 
         public void ProcessCustomKeystroke(ConsoleKeyInfo keystrokeInfo)
         {
-            if(keystrokeInfo.Key == ConsoleKey.Backspace)
+            char letter = keystrokeInfo.KeyChar;
+
+            if (keystrokeInfo.Key == ConsoleKey.Backspace)
             {
                 if (CurrentInput.Length > 0)
                     CurrentInput = CurrentInput[..^1];
@@ -35,13 +38,13 @@ namespace XKOMapp.GUI.ConsoleRows.User
             if (CurrentInput.Length >= maxLength)
                 return;
 
-            if (char.IsWhiteSpace(keystrokeInfo.KeyChar))
+            if (char.IsWhiteSpace(letter))
                 return;
 
-            if (!char.IsAscii(keystrokeInfo.KeyChar))
-                return;
+            if (letter <= 126 && letter >= 32)
+                CurrentInput += letter;
 
-            CurrentInput += keystrokeInfo.KeyChar;
+            CurrentInput += letter;
         }
 
 

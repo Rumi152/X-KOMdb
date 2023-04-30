@@ -43,13 +43,13 @@ namespace XKOMapp.GUI.ConsoleRows.User
                 return;
             }
 
-            if (char.IsLetterOrDigit(keystrokeInfo.KeyChar) && char.IsLower(keystrokeInfo.KeyChar))
+            if (char.IsLetterOrDigit(keystrokeInfo.KeyChar))
             {
                 CurrentInput += keystrokeInfo.KeyChar;
                 return;
             }
 
-            if (new List<char>() { '_', '.', '-' }.Contains(keystrokeInfo.KeyChar))
+            if (new List<char>() { '_', '.', '-', '%', '+' }.Contains(keystrokeInfo.KeyChar))
             {
                 CurrentInput += keystrokeInfo.KeyChar;
                 return;
