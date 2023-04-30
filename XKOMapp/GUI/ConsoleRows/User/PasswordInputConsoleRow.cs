@@ -45,7 +45,7 @@ namespace XKOMapp.GUI.ConsoleRows.User
         }
 
 
-        public string GetCustomCursor() => "\u00BB";
+        public string GetCustomCursor() => "[blink]\u00BB[/]";
         public string GetCustomCursorBackground() => " ";
 
         public void OnHoverStart() => isHovered = true;
