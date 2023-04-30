@@ -95,6 +95,8 @@ namespace XKOMapp.ViewsFSM.States
                 };
                 context.Add(newUser);
                 context.SaveChanges();
+
+                //TODO checkout
             }));
             printer.StartGroup("errors");
         }
