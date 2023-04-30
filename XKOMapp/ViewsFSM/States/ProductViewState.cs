@@ -160,7 +160,7 @@ public class ProductViewState : ViewState
             if (x.User is null)
                 header = $"| [[deleted user]] {stars} |";
             else if (x.User.Email == SessionData.LoggedEmail)
-                header = $"| [lime][[You]][/] {stars} |";
+                header = $"| [{StandardRenderables.GoldColorHex}][[You]][/] {stars} |";
             else
                 header = $"| [[{x.User.Name} {x.User.LastName}]] {stars} |";
 
