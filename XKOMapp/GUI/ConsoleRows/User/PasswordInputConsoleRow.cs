@@ -41,8 +41,8 @@ namespace XKOMapp.GUI.ConsoleRows.User
             if (char.IsWhiteSpace(letter))
                 return;
 
-            if (letter <= 126 && letter >= 32)
-                CurrentInput += letter;
+            if (letter > 126 || letter < 32)
+                return;
 
             CurrentInput += letter;
         }

@@ -25,6 +25,7 @@ namespace XKOMapp.ViewsFSM.States
             printer = new ConsolePrinter();
 
             printer.AddRow(StandardRenderables.StandardHeader.ToBasicConsoleRow());
+            printer.AddRow(new Rule("Registering").RuleStyle(Style.Parse(StandardRenderables.AquamarineColorHex)).HeavyBorder().ToBasicConsoleRow());
             printer.StartContent();
             printer.EnableScrolling();
 
@@ -65,7 +66,7 @@ namespace XKOMapp.ViewsFSM.States
             });
             printer.AddRow(surnameRow);
 
-            emailRow = new EmailInputConsoleRow($"{"Email: ",-labelPad} : ", 256);
+            emailRow = new EmailInputConsoleRow($"{"Email",-labelPad} : ", 256);
             printer.AddRow(emailRow);
 
             passwordRow = new PasswordInputConsoleRow($"{"Password",-labelPad} : ", 32);
@@ -129,6 +130,38 @@ namespace XKOMapp.ViewsFSM.States
             else if (!Regex.IsMatch(email, @"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$"))
             {
                 printer.AddRow(new Markup("[red]Email has wrong characters or is formatted wrong[/]").ToBasicConsoleRow(), "errors");
+                isValid = false;
+            }
+
+            if(password.Length < 6)
+            {
+                printer.AddRow(new Markup("[red]Password must be at least 6 characters[/]").ToBasicConsoleRow(), "errors");
+                isValid = false;
+            }
+            else if(password.Length > 64)
+            {
+                printer.AddRow(new Markup("[red]Password cannot be longer than 64 characters[/]").ToBasicConsoleRow(), "errors");
+                isValid = false;
+            }
+            if (!password.Any(x => char.IsLower(x)))
+            {
+                printer.AddRow(new Markup("[red]Password must have lowercase character[/]").ToBasicConsoleRow(), "errors");
+                isValid = false;
+            }
+            if (!password.Any(x => char.IsUpper(x)))
+            {
+                printer.AddRow(new Markup("[red]Password must have uppercase character[/]").ToBasicConsoleRow(), "errors");
+                isValid = false;
+            }
+            if (!password.Any(x => char.IsDigit(x)))
+            {
+                printer.AddRow(new Markup("[red]Password must have digit[/]").ToBasicConsoleRow(), "errors");
+                isValid = false;
+            }
+
+            if(password != passwordConfirm)
+            {
+                printer.AddRow(new Markup("[red]Password must match[/]").ToBasicConsoleRow(), "errors");
                 isValid = false;
             }
 
