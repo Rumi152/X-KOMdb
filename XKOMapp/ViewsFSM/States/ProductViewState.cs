@@ -47,7 +47,7 @@ public class ProductViewState : ViewState
                 ?.Average(x => x?.StarRating) ?? 0;
             int avgStarsRounded = (int)Math.Round(avgStars);
 
-            return new Markup("Average " + $"[yellow]{new string('*', avgStarsRounded)}[/][dim]{new string('*', 6 - avgStarsRounded)}[/] {avgStars}");
+            return new Markup("Average " + $"[yellow]{new string('*', avgStarsRounded)}[/][dim]{new string('*', 6 - avgStarsRounded)}[/] {avgStars:0.0}");
         }));
 
         printer.AddRow(new ReviewsAndPropertiesModeConsoleRow(ShowProperties, ShowReviews));
