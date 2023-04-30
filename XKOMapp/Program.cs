@@ -1,4 +1,5 @@
-﻿using XKOMapp.GUI;
+﻿using Spectre.Console;
+using XKOMapp.GUI;
 using XKOMapp.Models;
 using XKOMapp.ViewsFSM;
 using XKOMapp.ViewsFSM.States;
@@ -16,7 +17,7 @@ internal class Program
         fsm.SaveState("productsSearch", new ProductSearchViewState(fsm));
         fsm.Checkout("productsSearch");
 
-        fsm.Checkout(new RegisteringViewState(fsm));
+        fsm.Checkout(new FastLoginViewState(fsm, new Markup("[red]Session expired[/]\n").ToBasicConsoleRow()));
 
         //checking for input in loop
         while (true)
