@@ -19,14 +19,14 @@ namespace XKOMapp.ViewsFSM.States
         private readonly EmailInputConsoleRow emailRow;
         private readonly PasswordInputConsoleRow passwordRow;
 
-        public FastLoginViewState(ViewStateMachine stateMachine, IConsoleRow? additionalInfo = null) : base(stateMachine)
+        public FastLoginViewState(ViewStateMachine stateMachine, params IConsoleRow[] additionalRows) : base(stateMachine)
         {
             printer = new ConsolePrinter();
 
             printer.AddRow(StandardRenderables.StandardHeader.ToBasicConsoleRow());
 
-            if (additionalInfo is not null)
-                printer.AddRow(additionalInfo);
+            foreach(var extraRow in additionalRows)
+                printer.AddRow(extraRow);
 
             printer.AddRow(new Rule("Logging in").RuleStyle(Style.Parse(StandardRenderables.AquamarineColorHex)).HeavyBorder().ToBasicConsoleRow());
             printer.StartContent();
