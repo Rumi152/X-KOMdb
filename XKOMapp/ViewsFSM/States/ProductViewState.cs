@@ -32,8 +32,8 @@ public class ProductViewState : ViewState
 
         printer.AddRow(new Text(product.Name).ToBasicConsoleRow());
         printer.AddRow(new Markup($"[lime]{product.Price:F2}[/] PLN").ToBasicConsoleRow());
-        printer.AddRow(new Markup($"Made by {("[#96fa96]" + product.Company?.Name.EscapeMarkup() + "[/]") ?? "Unknown company"}").ToBasicConsoleRow());
-        printer.AddRow(new Markup($"[#96fa96]{product.NumberAvailable}[/] left in magazine").ToBasicConsoleRow());
+        printer.AddRow(new Markup($"Made by {($"[{StandardRenderables.GrassColorHex}]" + product.Company?.Name.EscapeMarkup() + "[/]") ?? "Unknown company"}").ToBasicConsoleRow());
+        printer.AddRow(new Markup($"[{StandardRenderables.GrassColorHex}]{product.NumberAvailable}[/] left in magazine").ToBasicConsoleRow());
 
         printer.StartGroup("averageStars");
         ShowAverageStars();
@@ -193,7 +193,7 @@ public class ProductViewState : ViewState
             if (!SessionData.IsLoggedIn())
             {
                 fsm.Checkout(new FastLoginViewState(fsm,
-                    new Markup("[red]Log in to write reviews[/]").ToBasicConsoleRow(),//TODO light green color standarize
+                    new Markup($"[{StandardRenderables.GrassColorHex}]Log in to write reviews[/]").ToBasicConsoleRow(),
                     new InteractableConsoleRow(new Markup("Click to abort"), (row, owner) => fsm.RollbackOrDefault(this)))); //TODO main menu rollback
                 return;
             }
@@ -201,7 +201,7 @@ public class ProductViewState : ViewState
             if (SessionData.HasSessionExpired(out User dbUser))
             {
                 fsm.Checkout(new FastLoginViewState(fsm,
-                    new Markup("[red]Session expired[/]").ToBasicConsoleRow(),//TODO light green color standarize
+                    new Markup($"[red]Session expired[/] - [{StandardRenderables.GrassColorHex}]Log in to write reviews[/]").ToBasicConsoleRow(),
                     new InteractableConsoleRow(new Markup("Click to abort"), (row, owner) => fsm.RollbackOrDefault(this)))); //TODO main menu rollback
                 return;
             }

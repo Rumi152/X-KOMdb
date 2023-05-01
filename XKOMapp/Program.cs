@@ -17,7 +17,9 @@ internal class Program
         fsm.SaveState("productsSearch", new ProductSearchViewState(fsm));
         fsm.Checkout("productsSearch");
 
-        fsm.Checkout(new FastLoginViewState(fsm, new Markup("[red]Session expired[/]\n").ToBasicConsoleRow()));
+        //SessionData.TryLogIn("emailtymek", "rogo123");
+
+        //fsm.Checkout(new UserDetailsViewState(fsm));
 
         //checking for input in loop
         while (true)
