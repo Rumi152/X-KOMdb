@@ -14,6 +14,7 @@ public class ProductViewState : ViewState
 {
     private readonly Product product;
     private bool propertiesView = true;
+    readonly ReviewInputPanelConsoleRow reviewInputPanel = new ReviewInputPanelConsoleRow();
 
     public ProductViewState(ViewStateMachine stateMachine, Product product) : base(stateMachine)
     {
@@ -183,8 +184,7 @@ public class ProductViewState : ViewState
 
     private void DisplayReviewInput()
     {
-        ReviewInputPanelConsoleRow panel = new ReviewInputPanelConsoleRow();
-        printer.AddRow(panel, "reviews");
+        printer.AddRow(reviewInputPanel, "reviews");
 
         ConsoleRowAction onClick = (row, owner) =>
         {
@@ -214,7 +214,7 @@ public class ProductViewState : ViewState
                 return;
             }
 
-            if (panel.StarRating == 0)
+            if (reviewInputPanel.StarRating == 0)
             {
                 converted.SetMarkupText("Click to post review [red]Please select star rating[/]");
                 return;
@@ -225,8 +225,8 @@ public class ProductViewState : ViewState
             var review = new Review()
             {
                 Product = product,
-                Description = panel.Description,
-                StarRating = panel.StarRating,
+                Description = reviewInputPanel.Description,
+                StarRating = reviewInputPanel.StarRating,
                 User = dbUser
             };
             context.Reviews.Add(review);
