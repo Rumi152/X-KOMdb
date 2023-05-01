@@ -66,7 +66,7 @@ namespace XKOMapp.ViewsFSM.States
                 context.Add(newUser);
                 context.SaveChanges();
 
-                //TODO checkout user view state
+                fsm.Checkout(new UserDetailsViewState(fsm));
             }));
             printer.StartGroup("errors");
         }

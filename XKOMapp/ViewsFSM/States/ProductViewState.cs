@@ -13,6 +13,7 @@ namespace XKOMapp.ViewsFSM.States;
 public class ProductViewState : ViewState
 {
     private readonly Product product;
+    private bool propertiesView = true;
 
     public ProductViewState(ViewStateMachine stateMachine, Product product) : base(stateMachine)
     {
@@ -50,8 +51,9 @@ public class ProductViewState : ViewState
     {
         base.OnEnter();
 
-        printer.ResetCursor();
-        ShowProperties();
+        if (propertiesView) ShowProperties();
+        else ShowReviews();
+
         ShowAverageStars();
         Display();
     }
@@ -73,6 +75,7 @@ public class ProductViewState : ViewState
 
     private void ShowProperties()
     {
+        propertiesView = true;
         printer.ClearMemoryGroup("properties");
         printer.ClearMemoryGroup("reviews");
 
@@ -105,6 +108,7 @@ public class ProductViewState : ViewState
 
     private void ShowReviews()
     {
+        propertiesView = false;
         printer.ClearMemoryGroup("properties");
         printer.ClearMemoryGroup("reviews");
 
@@ -188,13 +192,17 @@ public class ProductViewState : ViewState
 
             if (!SessionData.IsLoggedIn())
             {
-                converted.SetMarkupText("Click to post review [red]Placeholder.NotLoggedIn[/]");
+                fsm.Checkout(new FastLoginViewState(fsm,
+                    new Markup("[red]Log in to write reviews[/]").ToBasicConsoleRow(),//TODO light green color standarize
+                    new InteractableConsoleRow(new Markup("Click to abort"), (row, owner) => fsm.RollbackOrDefault(this)))); //TODO main menu rollback
                 return;
             }
 
             if (SessionData.HasSessionExpired(out User dbUser))
             {
-                converted.SetMarkupText("Click to post review [red]Placeholder.SessionExpired[/]");
+                fsm.Checkout(new FastLoginViewState(fsm,
+                    new Markup("[red]Session expired[/]").ToBasicConsoleRow(),//TODO light green color standarize
+                    new InteractableConsoleRow(new Markup("Click to abort"), (row, owner) => fsm.RollbackOrDefault(this)))); //TODO main menu rollback
                 return;
             }
 
@@ -202,7 +210,7 @@ public class ProductViewState : ViewState
 
             if (context.Reviews.Include(x => x.User).Include(x => x.Product).Any(x => x.UserId == dbUser.Id && x.ProductId == product.Id))
             {
-                converted.SetMarkupText("Click to post review [red]Placeholder.ReviewAlreadyWritten[/]");
+                converted.SetMarkupText("Click to post review [red]Placeholder.ReviewAlreadyWritten[/]");//TODO
                 return;
             }
 
