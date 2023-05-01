@@ -24,12 +24,12 @@ namespace XKOMapp.ViewsFSM.States
             printer = new ConsolePrinter();
 
             printer.AddRow(StandardRenderables.StandardHeader.ToBasicConsoleRow());
+            printer.StartContent();
 
-            foreach(var extraRow in additionalRows)
+            foreach (var extraRow in additionalRows)
                 printer.AddRow(extraRow);
 
             printer.AddRow(new Rule("Logging in").RuleStyle(Style.Parse(StandardRenderables.AquamarineColorHex)).HeavyBorder().ToBasicConsoleRow());
-            printer.StartContent();
             printer.EnableScrolling();
 
             const int labelPad = 8;
