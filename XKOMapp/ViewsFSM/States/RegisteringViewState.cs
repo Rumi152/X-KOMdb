@@ -27,8 +27,16 @@ namespace XKOMapp.ViewsFSM.States
             printer = new ConsolePrinter();
 
             printer.AddRow(StandardRenderables.StandardHeader.ToBasicConsoleRow());
-            printer.AddRow(new Rule("Registering").RuleStyle(Style.Parse(StandardRenderables.AquamarineColorHex)).HeavyBorder().ToBasicConsoleRow());
             printer.StartContent();
+
+
+            printer.AddRow(new InteractableConsoleRow(new Text("Click to abort"), (row, owner) =>
+            {
+                //TODO
+                fsm.Checkout("mainMenu");
+                throw new NotImplementedException();
+            }));
+            printer.AddRow(new Rule("Registering").RuleStyle(Style.Parse(StandardRenderables.AquamarineColorHex)).HeavyBorder().ToBasicConsoleRow());
             printer.EnableScrolling();
 
             const int labelPad = 16;
@@ -49,7 +57,7 @@ namespace XKOMapp.ViewsFSM.States
 
             printer.AddRow(StandardRenderables.StandardSeparator.ToBasicConsoleRow());
 
-            printer.AddRow(new InteractableConsoleRow(new Text("Log in"), (row, owner) => throw new NotImplementedException()));
+            printer.AddRow(new InteractableConsoleRow(new Text("Log in"), (row, owner) => fsm.Checkout(new LoginViewState(fsm))));
             printer.AddRow(new InteractableConsoleRow(new Text("Create account"), (row, owner) =>
             {
                 if (!ValidateInput())
