@@ -13,6 +13,8 @@ namespace XKOMapp.ViewsFSM.States;
 public class ProductViewState : ViewState
 {
     private readonly Product product;
+    private bool propertiesView = true;
+    readonly ReviewInputPanelConsoleRow reviewInputPanel = new ReviewInputPanelConsoleRow();
 
     public ProductViewState(ViewStateMachine stateMachine, Product product) : base(stateMachine)
     {
@@ -22,7 +24,7 @@ public class ProductViewState : ViewState
         printer.AddRow(StandardRenderables.StandardHeader.ToBasicConsoleRow());
         printer.StartContent();
 
-        printer.AddRow(new InteractableConsoleRow(new Text("Back to searching"), (row, owner) => fsm.RollbackOrDefault("productsSearch")));
+        printer.AddRow(new InteractableConsoleRow(new Text("Back to searching"), (row, owner) => fsm.Checkout("productsSearch")));
         printer.AddRow(new InteractableConsoleRow(new Text("Add to favourites"), (row, owner) => throw new NotImplementedException()));//TODO
         printer.AddRow(new InteractableConsoleRow(new Text("Add to cart"), (row, owner) => throw new NotImplementedException()));//TODO
         printer.AddRow(new InteractableConsoleRow(new Text("Add/Remove from list"), (row, owner) => throw new NotImplementedException()));//TODO
@@ -31,8 +33,8 @@ public class ProductViewState : ViewState
 
         printer.AddRow(new Text(product.Name).ToBasicConsoleRow());
         printer.AddRow(new Markup($"[lime]{product.Price:F2}[/] PLN").ToBasicConsoleRow());
-        printer.AddRow(new Markup($"Made by {("[#96fa96]" + product.Company?.Name.EscapeMarkup() + "[/]") ?? "Unknown company"}").ToBasicConsoleRow());
-        printer.AddRow(new Markup($"[#96fa96]{product.NumberAvailable}[/] left in magazine").ToBasicConsoleRow());
+        printer.AddRow(new Markup($"Made by {($"[{StandardRenderables.GrassColorHex}]" + product.Company?.Name.EscapeMarkup() + "[/]") ?? "Unknown company"}").ToBasicConsoleRow());
+        printer.AddRow(new Markup($"[{StandardRenderables.GrassColorHex}]{product.NumberAvailable}[/] left in magazine").ToBasicConsoleRow());
 
         printer.StartGroup("averageStars");
         ShowAverageStars();
@@ -50,8 +52,9 @@ public class ProductViewState : ViewState
     {
         base.OnEnter();
 
-        printer.ResetCursor();
-        ShowProperties();
+        if (propertiesView) ShowProperties();
+        else ShowReviews();
+
         ShowAverageStars();
         Display();
     }
@@ -73,6 +76,7 @@ public class ProductViewState : ViewState
 
     private void ShowProperties()
     {
+        propertiesView = true;
         printer.ClearMemoryGroup("properties");
         printer.ClearMemoryGroup("reviews");
 
@@ -105,6 +109,7 @@ public class ProductViewState : ViewState
 
     private void ShowReviews()
     {
+        propertiesView = false;
         printer.ClearMemoryGroup("properties");
         printer.ClearMemoryGroup("reviews");
 
@@ -179,8 +184,7 @@ public class ProductViewState : ViewState
 
     private void DisplayReviewInput()
     {
-        ReviewInputPanelConsoleRow panel = new ReviewInputPanelConsoleRow();
-        printer.AddRow(panel, "reviews");
+        printer.AddRow(reviewInputPanel, "reviews");
 
         ConsoleRowAction onClick = (row, owner) =>
         {
@@ -188,13 +192,17 @@ public class ProductViewState : ViewState
 
             if (!SessionData.IsLoggedIn())
             {
-                converted.SetMarkupText("Click to post review [red]Placeholder.NotLoggedIn[/]");
+                fsm.Checkout(new FastLoginViewState(fsm,
+                    new Markup($"[{StandardRenderables.GrassColorHex}]Log in to write reviews[/]").ToBasicConsoleRow(),
+                    new InteractableConsoleRow(new Markup("Click to abort"), (row, owner) => fsm.RollbackOrDefault(this)))); //TODO main menu rollback
                 return;
             }
 
             if (SessionData.HasSessionExpired(out User dbUser))
             {
-                converted.SetMarkupText("Click to post review [red]Placeholder.SessionExpired[/]");
+                fsm.Checkout(new FastLoginViewState(fsm,
+                    new Markup($"[red]Session expired[/] - [{StandardRenderables.GrassColorHex}]Log in to write reviews[/]").ToBasicConsoleRow(),
+                    new InteractableConsoleRow(new Markup("Click to abort"), (row, owner) => fsm.RollbackOrDefault(this)))); //TODO main menu rollback
                 return;
             }
 
@@ -202,11 +210,11 @@ public class ProductViewState : ViewState
 
             if (context.Reviews.Include(x => x.User).Include(x => x.Product).Any(x => x.UserId == dbUser.Id && x.ProductId == product.Id))
             {
-                converted.SetMarkupText("Click to post review [red]Placeholder.ReviewAlreadyWritten[/]");
+                converted.SetMarkupText("Click to post review [red]Placeholder.ReviewAlreadyWritten[/]");//TODO
                 return;
             }
 
-            if (panel.StarRating == 0)
+            if (reviewInputPanel.StarRating == 0)
             {
                 converted.SetMarkupText("Click to post review [red]Please select star rating[/]");
                 return;
@@ -217,8 +225,8 @@ public class ProductViewState : ViewState
             var review = new Review()
             {
                 Product = product,
-                Description = panel.Description,
-                StarRating = panel.StarRating,
+                Description = reviewInputPanel.Description,
+                StarRating = reviewInputPanel.StarRating,
                 User = dbUser
             };
             context.Reviews.Add(review);
