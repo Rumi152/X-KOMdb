@@ -32,4 +32,7 @@ public static class StandardRenderables
 
     public static Color AquamarineColor => new Color(0x0E, 0x8F, 0x75);
     public static string AquamarineColorHex => "#0E8F75";
+
+    public static Color GrassColor => new Color(0x96, 0xFA, 0x96);
+    public static string GrassColorHex => "#96fa96";
 }

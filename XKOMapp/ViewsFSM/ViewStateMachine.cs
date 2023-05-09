@@ -4,9 +4,9 @@
     {
         private readonly Dictionary<string, ViewState> states = new();
         private readonly Stack<ViewState> history = new Stack<ViewState>();
-        private ViewState? currentState;
+        public ViewState? CurrentState { get; private set; } = null;
 
-        public void PassKeystroke(ConsoleKeyInfo info) => currentState?.PassKeystroke(info);
+        public void PassKeystroke(ConsoleKeyInfo info) => CurrentState?.PassKeystroke(info);
 
         public void SaveState(string stateID, ViewState state) => states.Add(stateID, state);
 
@@ -32,14 +32,14 @@
 
         public void Checkout(ViewState newState)
         {
-            if (currentState is not null)
+            if (CurrentState is not null)
             {
-                currentState.OnExit();
-                history.Push(currentState);
+                CurrentState.OnExit();
+                history.Push(CurrentState);
             }
 
-            currentState = newState;
-            currentState.OnEnter();
+            CurrentState = newState;
+            CurrentState.OnEnter();
         }
     }
 }

@@ -27,6 +27,7 @@ public class ProductSearchViewState : ViewState
         nameSearchInputRow = new SearchContraintInputConsoleRow($"{"Name",-namePadding}: ", 32, (row, printer) => RefreshProducts(), (row, printer) => RefreshProducts());
         companySearchInputRow = new SearchContraintInputConsoleRow($"{"Company",-namePadding}: ", 64, (row, printer) => RefreshProducts(), (row, printer) => RefreshProducts());
         categorySearchChoiceParent = new ChoiceMenuParentConsoleRow($"{"Category",-namePadding}: ", 4, 2, (row, printer) => RefreshProducts(), (row, printer) => RefreshCategories());
+        //TODO favourites only
         List<ChoiceMenuChildConsoleRow> sortingOptions = new()
         {
             new ChoiceMenuChildConsoleRow("Newest"),

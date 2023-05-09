@@ -1,4 +1,5 @@
-﻿using XKOMapp.GUI;
+﻿using Spectre.Console;
+using XKOMapp.GUI;
 using XKOMapp.Models;
 using XKOMapp.ViewsFSM;
 using XKOMapp.ViewsFSM.States;
@@ -15,6 +16,10 @@ internal class Program
         var fsm = new ViewStateMachine();
         fsm.SaveState("productsSearch", new ProductSearchViewState(fsm));
         fsm.Checkout("productsSearch");
+
+        //SessionData.TryLogIn("emailtymek", "rogo123");
+
+        //fsm.Checkout(new UserDetailsViewState(fsm));
 
         //checking for input in loop
         while (true)
