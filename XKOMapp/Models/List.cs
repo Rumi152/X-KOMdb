@@ -11,5 +11,9 @@ public partial class List
 
     public string Name { get; set; } = null!;
 
+    public int UserId { get; set; }
+
     public virtual ICollection<ListProduct> ListProducts { get; } = new List<ListProduct>();
+
+    public virtual User User { get; set; } = null!;
 }

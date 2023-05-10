@@ -23,5 +23,7 @@ public partial class User
 
     public virtual ICollection<FavouriteProduct> FavouriteProducts { get; } = new List<FavouriteProduct>();
 
+    public virtual ICollection<List> Lists { get; } = new List<List>();
+
     public virtual ICollection<Review> Reviews { get; } = new List<Review>();
 }
