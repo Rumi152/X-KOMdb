@@ -14,8 +14,8 @@ internal class Program
         Console.Title = "X-KOMapp";
 
         var fsm = new ViewStateMachine();
-        fsm.SaveState("productsSearch", new ProductSearchViewState(fsm));
-        fsm.Checkout("productsSearch");
+        fsm.SaveState("ListBrowseViewState", new ListBrowseViewState(fsm));
+        fsm.Checkout("ListBrowseViewState");
 
         //SessionData.TryLogIn("emailtymek", "rogo123");
 
