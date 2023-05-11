@@ -12,9 +12,13 @@ internal class Program
     {
         Console.CursorVisible = false;
         Console.Title = "X-KOMapp";
+        Console.BackgroundColor = ConsoleColor.Black;
+        Console.ForegroundColor = ConsoleColor.White;
 
         var fsm = new ViewStateMachine();
-        fsm.SaveState("productsSearch", new ListBrowseViewState(fsm));//DONT TOUCH THIS TIMUR
+        fsm.SaveState("productsSearch", new ProductSearchViewState(fsm));//DONT TOUCH THIS TIMUR
+
+        fsm.Checkout("productsSearch");
 
         //checking for input in loop
         while (true)
