@@ -17,10 +17,10 @@ internal class PriceRangeInputConsoleRow : IModesConsoleRow, ICustomKeystrokeLis
     private bool isHovered = false;
 
     private readonly string preTextMarkup;
-    private readonly ConsoleRowAction? onHoverEnd;
-    private readonly ConsoleRowAction? onInteraction;
+    private readonly Action onHoverEnd;
+    private readonly Action onInteraction;
 
-    public PriceRangeInputConsoleRow(string preTextMarkup, ConsoleRowAction? onHoverEnd, ConsoleRowAction? onInteraction)
+    public PriceRangeInputConsoleRow(string preTextMarkup, Action onHoverEnd, Action onInteraction)
     {
         this.preTextMarkup = preTextMarkup;
         this.onHoverEnd = onHoverEnd;
@@ -87,7 +87,7 @@ internal class PriceRangeInputConsoleRow : IModesConsoleRow, ICustomKeystrokeLis
     {
         isHovered = false;
         modeIndex = 0;
-        onHoverEnd?.Invoke(this, owner);
+        onHoverEnd();
     }
 
     public void OnInteraction()
@@ -96,7 +96,8 @@ internal class PriceRangeInputConsoleRow : IModesConsoleRow, ICustomKeystrokeLis
             ((IModesConsoleRow)this).IncrementModeIndex();
         else
             ((IModesConsoleRow)this).DecrementModeIndex();
-        onInteraction?.Invoke(this, owner);
+
+        onInteraction();
     }
 
     public void ResetRange()

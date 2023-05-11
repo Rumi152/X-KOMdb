@@ -13,14 +13,14 @@ namespace XKOMapp.GUI.ConsoleRows.ProductSearching
     {
         private readonly string markupPreText;
         private readonly int inputMaxLength;
-        private readonly ConsoleRowAction? onInteraction;
-        private readonly ConsoleRowAction? onHoverEnd;
+        private readonly Action onInteraction;
+        private readonly Action onHoverEnd;
         private ConsolePrinter? owner;
 
         private bool isHovered = false;
         public string currentInput { get; private set; } = "";
 
-        public SearchContraintInputConsoleRow(string markupPreText, int inputMaxLength, ConsoleRowAction? onInteraction, ConsoleRowAction? onHoverEnd)
+        public SearchContraintInputConsoleRow(string markupPreText, int inputMaxLength, Action onInteraction, Action onHoverEnd)
         {
             this.markupPreText = markupPreText;
             this.inputMaxLength = inputMaxLength;
@@ -37,14 +37,14 @@ namespace XKOMapp.GUI.ConsoleRows.ProductSearching
         public void OnHoverEnd()
         {
             isHovered = false;
-            onHoverEnd?.Invoke(this, owner);
+            onHoverEnd();
         }
 
         public void OnHoverStart()
         {
             isHovered = true;
         }
-        public void OnInteraction() => onInteraction?.Invoke(this, owner);
+        public void OnInteraction() => onInteraction();
 
         public void ProcessCustomKeystroke(ConsoleKeyInfo keystrokeInfo)
         {

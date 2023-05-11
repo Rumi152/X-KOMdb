@@ -13,8 +13,8 @@ public class ChoiceMenuParentConsoleRow : ICustomCursorConsoleRow, ISwitchableCo
 {
     private int childrenDisplaySize;
     private int childrenStickyStart;
-    private readonly ConsoleRowAction? onAccept;
-    private readonly ConsoleRowAction? preEnter;
+    private readonly Action onAccept;
+    private readonly Action preEnter;
     private ConsolePrinter owner = null!;
     private readonly string markupPreText;
     private List<ChoiceMenuChildConsoleRow> children = new List<ChoiceMenuChildConsoleRow>();
@@ -26,7 +26,7 @@ public class ChoiceMenuParentConsoleRow : ICustomCursorConsoleRow, ISwitchableCo
     private int appliedChoiceIndex = 0;
 
 
-    public ChoiceMenuParentConsoleRow(string markupPreText, int childrenDisplaySize, int childrenStickyStart, ConsoleRowAction? onAccept, ConsoleRowAction? preEnter)
+    public ChoiceMenuParentConsoleRow(string markupPreText, int childrenDisplaySize, int childrenStickyStart, Action onAccept, Action preEnter)
     {
         this.markupPreText = markupPreText;
         this.childrenDisplaySize = childrenDisplaySize;
@@ -57,7 +57,7 @@ public class ChoiceMenuParentConsoleRow : ICustomCursorConsoleRow, ISwitchableCo
 
     public void OnInteraction()
     {
-        preEnter?.Invoke(this, owner);
+        preEnter();
 
         if (children.Count > 0)
         {
@@ -70,7 +70,7 @@ public class ChoiceMenuParentConsoleRow : ICustomCursorConsoleRow, ISwitchableCo
         {
             appliedChoiceIndex = choiceIndex;
             ((ISwitchableConsoleRow)this).TurnOff();
-            onAccept?.Invoke(this, owner);
+            onAccept();
             return;
         }
 
