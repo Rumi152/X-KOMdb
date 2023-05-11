@@ -13,12 +13,16 @@ namespace XKOMapp.ViewsFSM.States;
 public class ProductViewState : ViewState
 {
     private readonly Product product;
-    private bool propertiesView = true;
+    private bool isInPropertiesView = true;
     readonly ReviewInputPanelConsoleRow reviewInputPanel = new ReviewInputPanelConsoleRow();
 
     public ProductViewState(ViewStateMachine stateMachine, Product product) : base(stateMachine)
     {
         this.product = product;
+
+        if (!AssureProductExists())
+            return;
+
         printer = new ConsolePrinter();
 
         printer.AddRow(StandardRenderables.StandardHeader.ToBasicConsoleRow());
@@ -52,7 +56,7 @@ public class ProductViewState : ViewState
     {
         base.OnEnter();
 
-        if (propertiesView) ShowProperties();
+        if (isInPropertiesView) ShowProperties();
         else ShowReviews();
 
         ShowAverageStars();
@@ -76,7 +80,10 @@ public class ProductViewState : ViewState
 
     private void ShowProperties()
     {
-        propertiesView = true;
+        if (!AssureProductExists())
+            return;
+
+        isInPropertiesView = true;
         printer.ClearMemoryGroup("properties");
         printer.ClearMemoryGroup("reviews");
 
@@ -109,7 +116,10 @@ public class ProductViewState : ViewState
 
     private void ShowReviews()
     {
-        propertiesView = false;
+        if (!AssureProductExists())
+            return;
+
+        isInPropertiesView = false;
         printer.ClearMemoryGroup("properties");
         printer.ClearMemoryGroup("reviews");
 
@@ -137,6 +147,7 @@ public class ProductViewState : ViewState
         DisplayAllReviews(reviews);
         ShowAverageStars();
     }
+
 
     private void DisplayAllReviews(List<Review> reviews)
     {
@@ -189,6 +200,9 @@ public class ProductViewState : ViewState
 
         ConsoleRowAction onClick = (row, owner) =>
         {
+            if (!AssureProductExists())
+                return;
+
             var converted = (InteractableDynamicConsoleRow)row;
 
             if (!SessionData.IsLoggedIn())
@@ -250,11 +264,23 @@ public class ProductViewState : ViewState
                 .Where(x => x.Id == product.Id)
                 .Include(x => x.Reviews)
                 .Select(x => x.Reviews)
-                .FirstOrDefault()
+                .SingleOrDefault()
                 ?.DefaultIfEmpty()
                 ?.Average(x => x?.StarRating) ?? 0;
             int avgStarsRounded = (int)Math.Round(avgStars);
             printer.AddRow(new Markup("Average " + $"[yellow]{new string('*', avgStarsRounded)}[/][dim]{new string('*', 6 - avgStarsRounded)}[/] {avgStars:0.0}").ToBasicConsoleRow(), "averageStars");
         };
+    }
+
+
+    private bool AssureProductExists()
+    {
+        using var context = new XkomContext();
+
+        if(context.Products.Any(x => x.Id == product.Id))
+            return true;
+
+        fsm.Checkout("productsSearch");
+        return false;
     }
 }
