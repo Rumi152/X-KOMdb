@@ -35,7 +35,7 @@ public class ProductSearchViewState : ViewState
             new ChoiceMenuChildConsoleRow("Cheapest"),
             new ChoiceMenuChildConsoleRow("Most expensive", true)
         };
-        orderbyChoiceParent = new ChoiceMenuParentConsoleRow($"{"Sorting by",-namePadding}: ", sortingOptions.Count, 2, (row, printer) => RefreshProducts(), null);
+        orderbyChoiceParent = new ChoiceMenuParentConsoleRow($"{"Sorting by",-namePadding}: ", 5, 2, RefreshProducts, null);
         orderbyChoiceParent.SetChildren(sortingOptions);
 
         printer.AddRow(priceRangeInputConsoleRow);

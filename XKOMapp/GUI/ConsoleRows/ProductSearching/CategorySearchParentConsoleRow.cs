@@ -11,13 +11,13 @@ namespace XKOMapp.GUI.ConsoleRows.ProductSearching;
 
 public class ChoiceMenuParentConsoleRow : ICustomCursorConsoleRow, ISwitchableConsoleRow, IInteractableConsoleRow
 {
-    private int childrenDisplaySize;
-    private int childrenStickyStart;
-    private readonly Action onAccept;
-    private readonly Action preEnter;
+    private readonly int childrenDisplaySize;
+    private readonly int childrenStickyStart;
+    private readonly Action? onAccept;
+    private readonly Action? preEnter;
     private ConsolePrinter owner = null!;
     private readonly string markupPreText;
-    private List<ChoiceMenuChildConsoleRow> children = new List<ChoiceMenuChildConsoleRow>();
+    private List<ChoiceMenuChildConsoleRow> children = new();
 
     private bool isActive = false;
     bool ISwitchableConsoleRow.IsActive { get => isActive; set => isActive = value; }
@@ -26,7 +26,7 @@ public class ChoiceMenuParentConsoleRow : ICustomCursorConsoleRow, ISwitchableCo
     private int appliedChoiceIndex = 0;
 
 
-    public ChoiceMenuParentConsoleRow(string markupPreText, int childrenDisplaySize, int childrenStickyStart, Action onAccept, Action preEnter)
+    public ChoiceMenuParentConsoleRow(string markupPreText, int childrenDisplaySize, int childrenStickyStart, Action? onAccept, Action? preEnter)
     {
         this.markupPreText = markupPreText;
         this.childrenDisplaySize = childrenDisplaySize;
@@ -57,7 +57,7 @@ public class ChoiceMenuParentConsoleRow : ICustomCursorConsoleRow, ISwitchableCo
 
     public void OnInteraction()
     {
-        preEnter();
+        preEnter?.Invoke();
 
         if (children.Count > 0)
         {
@@ -70,7 +70,7 @@ public class ChoiceMenuParentConsoleRow : ICustomCursorConsoleRow, ISwitchableCo
         {
             appliedChoiceIndex = choiceIndex;
             ((ISwitchableConsoleRow)this).TurnOff();
-            onAccept();
+            onAccept?.Invoke();
             return;
         }
 
