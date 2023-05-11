@@ -10,9 +10,7 @@ namespace XKOMapp
 {
     public static class SessionData
     {
-        private static string? loggedUserPassword = null;
-        private static int? loggedUserID = null;
-        private static string? loggedUserEmail = null;
+        private static User? offlineUserRecord;
 
         public static bool TryLogIn(string email, string password, out User loggedUser)
         {
@@ -22,18 +20,17 @@ namespace XKOMapp
             if (loggedUser is null)
                 return false;
 
-            loggedUserID = loggedUser.Id;
-            loggedUserPassword = password;
-            loggedUserEmail = email;
+            offlineUserRecord = loggedUser;
             return true;
         }
 
         public static void LogOut()
         {
-            loggedUserID = null;
-            loggedUserEmail = null;
-            loggedUserPassword = null;
+            offlineUserRecord = null;
         }
+
+
+        public static User? GetUserOffline() => offlineUserRecord;
 
         public static bool HasSessionExpired(out User loggedUser)
         {
@@ -43,7 +40,7 @@ namespace XKOMapp
                 return true;
 
             using var context = new XkomContext();
-            loggedUser = context.Users.SingleOrDefault(x => x.Id == loggedUserID && x.Email == loggedUserEmail && x.Password == loggedUserPassword)!;
+            loggedUser = context.Users.SingleOrDefault(x => x.Id == offlineUserRecord!.Id && x.Email == offlineUserRecord.Email && x.Password == offlineUserRecord.Password)!;
 
             if (loggedUser is null)
                 return true;
@@ -51,6 +48,6 @@ namespace XKOMapp
             return false;
         }
 
-        public static bool IsLoggedIn() => loggedUserID is not null;
+        public static bool IsLoggedIn() => offlineUserRecord is not null;
     }
 }
