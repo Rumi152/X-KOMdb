@@ -29,7 +29,6 @@ namespace XKOMapp
             offlineUserRecord = null;
         }
 
-
         public static User? GetUserOffline() => offlineUserRecord;
 
         public static bool HasSessionExpired(out User loggedUser)
@@ -45,7 +44,16 @@ namespace XKOMapp
             if (loggedUser is null)
                 return true;
 
+            offlineUserRecord = loggedUser;
             return false;
+        }
+
+        public static void RefreshOfflineUserRecord()
+        {
+            if (HasSessionExpired(out var user))
+                return;
+
+            offlineUserRecord = user;
         }
 
         public static bool IsLoggedIn() => offlineUserRecord is not null;
