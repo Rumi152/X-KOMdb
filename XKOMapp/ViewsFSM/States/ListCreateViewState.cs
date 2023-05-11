@@ -45,7 +45,7 @@ internal class ListCreateViewState : ViewState
             if (!SessionData.IsLoggedIn())
             {
                 fsm.Checkout(new FastLoginViewState(fsm,
-                    new Markup($"[{StandardRenderables.GrassColorHex}]Log in to edit list[/]").ToBasicConsoleRow(),
+                    new Markup($"[{StandardRenderables.GrassColorHex}]Log in to add list[/]").ToBasicConsoleRow(),
                     new InteractableConsoleRow(new Markup("Click to abort"), (row, owner) => fsm.Checkout(this))));
                 return;
             }
@@ -53,7 +53,7 @@ internal class ListCreateViewState : ViewState
             if (SessionData.HasSessionExpired(out User dbUser))
             {
                 fsm.Checkout(new FastLoginViewState(fsm,
-                    new Markup($"[red]Session expired[/] - [{StandardRenderables.GrassColorHex}]Log in to edit list[/]").ToBasicConsoleRow(),
+                    new Markup($"[red]Session expired[/] - [{StandardRenderables.GrassColorHex}]Log in to add list[/]").ToBasicConsoleRow(),
                     new InteractableConsoleRow(new Markup("Click to abort"), (row, owner) => fsm.Checkout(this))));
                 return;
             }
@@ -103,16 +103,14 @@ internal class ListCreateViewState : ViewState
         string link = "https://www.x-kom.pl/list/";
         var random = new Random();
         List<int> notAvailalbe = new List<int> { 58, 59, 60, 61, 62, 63, 64, 91, 92, 93, 94, 95, 96 };
-        int i = 0;
 
-        while (i<102)
+        while (link.Length<128)
         {
             int randomNumber = random.Next(48, 122);
             char a = Convert.ToChar(randomNumber);
             if (!notAvailalbe.Contains(a))
             {
                 link += a;
-                i++;
             }
         }
         using (var context = new XkomContext())

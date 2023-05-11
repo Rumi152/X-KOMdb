@@ -8,6 +8,7 @@ using XKOMapp.GUI.ConsoleRows;
 using XKOMapp.GUI;
 using Microsoft.EntityFrameworkCore.Update.Internal;
 using XKOMapp.Models;
+using Microsoft.EntityFrameworkCore;
 
 namespace XKOMapp.ViewsFSM.States;
 internal class ListBrowseViewState : ViewState
@@ -100,7 +101,8 @@ internal class ListBrowseViewState : ViewState
         using var context = new XkomContext();
         //TODO users list only
         context.Attach(dbUser);
-        var lists = context.Lists.Where(x => x.User == dbUser);
+        var x1 = context.Lists.Include(x => x.User).ToList();
+            var lists = x1.Where(x => x.User == dbUser).ToList();
         if (!lists.Any())
             printer.AddRow(new Text("No lists were found").ToBasicConsoleRow(), "lists");
 

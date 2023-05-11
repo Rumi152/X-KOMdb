@@ -48,7 +48,7 @@ internal class ListViewState: ViewState
             if (!SessionData.IsLoggedIn())
             {
                 fsm.Checkout(new FastLoginViewState(fsm,
-                    new Markup($"[{StandardRenderables.GrassColorHex}]Log in to edit list[/]").ToBasicConsoleRow(),
+                    new Markup($"[{StandardRenderables.GrassColorHex}]Log in to clone list[/]").ToBasicConsoleRow(),
                     new InteractableConsoleRow(new Markup("Click to abort"), (row, owner) => fsm.Checkout(this))));
                 return;
             }
@@ -56,7 +56,7 @@ internal class ListViewState: ViewState
             if (SessionData.HasSessionExpired(out User dbUser))
             {
                 fsm.Checkout(new FastLoginViewState(fsm,
-                    new Markup($"[red]Session expired[/] - [{StandardRenderables.GrassColorHex}]Log in to edit list[/]").ToBasicConsoleRow(),
+                    new Markup($"[red]Session expired[/] - [{StandardRenderables.GrassColorHex}]Log in to clone list[/]").ToBasicConsoleRow(),
                     new InteractableConsoleRow(new Markup("Click to abort"), (row, owner) => fsm.Checkout(this))));
                 return;
             }
@@ -77,7 +77,7 @@ internal class ListViewState: ViewState
             if (!SessionData.IsLoggedIn())
             {
                 fsm.Checkout(new FastLoginViewState(fsm,
-                    new Markup($"[{StandardRenderables.GrassColorHex}]Log in to edit list[/]").ToBasicConsoleRow(),
+                    new Markup($"[{StandardRenderables.GrassColorHex}]Log in to delete list[/]").ToBasicConsoleRow(),
                     new InteractableConsoleRow(new Markup("Click to abort"), (row, owner) => fsm.Checkout(this))));
                 return;
             }
@@ -85,7 +85,7 @@ internal class ListViewState: ViewState
             if (SessionData.HasSessionExpired(out User dbUser))
             {
                 fsm.Checkout(new FastLoginViewState(fsm,
-                    new Markup($"[red]Session expired[/] - [{StandardRenderables.GrassColorHex}]Log in to edit list[/]").ToBasicConsoleRow(),
+                    new Markup($"[red]Session expired[/] - [{StandardRenderables.GrassColorHex}]Log in to delete list[/]").ToBasicConsoleRow(),
                     new InteractableConsoleRow(new Markup("Click to abort"), (row, owner) => fsm.Checkout(this))));
                 return;
             }
@@ -97,7 +97,7 @@ internal class ListViewState: ViewState
                 context.Remove(deleteList);
                 context.SaveChanges();
             }
-
+                
             fsm.Checkout("ListBrowseViewState");
         }));
         printer.AddRow(new InteractableConsoleRow(new Text("Save changes"), (row, own) =>
