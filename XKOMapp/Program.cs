@@ -14,12 +14,7 @@ internal class Program
         Console.Title = "X-KOMapp";
 
         var fsm = new ViewStateMachine();
-        fsm.SaveState("ListBrowseViewState", new ListBrowseViewState(fsm));
-        fsm.Checkout("ListBrowseViewState");
-
-        //SessionData.TryLogIn("emailtymek", "rogo123");
-
-        //fsm.Checkout(new UserDetailsViewState(fsm));
+        fsm.SaveState("productsSearch", new ListBrowseViewState(fsm));//DONT TOUCH THIS TIMUR
 
         //checking for input in loop
         while (true)
