@@ -119,7 +119,7 @@ public class ProductViewState : ViewState
             .Include(x => x.Product)
             .Include(x => x.User)
             .Where(x => x.ProductId == product.Id)
-            .OrderByDescending(x => x.User != null && x.User.Id == SessionData.LoggedUserID)
+            .OrderByDescending(x => x.User != null && x.User.Id == SessionData.loggedUserID)
             .ToList();
 
         if (reviews.IsNullOrEmpty())
@@ -148,7 +148,7 @@ public class ProductViewState : ViewState
             string header;
             if (x.User is null)
                 header = $"| [[deleted user]] {stars} |";
-            else if (x.UserId == SessionData.LoggedUserID)
+            else if (x.UserId == SessionData.loggedUserID)
                 header = $"| [{StandardRenderables.GoldColorHex}][[You]][/] {stars} |";
             else
                 header = $"| [[{x.User.Name} {x.User.LastName}]] {stars} |";
