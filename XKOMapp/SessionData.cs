@@ -10,42 +10,27 @@ namespace XKOMapp
 {
     public static class SessionData
     {
-        public static string? LoggedUserPassword { get; private set; } = null;
-        public static int? LoggedUserID { get; private set; } = null;
-        public static string? LoggedUserEmail { get; private set; } = null;
+        private static User? offlineUserRecord;
 
-        public static bool TryLogIn(string email, string password)
+        public static bool TryLogIn(string email, string password, out User loggedUser)
         {
             using var context = new XkomContext();
 
-            var loggedUser = context.Users.FirstOrDefault(x => x.Email == email && x.Password == password);
+            loggedUser = context.Users.SingleOrDefault(x => x.Email == email && x.Password == password)!;
             if (loggedUser is null)
                 return false;
 
-            LoggedUserID = loggedUser.Id;
-            LoggedUserPassword = password;
-            LoggedUserEmail = email;
+            offlineUserRecord = loggedUser;
             return true;
         }
 
         public static void LogOut()
         {
-            LoggedUserID = null;
-            LoggedUserEmail = null;
-            LoggedUserPassword = null;
+            offlineUserRecord = null;
         }
 
-        public static bool HasSessionExpired()
-        {
-            if (!IsLoggedIn())
-                return true;
 
-            using var context = new XkomContext();
-            if (context.Users.Any(x => x.Id == LoggedUserID && x.Email == LoggedUserEmail && x.Password == LoggedUserPassword))
-                return false;
-
-            return true;
-        }
+        public static User? GetUserOffline() => offlineUserRecord;
 
         public static bool HasSessionExpired(out User loggedUser)
         {
@@ -55,7 +40,7 @@ namespace XKOMapp
                 return true;
 
             using var context = new XkomContext();
-            loggedUser = context.Users.FirstOrDefault(x => x.Id == LoggedUserID && x.Email == LoggedUserEmail && x.Password == LoggedUserPassword)!;
+            loggedUser = context.Users.SingleOrDefault(x => x.Id == offlineUserRecord!.Id && x.Email == offlineUserRecord.Email && x.Password == offlineUserRecord.Password)!;
 
             if (loggedUser is null)
                 return true;
@@ -63,6 +48,6 @@ namespace XKOMapp
             return false;
         }
 
-        public static bool IsLoggedIn() => LoggedUserID is not null;
+        public static bool IsLoggedIn() => offlineUserRecord is not null;
     }
 }

@@ -119,7 +119,7 @@ public class ProductViewState : ViewState
             .Include(x => x.Product)
             .Include(x => x.User)
             .Where(x => x.ProductId == product.Id)
-            .OrderByDescending(x => x.User != null && x.User.Id == SessionData.LoggedUserID)
+            .OrderByDescending(x => x.User != null && SessionData.GetUserOffline() != null && x.User.Id == SessionData.GetUserOffline()!.Id)
             .ToList();
 
         if (reviews.IsNullOrEmpty())
@@ -143,12 +143,13 @@ public class ProductViewState : ViewState
         reviews.ForEach(x =>
         {
             printer.AddRow(new Text("").ToBasicConsoleRow(), "reviews");
+            int? loggedUserID = SessionData.GetUserOffline()?.Id;
 
             var stars = $"[yellow]{new string('*', x.StarRating)}[/][dim]{new string('*', 6 - x.StarRating)}[/]";
             string header;
             if (x.User is null)
                 header = $"| [[deleted user]] {stars} |";
-            else if (x.UserId == SessionData.LoggedUserID)
+            else if (x.UserId == loggedUserID)
                 header = $"| [{StandardRenderables.GoldColorHex}][[You]][/] {stars} |";
             else
                 header = $"| [[{x.User.Name} {x.User.LastName}]] {stars} |";

@@ -81,7 +81,7 @@ namespace XKOMapp.ViewsFSM.States
             string email = emailRow.CurrentInput;
             string password = passwordRow.CurrentInput;
 
-            if (SessionData.TryLogIn(email, password))
+            if (SessionData.TryLogIn(email, password, out _))
                 return true;
 
             printer.AddRow(new Markup("[red]Wrong password and/or email[/]").ToBasicConsoleRow(), "errors");
