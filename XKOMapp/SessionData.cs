@@ -44,6 +44,7 @@ namespace XKOMapp
             if (loggedUser is null)
                 return true;
 
+            offlineUserRecord = loggedUser;
             return false;
         }
 
