@@ -13,12 +13,16 @@ namespace XKOMapp.ViewsFSM.States;
 public class ProductViewState : ViewState
 {
     private readonly Product product;
-    private bool propertiesView = true;
+    private bool isInPropertiesView = true;
     readonly ReviewInputPanelConsoleRow reviewInputPanel = new ReviewInputPanelConsoleRow();
 
     public ProductViewState(ViewStateMachine stateMachine, Product product) : base(stateMachine)
     {
         this.product = product;
+
+        if (!AssureProductExists())
+            return;
+
         printer = new ConsolePrinter();
 
         printer.AddRow(StandardRenderables.StandardHeader.ToBasicConsoleRow());
@@ -34,7 +38,7 @@ public class ProductViewState : ViewState
         printer.AddRow(new Text(product.Name).ToBasicConsoleRow());
         printer.AddRow(new Markup($"[lime]{product.Price:F2}[/] PLN").ToBasicConsoleRow());
         printer.AddRow(new Markup($"Made by {($"[{StandardRenderables.GrassColorHex}]" + product.Company?.Name.EscapeMarkup() + "[/]") ?? "Unknown company"}").ToBasicConsoleRow());
-        printer.AddRow(new Markup($"[{StandardRenderables.GrassColorHex}]{product.NumberAvailable}[/] left in magazine").ToBasicConsoleRow());
+        printer.AddRow(new Markup($"[{((product.NumberAvailable == 0) ? "#red" : StandardRenderables.GrassColorHex)}]{product.NumberAvailable}[/] left in magazine").ToBasicConsoleRow());
 
         printer.StartGroup("averageStars");
         ShowAverageStars();
@@ -52,7 +56,7 @@ public class ProductViewState : ViewState
     {
         base.OnEnter();
 
-        if (propertiesView) ShowProperties();
+        if (isInPropertiesView) ShowProperties();
         else ShowReviews();
 
         ShowAverageStars();
@@ -76,7 +80,10 @@ public class ProductViewState : ViewState
 
     private void ShowProperties()
     {
-        propertiesView = true;
+        if (!AssureProductExists())
+            return;
+
+        isInPropertiesView = true;
         printer.ClearMemoryGroup("properties");
         printer.ClearMemoryGroup("reviews");
 
@@ -109,7 +116,10 @@ public class ProductViewState : ViewState
 
     private void ShowReviews()
     {
-        propertiesView = false;
+        if (!AssureProductExists())
+            return;
+
+        isInPropertiesView = false;
         printer.ClearMemoryGroup("properties");
         printer.ClearMemoryGroup("reviews");
 
@@ -138,76 +148,118 @@ public class ProductViewState : ViewState
         ShowAverageStars();
     }
 
+
     private void DisplayAllReviews(List<Review> reviews)
     {
         reviews.ForEach(x =>
         {
             printer.AddRow(new Text("").ToBasicConsoleRow(), "reviews");
-            int? loggedUserID = SessionData.GetUserOffline()?.Id;
-
-            var stars = $"[yellow]{new string('*', x.StarRating)}[/][dim]{new string('*', 6 - x.StarRating)}[/]";
-            string header;
-            if (x.User is null)
-                header = $"| [[deleted user]] {stars} |";
-            else if (x.UserId == loggedUserID)
-                header = $"| [{StandardRenderables.GoldColorHex}][[You]][/] {stars} |";
-            else
-                header = $"| [[{x.User.Name} {x.User.LastName}]] {stars} |";
-
-            string description;
-            if (x.Description.Length == 0)
-                description = "[dim]No description provided[/]";
-            else
-                description = x.Description.ReplaceLineEndings(" ");
-
-            int descriptionHeight = (int)Math.Ceiling(description.Length / (Console.WindowWidth - 10f));
-
-            var panel = new Panel(description).HeavyBorder();
-            panel.Header = new PanelHeader(header);
-            panel.Height = descriptionHeight + 2;
-            panel.Width = 64;
-            printer.AddRow(new MultiLineConsoleRow(panel, descriptionHeight + 2), "reviews");
+            DisplayReview(x);
         });
+    }
+
+    private void DisplayReview(Review review)
+    {
+        int? offlineUserID = SessionData.GetUserOffline()?.Id;
+        string stars = $"[yellow]{new string('*', review.StarRating)}[/][dim]{new string('*', 6 - review.StarRating)}[/]";
+
+        string userDisplay;
+        if (review.User is null)
+            userDisplay = $"[[ deleted user ]]";
+        else if (review.UserId == offlineUserID)
+            userDisplay = $"[{StandardRenderables.GoldColorHex}]You[/]";
+        else
+            userDisplay = $"{review.User.Name} {review.User.LastName}";
+
+        string header = $"{userDisplay} {stars}";
+
+        string description;
+        if (review.Description.Length == 0)
+            description = "[dim]No description provided[/]";
+        else
+            description = review.Description.ReplaceLineEndings(" ");
+
+        List<string> descriptionLines = new();
+        while (description.Length > 0)
+        {
+            const string leftPad = "  ";
+            int width = Math.Max(32, Console.WindowWidth - 8);
+
+            if (description.RemoveMarkup().Length <= width)
+            {
+                descriptionLines.Add(leftPad + description.Trim());
+                break;
+            }
+
+            int takenLength = new string(description.Take(width).ToArray()).LastIndexOf(' ') + 1;
+            if (takenLength == -1) takenLength = width;
+
+            descriptionLines.Add(leftPad + new string(description.Take(takenLength).ToArray()).Trim());
+            description = new(description.Skip(takenLength).ToArray());
+        }
+
+        printer.AddRow(new Markup(header).ToBasicConsoleRow(), "reviews");
+        descriptionLines.ForEach(x => printer.AddRow(new Text(x).ToBasicConsoleRow(), "reviews"));
     }
 
     private void DisplayReviewChart(List<Review> reviews)
     {
-        var barChart = new BarChart()
-            .Width(32)
-            .AddItem($"[yellow]{new string('*', 6)}[/][dim]{new string('*', 0)}[/]", reviews.Where(x => x.StarRating == 6).Count(), new Color(0xFF, 0xFF, 0x00))
-            .AddItem($"[yellow]{new string('*', 5)}[/][dim]{new string('*', 1)}[/]", reviews.Where(x => x.StarRating == 5).Count(), new Color(0xFF, 0xED, 0x4B))
-            .AddItem($"[yellow]{new string('*', 4)}[/][dim]{new string('*', 2)}[/]", reviews.Where(x => x.StarRating == 4).Count(), new Color(0xFC, 0xD1, 0x2A))
-            .AddItem($"[yellow]{new string('*', 3)}[/][dim]{new string('*', 3)}[/]", reviews.Where(x => x.StarRating == 3).Count(), new Color(0xFF, 0xC3, 0x00))
-            .AddItem($"[yellow]{new string('*', 2)}[/][dim]{new string('*', 4)}[/]", reviews.Where(x => x.StarRating == 2).Count(), new Color(0xF8, 0xB4, 0x12))
-            .AddItem($"[yellow]{new string('*', 1)}[/][dim]{new string('*', 5)}[/]", reviews.Where(x => x.StarRating == 1).Count(), new Color(0xFF, 0xA6, 0x00));
-        printer.AddRow(new MultiLineConsoleRow(barChart, 6), "reviews");
+        const int chartWidth = 32;
+        //doin' meth
+        //get count of every start rating given
+        List<int> values = Enumerable.Range(1, 6)
+            .Select(x => reviews.Where(review => review.StarRating == x).Count())
+            .ToList();
+
+        //get number of star ratings product has the most
+        int maxValue = values.Max();
+
+        //map these amounts into 0..32 range
+        List<int> mappedValues = Enumerable.Range(1, 6)
+            .Select(x => reviews
+                .Where(review => review.StarRating == x)
+                .Count() / (float)maxValue * chartWidth)
+            .Select(x => (int)Math.Ceiling(x))
+            .ToList();
+
+        //render char
+        for (int i = 5; i >= 0; i--)
+        {
+            string stars = $"[yellow]{new string('*', i + 1)}[/][dim]{new string('*', 5 - i)}[/]";
+            string barValue = $"[{StandardRenderables.GoldColorHex}]{new string('-', mappedValues[i])}[/]";
+            string numberValue = $"{values[i]}";
+
+            printer.AddRow(new Markup($"{stars} {barValue} {numberValue}").ToBasicConsoleRow(), "reviews");
+        }
     }
 
     private void DisplayReviewInput()
     {
         printer.AddRow(reviewInputPanel, "reviews");
 
-        ConsoleRowAction onClick = (row, owner) =>
+        void onClick(IConsoleRow row, ConsolePrinter? owner)
         {
-            var converted = (InteractableDynamicConsoleRow)row;
+            if (!AssureProductExists())
+                return;
 
             if (!SessionData.IsLoggedIn())
             {
                 fsm.Checkout(new FastLoginViewState(fsm,
                     new Markup($"[{StandardRenderables.GrassColorHex}]Log in to write reviews[/]").ToBasicConsoleRow(),
-                    new InteractableConsoleRow(new Markup("Click to abort"), (row, owner) => fsm.RollbackOrDefault(this)))); //TODO main menu rollback
+                    new InteractableConsoleRow(new Markup("Click to abort"), (row, owner) => fsm.Checkout(this))));
                 return;
             }
-            
+
             if (SessionData.HasSessionExpired(out User dbUser))
             {
                 fsm.Checkout(new FastLoginViewState(fsm,
                     new Markup($"[red]Session expired[/] - [{StandardRenderables.GrassColorHex}]Log in to write reviews[/]").ToBasicConsoleRow(),
-                    new InteractableConsoleRow(new Markup("Click to abort"), (row, owner) => fsm.RollbackOrDefault(this)))); //TODO main menu rollback
+                    new InteractableConsoleRow(new Markup("Click to abort"), (row, owner) => fsm.Checkout(this))));
                 return;
             }
 
             using var context = new XkomContext();
+            var converted = (InteractableDynamicConsoleRow)row;
 
             if (context.Reviews.Include(x => x.User).Include(x => x.Product).Any(x => x.UserId == dbUser.Id && x.ProductId == product.Id))
             {
@@ -235,7 +287,7 @@ public class ProductViewState : ViewState
 
             ShowReviews();
             ShowAverageStars();
-        };
+        }
 
         printer.AddRow(new InteractableDynamicConsoleRow("Click to post review", onClick), "reviews");
     }
@@ -250,11 +302,23 @@ public class ProductViewState : ViewState
                 .Where(x => x.Id == product.Id)
                 .Include(x => x.Reviews)
                 .Select(x => x.Reviews)
-                .FirstOrDefault()
+                .SingleOrDefault()
                 ?.DefaultIfEmpty()
                 ?.Average(x => x?.StarRating) ?? 0;
             int avgStarsRounded = (int)Math.Round(avgStars);
             printer.AddRow(new Markup("Average " + $"[yellow]{new string('*', avgStarsRounded)}[/][dim]{new string('*', 6 - avgStarsRounded)}[/] {avgStars:0.0}").ToBasicConsoleRow(), "averageStars");
         };
+    }
+
+
+    private bool AssureProductExists()
+    {
+        using var context = new XkomContext();
+
+        if (context.Products.Any(x => x.Id == product.Id))
+            return true;
+
+        fsm.Checkout("productsSearch");
+        return false;
     }
 }

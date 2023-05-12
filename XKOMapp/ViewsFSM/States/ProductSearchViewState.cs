@@ -23,10 +23,10 @@ public class ProductSearchViewState : ViewState
         printer.StartContent();
 
         const int namePadding = 11;
-        priceRangeInputConsoleRow = new PriceRangeInputConsoleRow($"{"Price",-namePadding}: ", (row, printer) => RefreshProducts(), (row, printer) => RefreshProducts());
-        nameSearchInputRow = new SearchContraintInputConsoleRow($"{"Name",-namePadding}: ", 32, (row, printer) => RefreshProducts(), (row, printer) => RefreshProducts());
-        companySearchInputRow = new SearchContraintInputConsoleRow($"{"Company",-namePadding}: ", 64, (row, printer) => RefreshProducts(), (row, printer) => RefreshProducts());
-        categorySearchChoiceParent = new ChoiceMenuParentConsoleRow($"{"Category",-namePadding}: ", 4, 2, (row, printer) => RefreshProducts(), (row, printer) => RefreshCategories());
+        priceRangeInputConsoleRow = new PriceRangeInputConsoleRow($"{"Price",-namePadding}: ", RefreshProducts, RefreshProducts);
+        nameSearchInputRow = new SearchContraintInputConsoleRow($"{"Name",-namePadding}: ", 32, RefreshProducts, RefreshProducts);
+        companySearchInputRow = new SearchContraintInputConsoleRow($"{"Company",-namePadding}: ", 64, RefreshProducts, RefreshProducts);
+        categorySearchChoiceParent = new ChoiceMenuParentConsoleRow($"{"Category",-namePadding}: ", 4, 2, RefreshProducts, RefreshCategories);
         //TODO favourites only
         List<ChoiceMenuChildConsoleRow> sortingOptions = new()
         {
@@ -35,7 +35,7 @@ public class ProductSearchViewState : ViewState
             new ChoiceMenuChildConsoleRow("Cheapest"),
             new ChoiceMenuChildConsoleRow("Most expensive", true)
         };
-        orderbyChoiceParent = new ChoiceMenuParentConsoleRow($"{"Sorting by",-namePadding}: ", sortingOptions.Count, 2, (row, printer) => RefreshProducts(), null);
+        orderbyChoiceParent = new ChoiceMenuParentConsoleRow($"{"Sorting by",-namePadding}: ", 5, 2, RefreshProducts, null);
         orderbyChoiceParent.SetChildren(sortingOptions);
 
         printer.AddRow(priceRangeInputConsoleRow);
