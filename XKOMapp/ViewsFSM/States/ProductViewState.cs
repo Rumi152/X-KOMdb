@@ -206,10 +206,15 @@ public class ProductViewState : ViewState
     {
         const int chartWidth = 32;
         //doin' meth
+        //get count of every start rating given
         List<int> values = Enumerable.Range(1, 6)
             .Select(x => reviews.Where(review => review.StarRating == x).Count())
             .ToList();
+
+        //get number of star ratings product has the most
         int maxValue = values.Max();
+
+        //map these amounts into 0..32 range
         List<int> mappedValues = Enumerable.Range(1, 6)
             .Select(x => reviews
                 .Where(review => review.StarRating == x)
@@ -217,15 +222,7 @@ public class ProductViewState : ViewState
             .Select(x => (int)Math.Ceiling(x))
             .ToList();
 
-        //var barChart = new BarChart()
-        //    .Width(32)
-        //    .AddItem(, reviews.Where(x => x.StarRating == 6).Count(), new Color(0xFF, 0xFF, 0x00))
-        //    .AddItem($"[yellow]{new string('*', 5)}[/][dim]{new string('*', 1)}[/]", reviews.Where(x => x.StarRating == 5).Count(), new Color(0xFF, 0xED, 0x4B))
-        //    .AddItem($"[yellow]{new string('*', 4)}[/][dim]{new string('*', 2)}[/]", reviews.Where(x => x.StarRating == 4).Count(), new Color(0xFC, 0xD1, 0x2A))
-        //    .AddItem($"[yellow]{new string('*', 3)}[/][dim]{new string('*', 3)}[/]", reviews.Where(x => x.StarRating == 3).Count(), new Color(0xFF, 0xC3, 0x00))
-        //    .AddItem($"[yellow]{new string('*', 2)}[/][dim]{new string('*', 4)}[/]", reviews.Where(x => x.StarRating == 2).Count(), new Color(0xF8, 0xB4, 0x12))
-        //    .AddItem($"[yellow]{new string('*', 1)}[/][dim]{new string('*', 5)}[/]", reviews.Where(x => x.StarRating == 1).Count(), new Color(0xFF, 0xA6, 0x00));
-
+        //render char
         for (int i = 5; i >= 0; i--)
         {
             string stars = $"[yellow]{new string('*', i + 1)}[/][dim]{new string('*', 5 - i)}[/]";
