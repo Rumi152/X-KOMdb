@@ -154,31 +154,52 @@ public class ProductViewState : ViewState
         reviews.ForEach(x =>
         {
             printer.AddRow(new Text("").ToBasicConsoleRow(), "reviews");
-            int? loggedUserID = SessionData.GetUserOffline()?.Id;
-
-            var stars = $"[yellow]{new string('*', x.StarRating)}[/][dim]{new string('*', 6 - x.StarRating)}[/]";
-            string header;
-            if (x.User is null)
-                header = $"| [[deleted user]] {stars} |";
-            else if (x.UserId == loggedUserID)
-                header = $"| [{StandardRenderables.GoldColorHex}][[You]][/] {stars} |";
-            else
-                header = $"| [[{x.User.Name} {x.User.LastName}]] {stars} |";
-
-            string description;
-            if (x.Description.Length == 0)
-                description = "[dim]No description provided[/]";
-            else
-                description = x.Description.ReplaceLineEndings(" ");
-
-            int descriptionHeight = (int)Math.Ceiling(description.Length / (Console.WindowWidth - 10f));
-
-            var panel = new Panel(description).HeavyBorder();
-            panel.Header = new PanelHeader(header);
-            panel.Height = descriptionHeight + 2;
-            panel.Width = 64;
-            printer.AddRow(new MultiLineConsoleRow(panel, descriptionHeight + 2), "reviews");
+            DisplayReview(x);
         });
+    }
+
+    private void DisplayReview(Review review)
+    {
+        int? loggedUserID = SessionData.GetUserOffline()?.Id;
+        string stars = $"[yellow]{new string('*', review.StarRating)}[/][dim]{new string('*', 6 - review.StarRating)}[/]";
+
+        string userDisplay;
+        if (review.User is null)
+            userDisplay = $"[[ deleted user ]]";
+        else if (review.UserId == loggedUserID)
+            userDisplay = $"[{StandardRenderables.GoldColorHex}]You[/]";
+        else
+            userDisplay = $"{review.User.Name} {review.User.LastName}";
+
+        string header = $"{userDisplay} {stars}";
+
+        string description;
+        if (review.Description.Length == 0)
+            description = "[dim]No description provided[/]";
+        else
+            description = review.Description.ReplaceLineEndings(" ");
+
+        List<string> descriptionLines = new();
+        while (description.Length > 0)
+        {
+            const string leftPad = "  ";
+            int width = Math.Max(32, Console.WindowWidth - 8);
+
+            if(description.Length <= width)
+            {
+                descriptionLines.Add(leftPad + description.Trim());
+                break;
+            }
+
+            int takenLength = new string(description.Take(width).ToArray()).LastIndexOf(' ') + 1;
+            if (takenLength == -1) takenLength = width;
+
+            descriptionLines.Add(leftPad + new string(description.Take(takenLength).ToArray()).Trim());
+            description = new(description.Skip(takenLength).ToArray());
+        }
+
+        printer.AddRow(new Markup(header).ToBasicConsoleRow(), "reviews");
+        descriptionLines.ForEach(x => printer.AddRow(new Text(x).ToBasicConsoleRow(), "reviews"));
     }
 
     private void DisplayReviewChart(List<Review> reviews)
