@@ -160,13 +160,13 @@ public class ProductViewState : ViewState
 
     private void DisplayReview(Review review)
     {
-        int? loggedUserID = SessionData.GetUserOffline()?.Id;
+        int? offlineUserID = SessionData.GetUserOffline()?.Id;
         string stars = $"[yellow]{new string('*', review.StarRating)}[/][dim]{new string('*', 6 - review.StarRating)}[/]";
 
         string userDisplay;
         if (review.User is null)
             userDisplay = $"[[ deleted user ]]";
-        else if (review.UserId == loggedUserID)
+        else if (review.UserId == offlineUserID)
             userDisplay = $"[{StandardRenderables.GoldColorHex}]You[/]";
         else
             userDisplay = $"{review.User.Name} {review.User.LastName}";
@@ -185,7 +185,7 @@ public class ProductViewState : ViewState
             const string leftPad = "  ";
             int width = Math.Max(32, Console.WindowWidth - 8);
 
-            if(description.Length <= width)
+            if (description.RemoveMarkup().Length <= width)
             {
                 descriptionLines.Add(leftPad + description.Trim());
                 break;
@@ -204,15 +204,36 @@ public class ProductViewState : ViewState
 
     private void DisplayReviewChart(List<Review> reviews)
     {
-        var barChart = new BarChart()
-            .Width(32)
-            .AddItem($"[yellow]{new string('*', 6)}[/][dim]{new string('*', 0)}[/]", reviews.Where(x => x.StarRating == 6).Count(), new Color(0xFF, 0xFF, 0x00))
-            .AddItem($"[yellow]{new string('*', 5)}[/][dim]{new string('*', 1)}[/]", reviews.Where(x => x.StarRating == 5).Count(), new Color(0xFF, 0xED, 0x4B))
-            .AddItem($"[yellow]{new string('*', 4)}[/][dim]{new string('*', 2)}[/]", reviews.Where(x => x.StarRating == 4).Count(), new Color(0xFC, 0xD1, 0x2A))
-            .AddItem($"[yellow]{new string('*', 3)}[/][dim]{new string('*', 3)}[/]", reviews.Where(x => x.StarRating == 3).Count(), new Color(0xFF, 0xC3, 0x00))
-            .AddItem($"[yellow]{new string('*', 2)}[/][dim]{new string('*', 4)}[/]", reviews.Where(x => x.StarRating == 2).Count(), new Color(0xF8, 0xB4, 0x12))
-            .AddItem($"[yellow]{new string('*', 1)}[/][dim]{new string('*', 5)}[/]", reviews.Where(x => x.StarRating == 1).Count(), new Color(0xFF, 0xA6, 0x00));
-        printer.AddRow(new MultiLineConsoleRow(barChart, 6), "reviews");
+        const int chartWidth = 32;
+        //doin' meth
+        List<int> values = Enumerable.Range(1, 6)
+            .Select(x => reviews.Where(review => review.StarRating == x).Count())
+            .ToList();
+        int maxValue = values.Max();
+        List<int> mappedValues = Enumerable.Range(1, 6)
+            .Select(x => reviews
+                .Where(review => review.StarRating == x)
+                .Count() / (float)maxValue * chartWidth)
+            .Select(x => (int)Math.Ceiling(x))
+            .ToList();
+
+        //var barChart = new BarChart()
+        //    .Width(32)
+        //    .AddItem(, reviews.Where(x => x.StarRating == 6).Count(), new Color(0xFF, 0xFF, 0x00))
+        //    .AddItem($"[yellow]{new string('*', 5)}[/][dim]{new string('*', 1)}[/]", reviews.Where(x => x.StarRating == 5).Count(), new Color(0xFF, 0xED, 0x4B))
+        //    .AddItem($"[yellow]{new string('*', 4)}[/][dim]{new string('*', 2)}[/]", reviews.Where(x => x.StarRating == 4).Count(), new Color(0xFC, 0xD1, 0x2A))
+        //    .AddItem($"[yellow]{new string('*', 3)}[/][dim]{new string('*', 3)}[/]", reviews.Where(x => x.StarRating == 3).Count(), new Color(0xFF, 0xC3, 0x00))
+        //    .AddItem($"[yellow]{new string('*', 2)}[/][dim]{new string('*', 4)}[/]", reviews.Where(x => x.StarRating == 2).Count(), new Color(0xF8, 0xB4, 0x12))
+        //    .AddItem($"[yellow]{new string('*', 1)}[/][dim]{new string('*', 5)}[/]", reviews.Where(x => x.StarRating == 1).Count(), new Color(0xFF, 0xA6, 0x00));
+
+        for (int i = 5; i >= 0; i--)
+        {
+            string stars = $"[yellow]{new string('*', i + 1)}[/][dim]{new string('*', 5 - i)}[/]";
+            string barValue = $"[{StandardRenderables.GoldColorHex}]{new string('-', mappedValues[i])}[/]";
+            string numberValue = $"{values[i]}";
+
+            printer.AddRow(new Markup($"{stars} {barValue} {numberValue}").ToBasicConsoleRow(), "reviews");
+        }
     }
 
     private void DisplayReviewInput()
@@ -233,7 +254,7 @@ public class ProductViewState : ViewState
                     new InteractableConsoleRow(new Markup("Click to abort"), (row, owner) => fsm.RollbackOrDefault(this)))); //TODO main menu rollback
                 return;
             }
-            
+
             if (SessionData.HasSessionExpired(out User dbUser))
             {
                 fsm.Checkout(new FastLoginViewState(fsm,
@@ -298,7 +319,7 @@ public class ProductViewState : ViewState
     {
         using var context = new XkomContext();
 
-        if(context.Products.Any(x => x.Id == product.Id))
+        if (context.Products.Any(x => x.Id == product.Id))
             return true;
 
         fsm.Checkout("productsSearch");
