@@ -237,18 +237,16 @@ public class ProductViewState : ViewState
     {
         printer.AddRow(reviewInputPanel, "reviews");
 
-        ConsoleRowAction onClick = (row, owner) =>
+        void onClick(IConsoleRow row, ConsolePrinter? owner)
         {
             if (!AssureProductExists())
                 return;
-
-            var converted = (InteractableDynamicConsoleRow)row;
 
             if (!SessionData.IsLoggedIn())
             {
                 fsm.Checkout(new FastLoginViewState(fsm,
                     new Markup($"[{StandardRenderables.GrassColorHex}]Log in to write reviews[/]").ToBasicConsoleRow(),
-                    new InteractableConsoleRow(new Markup("Click to abort"), (row, owner) => fsm.RollbackOrDefault(this)))); //TODO main menu rollback
+                    new InteractableConsoleRow(new Markup("Click to abort"), (row, owner) => fsm.Checkout(this))));
                 return;
             }
 
@@ -256,11 +254,12 @@ public class ProductViewState : ViewState
             {
                 fsm.Checkout(new FastLoginViewState(fsm,
                     new Markup($"[red]Session expired[/] - [{StandardRenderables.GrassColorHex}]Log in to write reviews[/]").ToBasicConsoleRow(),
-                    new InteractableConsoleRow(new Markup("Click to abort"), (row, owner) => fsm.RollbackOrDefault(this)))); //TODO main menu rollback
+                    new InteractableConsoleRow(new Markup("Click to abort"), (row, owner) => fsm.Checkout(this))));
                 return;
             }
 
             using var context = new XkomContext();
+            var converted = (InteractableDynamicConsoleRow)row;
 
             if (context.Reviews.Include(x => x.User).Include(x => x.Product).Any(x => x.UserId == dbUser.Id && x.ProductId == product.Id))
             {
@@ -288,7 +287,7 @@ public class ProductViewState : ViewState
 
             ShowReviews();
             ShowAverageStars();
-        };
+        }
 
         printer.AddRow(new InteractableDynamicConsoleRow("Click to post review", onClick), "reviews");
     }
