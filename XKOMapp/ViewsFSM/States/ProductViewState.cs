@@ -48,6 +48,7 @@ public class ProductViewState : ViewState
 
         printer.StartGroup("properties");
         printer.StartGroup("reviews");
+        printer.StartGroup("allReviews");
 
         ShowProperties();
     }
@@ -87,28 +88,27 @@ public class ProductViewState : ViewState
         printer.ClearMemoryGroup("properties");
         printer.ClearMemoryGroup("reviews");
 
-        if (product.Properties is not null)
+        if (product.Properties is null)
         {
-            try
-            {
-                Dictionary<string, object> properties = JsonSerializer.Deserialize<Dictionary<string, object>>(product.Properties)!;
-                var longestKey = properties.Keys.Max(x => x.Length);
-                properties.ToList().ForEach(x =>
-                {
-                    string valueToPrint = x.Value switch
-                    {
-                        bool => ((bool)x.Value) ? "Yes" : "No",
-                        _ => x.Value.ToString() ?? "",
-                    };
-                    printer.AddRow(new Text($"{x.Key.PadRight(longestKey)} : {valueToPrint}").ToBasicConsoleRow(), "properties");
-                });
-            }
-            catch
-            {
-                printer.AddRow(new Text("Failed to load product's properties").ToBasicConsoleRow(), "properties");
-            }
+            printer.AddRow(new Text("Product has no properties").ToBasicConsoleRow(), "properties");
+            return;
         }
-        else
+
+        try
+        {
+            Dictionary<string, object> properties = JsonSerializer.Deserialize<Dictionary<string, object>>(product.Properties)!;
+            var longestKey = properties.Keys.Max(x => x.Length);
+            properties.ToList().ForEach(x =>
+            {
+                string valueToPrint = x.Value switch
+                {
+                    bool => ((bool)x.Value) ? "Yes" : "No",
+                    _ => x.Value.ToString() ?? "",
+                };
+                printer.AddRow(new Text($"{x.Key.PadRight(longestKey)} : {valueToPrint}").ToBasicConsoleRow(), "properties");
+            });
+        }
+        catch
         {
             printer.AddRow(new Text("Failed to load product's properties").ToBasicConsoleRow(), "properties");
         }
@@ -153,7 +153,7 @@ public class ProductViewState : ViewState
     {
         reviews.ForEach(x =>
         {
-            printer.AddRow(new Text("").ToBasicConsoleRow(), "reviews");
+            printer.AddRow(new Text("").ToBasicConsoleRow(), "allReviews");
             DisplayReview(x);
         });
     }
@@ -198,8 +198,8 @@ public class ProductViewState : ViewState
             description = new(description.Skip(takenLength).ToArray());
         }
 
-        printer.AddRow(new Markup(header).ToBasicConsoleRow(), "reviews");
-        descriptionLines.ForEach(x => printer.AddRow(new Text(x).ToBasicConsoleRow(), "reviews"));
+        printer.AddRow(new Markup(header).ToBasicConsoleRow(), "allReviews");
+        descriptionLines.ForEach(x => printer.AddRow(new Text(x).ToBasicConsoleRow(), "allReviews"));
     }
 
     private void DisplayReviewChart(List<Review> reviews)
@@ -215,10 +215,8 @@ public class ProductViewState : ViewState
         int maxValue = values.Max();
 
         //map these amounts into 0..32 range
-        List<int> mappedValues = Enumerable.Range(1, 6)
-            .Select(x => reviews
-                .Where(review => review.StarRating == x)
-                .Count() / (float)maxValue * chartWidth)
+        List<int> mappedValues = values
+            .Select(x => x / (float)maxValue * chartWidth)
             .Select(x => (int)Math.Ceiling(x))
             .ToList();
 
