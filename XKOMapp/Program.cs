@@ -19,9 +19,12 @@ internal class Program
         var fsm = new ViewStateMachine();
         //DONT TOUCH THESE TIMUR
         fsm.SaveState("productsSearch", new ProductSearchViewState(fsm));
-        fsm.SaveState("listBrowseViewState", new ListBrowseViewState(fsm));
+        fsm.SaveState("listBrowse", new ListBrowseViewState(fsm));
 
-        fsm.Checkout("productsSearch");
+        //fsm.Checkout("productsSearch");
+        //fsm.Checkout("listBrowse");
+        //fsm.Checkout(new RegisteringViewState(fsm));
+
 
         //checking for input in loop
         while (true)

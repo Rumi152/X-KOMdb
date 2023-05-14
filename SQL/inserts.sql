@@ -4,7 +4,7 @@ GO
 INSERT INTO [User]([Name],LastName,[Password],Email)
 VALUES
 ('Jakub','Cackowski','123','cyc'),
-('Sasza','Ukraina','312','ukr');
+('Sasza','Ukraina','321','ukr');
 
 INSERT INTO City(Name)
 VALUES
@@ -109,7 +109,7 @@ VALUES
 '{"Mouse type":"Gaming","Connection":"Wireless","Resolution":"12000dpi","Number of buttons":"6","Power supply":"Battery AA"}'
 ),
 ('HP 15s',2499,1,4,458,'2019-12-07',
-'{"Processor":"AMD Ryzen 5 5625U","Graphic card":"AMD Radeon Graphics","RAM","16GB","Storage":"SSD M.2 PCIe 512GB","Screen diagonal":"15,6","Resolution":"1920x1080","Battery":"3454 mAh"}'
+'{"Processor":"AMD Ryzen 5 5625U","Graphic card":"AMD Radeon Graphics","RAM":"16GB","Storage":"SSD M.2 PCIe 512GB","Screen diagonal":"15,6","Resolution":"1920x1080","Battery":"3454 mAh"}'
 ),
 ('Xiaomi POCO X5 Pro',1799,3,25,128,'2023-02-06',
 '{"Screen diagonal":"6,67","Processor":"Qualcomm Snapdragon 778G","Graphic card":"Adreno 642L","RAM":"8GB","Storage":"256GB","Screen type":"Touchscreen, AMOLED","Refresh rate":"120Hz","Resolution":"2400 x 1080","Battery":"5000 mAh","Wireless charging": false}'
@@ -124,7 +124,7 @@ VALUES
 '{"Screen diagonal":"55","Resolution":"UHD 4K 3840 x 2160","Refresh rate":"120Hz","TV type":"OLED","HDR":true}'
 ),
 ('ENDORFY Thock 75% Wireless',369,17,27,98,'2023-03-08',
-'{"Switches":"Mechanical Kailh Box Red","Connection":"Wire, Wireless","Key illumination color":"Multicolor - RGB","Connectors":"USB-C x1",}'
+'{"Switches":"Mechanical Kailh Box Red","Connection":"Wire, Wireless","Key illumination color":"Multicolor - RGB","Connectors":"USB-C x1"}'
 ),
 ('Samsung Portable SSD T7',599,8,2,11,'2023-01-17',
 '{"Capacity":"2000TB","Interface":"USB 3.2 Gen. 2","Connectors":"USB Type-C","Read speed":"1050 MB/s","Write speed":"1000 MB/s"}'
