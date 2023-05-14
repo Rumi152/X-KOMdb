@@ -3,6 +3,15 @@
 namespace XKOMapp.GUI.ConsoleRows;
 
 /// <summary>
+/// Marker that evaluates to multiple ConsoleRows at buffer reload
+/// </summary>
+public interface IConsoleRowPacket : IConsoleRow
+{
+    public new void GetRenderContent() => throw new InvalidOperationException();
+    public List<IConsoleRow> GetPacket();
+}
+
+/// <summary>
 /// Basic renderable ConsoleRow
 /// </summary>
 public interface IConsoleRow
