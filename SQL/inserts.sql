@@ -1,6 +1,11 @@
 ﻿USE XKOM
 GO
 
+INSERT INTO [User]([Name],LastName,[Password],Email)
+VALUES
+('Jakub','Cackowski','123','cyc'),
+('Sasza','Ukraina','312','ukr');
+
 INSERT INTO City(Name)
 VALUES
 ('Warszawa'),
@@ -124,7 +129,7 @@ VALUES
 ('Samsung Portable SSD T7',599,8,2,11,'2023-01-17',
 '{"Capacity":"2000TB","Interface":"USB 3.2 Gen. 2","Connectors":"USB Type-C","Read speed":"1050 MB/s","Write speed":"1000 MB/s"}'
 ),
-('Tymek Rogowski',0,20,27,1,'2007-05-11',
+('Tymek Rogowski',0,20,28,1,'2007-05-11',
 '{"Color":"#000000","Speed":"0.(9)c","Specialization":"Basketball"}'
 )
 
