@@ -15,7 +15,7 @@ namespace XKOMapp.GUI.ConsoleRows.ProductSearching
         private readonly int inputMaxLength;
         private readonly Action onInteraction;
         private readonly Action onHoverEnd;
-        private ConsolePrinter? owner;
+        private ConsolePrinter owner = null!;
 
         private bool isHovered = false;
         public string currentInput { get; private set; } = "";
@@ -48,6 +48,8 @@ namespace XKOMapp.GUI.ConsoleRows.ProductSearching
 
         public void ProcessCustomKeystroke(ConsoleKeyInfo keystrokeInfo)
         {
+            owner.SetBufferDirty();
+
             if (keystrokeInfo.Key == ConsoleKey.Backspace && currentInput.Length > 0)
                 currentInput = currentInput[..^1];
             else if (currentInput.Length < inputMaxLength && (char.IsLetterOrDigit(keystrokeInfo.KeyChar) || keystrokeInfo.Key == ConsoleKey.Spacebar))
@@ -62,6 +64,7 @@ namespace XKOMapp.GUI.ConsoleRows.ProductSearching
         public void ResetInput()
         {
             currentInput = "";
+            owner.SetBufferDirty();
         }
     }
 }
