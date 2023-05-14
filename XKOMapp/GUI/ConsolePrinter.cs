@@ -388,8 +388,6 @@ public class ConsolePrinter
     {
         if (isBufferDirty)
             ReloadBuffer();
-
-        //TODO: make dirty memory group system
     }
 
 
@@ -414,19 +412,21 @@ public class ConsolePrinter
         ClampCursorUp();
         FinalizeCursorChange();
 
+        List<IConsoleRow> unpackedMemory = memory.SelectMany(x => x is IConsoleRowPacket converted ? converted.GetPacket() : new List<IConsoleRow> { x }).ToList();
+
         int endLineIndex = 0;
         int linesShifted = 0;
-        int linesShiftStartIndex = memory
+        int linesShiftStartIndex = unpackedMemory
             .Take(CursorIndex ?? 0)
             .Where(x => x is not IDeactivableConsoleRow converted || converted.IsActive)
             .Sum(x => (x as ICustomLineSpanConsoleRow)?.GetRenderHeight() ?? 1)
             - cursorStickyStart;
-        int linesEndTotalIndex = memory
+        int linesEndTotalIndex = unpackedMemory
             .Where(x => x is not IDeactivableConsoleRow converted || converted.IsActive)
             .Sum(x => (x as ICustomLineSpanConsoleRow)?.GetRenderHeight() ?? 1);
-        for (int index = 0; index < memory.Count; index++)
+        for (int index = 0; index < unpackedMemory.Count; index++)
         {
-            IConsoleRow row = memory[index];
+            IConsoleRow row = unpackedMemory[index];
 
             bool isHidden = row is IHideableConsoleRow hideableConverted && !hideableConverted.IsActive;
             if (isHidden)
