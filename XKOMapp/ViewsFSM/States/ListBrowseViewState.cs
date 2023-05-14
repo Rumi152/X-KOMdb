@@ -21,10 +21,9 @@ internal class ListBrowseViewState : ViewState
         printer.StartContent();
 
 
+        //TODO
         printer.AddRow(new InteractableConsoleRow(new Text("Click to abort"), (row, owner) =>
         {
-            //TODO
-            fsm.RollbackOrDefault("mainMenu");
             throw new NotImplementedException();
         }));
         printer.AddRow(new Rule("Lists").RuleStyle(Style.Parse(StandardRenderables.AquamarineColorHex)).HeavyBorder().ToBasicConsoleRow());
@@ -60,24 +59,10 @@ internal class ListBrowseViewState : ViewState
     public override void OnEnter()
     {
         base.OnEnter();
+        printer.ResetCursor();
+
         RefreshLists();
 
-        printer.ResetCursor();
-        Display();
-    }
-
-    protected override void OnKeystrokePassed(ConsoleKeyInfo info)
-    {
-        base.OnKeystrokePassed(info);
-
-        printer.PassKeystroke(info);
-    }
-
-    protected override void OnKeystrokePassedFinally(ConsoleKeyInfo info)
-    {
-        base.OnKeystrokePassedFinally(info);
-
-        Display();
     }
 
     private void RefreshLists()

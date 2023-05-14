@@ -21,8 +21,6 @@ namespace XKOMapp.ViewsFSM.States
 
         public override void OnEnter()
         {
-            base.OnEnter();
-
             if (!SessionData.IsLoggedIn())
             {
                 fsm.Checkout(new FastLoginViewState(fsm));
@@ -36,21 +34,8 @@ namespace XKOMapp.ViewsFSM.States
 
             SetupPrinter();
 
-            Display();
-        }
+            base.OnEnter();//REFACTOR
 
-        protected override void OnKeystrokePassed(ConsoleKeyInfo info)
-        {
-            base.OnKeystrokePassed(info);
-
-            printer.PassKeystroke(info);
-        }
-
-        protected override void OnKeystrokePassedFinally(ConsoleKeyInfo info)
-        {
-            base.OnKeystrokePassedFinally(info);
-
-            Display();
         }
 
 

@@ -24,11 +24,9 @@ internal class ListCreateViewState : ViewState
         printer.AddRow(StandardRenderables.StandardHeader.ToBasicConsoleRow());
         printer.StartContent();
         
-
+        //TODO
         printer.AddRow(new InteractableConsoleRow(new Text("Click to abort"), (row, owner) =>
         {
-            //TODO
-            fsm.RollbackOrDefault("ListBrowseViewState");
             throw new NotImplementedException();
         }));
         printer.AddRow(new Rule("Create list").RuleStyle(Style.Parse(StandardRenderables.AquamarineColorHex)).HeavyBorder().ToBasicConsoleRow());
@@ -81,21 +79,6 @@ internal class ListCreateViewState : ViewState
         base.OnEnter();
 
         printer.ResetCursor();
-        Display();
-    }
-
-    protected override void OnKeystrokePassed(ConsoleKeyInfo info)
-    {
-        base.OnKeystrokePassed(info);
-
-        printer.PassKeystroke(info);
-    }
-
-    protected override void OnKeystrokePassedFinally(ConsoleKeyInfo info)
-    {
-        base.OnKeystrokePassedFinally(info);
-
-        Display();
     }
 
     private static string GetLink()

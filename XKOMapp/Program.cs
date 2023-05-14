@@ -15,14 +15,19 @@ internal class Program
         Console.BackgroundColor = ConsoleColor.Black;
         Console.ForegroundColor = ConsoleColor.White;
 
+
         var fsm = new ViewStateMachine();
-        fsm.SaveState("productsSearch", new ProductSearchViewState(fsm));//DONT TOUCH THIS TIMUR
+        //DONT TOUCH THESE TIMUR
+        fsm.SaveState("productsSearch", new ProductSearchViewState(fsm));
+        fsm.SaveState("listBrowseViewState", new ListBrowseViewState(fsm));
 
         fsm.Checkout("productsSearch");
 
         //checking for input in loop
         while (true)
         {
+            fsm?.Tick();
+
             if (Console.KeyAvailable)
             {
                 var info = Console.ReadKey(true);
