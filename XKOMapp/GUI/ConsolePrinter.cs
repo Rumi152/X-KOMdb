@@ -412,21 +412,19 @@ public class ConsolePrinter
         ClampCursorUp();
         FinalizeCursorChange();
 
-        List<IConsoleRow> unpackedMemory = memory.SelectMany(x => x is IConsoleRowPacket converted ? converted.GetPacket() : new List<IConsoleRow> { x }).ToList();
-
         int endLineIndex = 0;
         int linesShifted = 0;
-        int linesShiftStartIndex = unpackedMemory
+        int linesShiftStartIndex = memory
             .Take(CursorIndex ?? 0)
             .Where(x => x is not IDeactivableConsoleRow converted || converted.IsActive)
             .Sum(x => (x as ICustomLineSpanConsoleRow)?.GetRenderHeight() ?? 1)
             - cursorStickyStart;
-        int linesEndTotalIndex = unpackedMemory
+        int linesEndTotalIndex = memory
             .Where(x => x is not IDeactivableConsoleRow converted || converted.IsActive)
             .Sum(x => (x as ICustomLineSpanConsoleRow)?.GetRenderHeight() ?? 1);
-        for (int index = 0; index < unpackedMemory.Count; index++)
+        for (int index = 0; index < memory.Count; index++)
         {
-            IConsoleRow row = unpackedMemory[index];
+            IConsoleRow row = memory[index];
 
             bool isHidden = row is IHideableConsoleRow hideableConverted && !hideableConverted.IsActive;
             if (isHidden)
