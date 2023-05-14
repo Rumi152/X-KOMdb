@@ -24,10 +24,9 @@ internal class ListCreateViewState : ViewState
         printer.AddRow(StandardRenderables.StandardHeader.ToBasicConsoleRow());
         printer.StartContent();
         
-        //TODO
         printer.AddRow(new InteractableConsoleRow(new Text("Click to abort"), (row, owner) =>
         {
-            throw new NotImplementedException();
+            fsm.Checkout("listBrowse");
         }));
         printer.AddRow(new Rule("Create list").RuleStyle(Style.Parse(StandardRenderables.AquamarineColorHex)).HeavyBorder().ToBasicConsoleRow());
         printer.EnableScrolling();
@@ -98,7 +97,7 @@ internal class ListCreateViewState : ViewState
         }
         using (var context = new XkomContext())
             if (context.Lists.Any(x => x.Link == link))
-                GetLink();
+                return GetLink();
         
         return link;
     }

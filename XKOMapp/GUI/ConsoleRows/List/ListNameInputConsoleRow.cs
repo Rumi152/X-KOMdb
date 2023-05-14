@@ -29,6 +29,7 @@ internal class ListNameInputConsoleRow : ICustomCursorConsoleRow, ICustomKeystro
 
     public void ProcessCustomKeystroke(ConsoleKeyInfo keystrokeInfo)
     {
+        owner.SetBufferDirty();
         char letter = keystrokeInfo.KeyChar;
 
         if (keystrokeInfo.Key == ConsoleKey.Backspace)
