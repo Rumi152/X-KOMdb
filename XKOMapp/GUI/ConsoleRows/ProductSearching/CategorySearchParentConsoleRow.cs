@@ -66,6 +66,8 @@ public class ChoiceMenuParentConsoleRow : ICustomCursorConsoleRow, ISwitchableCo
     }
     public void ProcessChildrenStandardKeystroke(ConsoleKeyInfo keystrokeInfo)
     {
+        owner.SetBufferDirty();
+
         if (keystrokeInfo.Key == owner.InteractionKey)
         {
             appliedChoiceIndex = choiceIndex;
@@ -89,7 +91,9 @@ public class ChoiceMenuParentConsoleRow : ICustomCursorConsoleRow, ISwitchableCo
     }
     public void ProcessChildrenCustomKeystroke(ConsoleKeyInfo keystrokeInfo)
     {
-        if(!char.IsLetterOrDigit(keystrokeInfo.KeyChar))
+        owner.SetBufferDirty();
+
+        if (!char.IsLetterOrDigit(keystrokeInfo.KeyChar))
             return;
 
         var x = children.FindIndex(x => x.category.StartsWith((keystrokeInfo.KeyChar.ToString()), true, null));
@@ -124,14 +128,20 @@ public class ChoiceMenuParentConsoleRow : ICustomCursorConsoleRow, ISwitchableCo
     {
         children.ForEach(x => ((IHideableConsoleRow)x).TurnOff());
         choiceIndex = 0;
+
+        owner.SetBufferDirty();
     }
     void ISwitchableConsoleRow.OnTurningOn()
     {
         RefreshNeededDisplay();
+
+        owner.SetBufferDirty();
     }
 
     private void RefreshNeededDisplay()
     {
+        owner.SetBufferDirty();
+
         children.ForEach(x => ((IHideableConsoleRow)x).TurnOff());
 
         var firstIndex = Enumerable.Range(0, children.Count)
@@ -149,5 +159,6 @@ public class ChoiceMenuParentConsoleRow : ICustomCursorConsoleRow, ISwitchableCo
     {
         choiceIndex = 0;
         appliedChoiceIndex = 0;
+        owner.SetBufferDirty();
     }
 }

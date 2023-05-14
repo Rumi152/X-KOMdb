@@ -13,7 +13,7 @@ internal class PriceRangeInputConsoleRow : IModesConsoleRow, ICustomKeystrokeLis
     public string LowestPrice { get; private set; } = "";
     public string HighestPrice { get; private set; } = "";
 
-    private ConsolePrinter? owner;
+    private ConsolePrinter owner = null!;
     private bool isHovered = false;
 
     private readonly string preTextMarkup;
@@ -48,6 +48,8 @@ internal class PriceRangeInputConsoleRow : IModesConsoleRow, ICustomKeystrokeLis
 
     public void ProcessCustomKeystroke(ConsoleKeyInfo keystrokeInfo)
     {
+        owner.SetBufferDirty();
+
         if (keystrokeInfo.Key == ConsoleKey.RightArrow)
             (this as IModesConsoleRow).IncrementModeIndex();
         else if (keystrokeInfo.Key == ConsoleKey.LeftArrow)
@@ -75,7 +77,7 @@ internal class PriceRangeInputConsoleRow : IModesConsoleRow, ICustomKeystrokeLis
 
     void IModesConsoleRow.OnModeChange()
     {
-
+        owner.SetBufferDirty();
     }
 
     public void OnHoverStart()
@@ -104,5 +106,6 @@ internal class PriceRangeInputConsoleRow : IModesConsoleRow, ICustomKeystrokeLis
     {
         LowestPrice = "";
         HighestPrice = "";
+        owner.SetBufferDirty();
     }
 }

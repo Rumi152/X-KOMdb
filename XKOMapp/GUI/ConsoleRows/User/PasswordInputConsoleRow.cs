@@ -26,6 +26,8 @@ namespace XKOMapp.GUI.ConsoleRows.User
 
         public void ProcessCustomKeystroke(ConsoleKeyInfo keystrokeInfo)
         {
+            owner.SetBufferDirty();
+
             char letter = keystrokeInfo.KeyChar;
 
             if (keystrokeInfo.Key == ConsoleKey.Backspace)

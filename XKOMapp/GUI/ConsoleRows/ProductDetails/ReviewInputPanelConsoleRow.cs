@@ -53,6 +53,8 @@ namespace XKOMapp.GUI.ConsoleRows.ProductDetails
 
         public void ProcessCustomKeystroke(ConsoleKeyInfo keystrokeInfo)
         {
+            owner.SetBufferDirty();
+
             if (keystrokeInfo.Key == ConsoleKey.RightArrow)
             {
                 if (StarRating < 6)

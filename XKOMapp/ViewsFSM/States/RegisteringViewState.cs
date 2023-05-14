@@ -32,9 +32,7 @@ namespace XKOMapp.ViewsFSM.States
 
             printer.AddRow(new InteractableConsoleRow(new Text("Click to abort"), (row, owner) =>
             {
-                //TODO
                 fsm.Checkout("mainMenu");
-                throw new NotImplementedException();
             }));
             printer.AddRow(new Rule("Registering").RuleStyle(Style.Parse(StandardRenderables.AquamarineColorHex)).HeavyBorder().ToBasicConsoleRow());
             printer.EnableScrolling();

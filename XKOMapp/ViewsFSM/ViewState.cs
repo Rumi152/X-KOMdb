@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using XKOMapp.GUI;
+using XKOMapp.Models;
 
 namespace XKOMapp.ViewsFSM
 {
@@ -22,6 +23,7 @@ namespace XKOMapp.ViewsFSM
         {
             printer.OnBufferReload += Display;
             isActiveState = true;
+            printer.SetBufferDirty();
         }
 
         public virtual void OnExit()
