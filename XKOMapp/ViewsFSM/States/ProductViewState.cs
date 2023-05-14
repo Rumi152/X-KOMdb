@@ -15,7 +15,7 @@ public class ProductViewState : ViewState
     private bool isInPropertiesView = true;
 
     private int reviewWriteStars = 0;
-    private string reviewWriteDescription = "";
+    private string reviewWriteDescription = new('c', 256);
 
     public ProductViewState(ViewStateMachine stateMachine, Product product) : base(stateMachine)
     {
@@ -248,8 +248,6 @@ public class ProductViewState : ViewState
             ShowAverageStars();
         }
 
-        var descriptionLines = GetWrappedDescription((reviewWriteDescription.Length == 0) ? "[dim]Write something about product (optional)[/]" : reviewWriteDescription);
-
 
         printer.AddRow(new ReviewInputHeaderConsoleRow(
             getRenderable: () =>
@@ -272,7 +270,10 @@ public class ProductViewState : ViewState
             }
         ), "reviews");
 
-        descriptionLines.ForEach(x => printer.AddRow(new Markup(x).ToBasicConsoleRow(), "reviews"));//UNDONE (+remove input panel class after)
+        var descriptionRows = GetWrappedDescription((reviewWriteDescription.Length == 0) ? "[dim]Write something about product (optional)[/]" : reviewWriteDescription)
+            .Select(x => new Markup(x).ToBasicConsoleRow())
+            .ToList();
+        printer.AddRow(new DynamicConsoleRowPacket(() => descriptionRows), "reviews");
 
         //TEMP
         printer.AddRow(new InteractableDynamicConsoleRow("Click to post review", onClick), "reviews");
@@ -324,8 +325,8 @@ public class ProductViewState : ViewState
                 break;
             }
 
-            int takenLength = new string(description.Take(width).ToArray()).LastIndexOf(' ') + 1;
-            if (takenLength == -1) takenLength = width;
+            int takenLength = new string(description.Take(width).ToArray()).LastIndexOf(' ');
+            if (takenLength++ == -1) takenLength = width;
 
             descriptionLines.Add(leftPad + new string(description.Take(takenLength).ToArray()).Trim());
             description = new(description.Skip(takenLength).ToArray());
