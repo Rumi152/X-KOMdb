@@ -5,7 +5,6 @@ using System.Text.Json;
 using XKOMapp.GUI;
 using XKOMapp.GUI.ConsoleRows;
 using XKOMapp.GUI.ConsoleRows.ProductDetails;
-using XKOMapp.GUI.ConsoleRows.ProductSearching;
 using XKOMapp.Models;
 
 namespace XKOMapp.ViewsFSM.States;
@@ -14,7 +13,9 @@ public class ProductViewState : ViewState
 {
     private readonly Product product;
     private bool isInPropertiesView = true;
-    readonly ReviewInputPanelConsoleRow reviewInputPanel = new ReviewInputPanelConsoleRow();
+
+    private int reviewWriteStars = 0;
+    private string reviewWriteDescription = "";
 
     public ProductViewState(ViewStateMachine stateMachine, Product product) : base(stateMachine)
     {
@@ -158,30 +159,7 @@ public class ProductViewState : ViewState
 
         string header = $"{userDisplay} {stars}";
 
-        string description;
-        if (review.Description.Length == 0)
-            description = "[dim]No description provided[/]";
-        else
-            description = review.Description.ReplaceLineEndings(" ");
-
-        List<string> descriptionLines = new();
-        while (description.Length > 0)
-        {
-            const string leftPad = "  ";
-            int width = Math.Max(32, Console.WindowWidth - 8);
-
-            if (description.RemoveMarkup().Length <= width)
-            {
-                descriptionLines.Add(leftPad + description.Trim());
-                break;
-            }
-
-            int takenLength = new string(description.Take(width).ToArray()).LastIndexOf(' ') + 1;
-            if (takenLength == -1) takenLength = width;
-
-            descriptionLines.Add(leftPad + new string(description.Take(takenLength).ToArray()).Trim());
-            description = new(description.Skip(takenLength).ToArray());
-        }
+        var descriptionLines = GetWrappedDescription((review.Description.Length == 0) ? "[dim]Write something about product[/]" : review.Description);
 
         printer.AddRow(new Markup(header).ToBasicConsoleRow(), "allReviews");
         descriptionLines.ForEach(x => printer.AddRow(new Text(x).ToBasicConsoleRow(), "allReviews"));
@@ -218,8 +196,6 @@ public class ProductViewState : ViewState
 
     private void DisplayReviewInput()
     {
-        printer.AddRow(reviewInputPanel, "reviews");
-
         void onClick(IConsoleRow row, ConsolePrinter? owner)
         {
             if (!AssureProductExists())
@@ -250,7 +226,7 @@ public class ProductViewState : ViewState
                 return;
             }
 
-            if (reviewInputPanel.StarRating == 0)
+            if (reviewWriteStars == 0)
             {
                 converted.SetMarkupText("Click to post review [red]Please select star rating[/]");
                 return;
@@ -261,8 +237,8 @@ public class ProductViewState : ViewState
             var review = new Review()
             {
                 Product = product,
-                Description = reviewInputPanel.Description,
-                StarRating = reviewInputPanel.StarRating,
+                Description = reviewWriteDescription,
+                StarRating = reviewWriteStars,
                 User = dbUser
             };
             context.Reviews.Add(review);
@@ -272,6 +248,33 @@ public class ProductViewState : ViewState
             ShowAverageStars();
         }
 
+        var descriptionLines = GetWrappedDescription((reviewWriteDescription.Length == 0) ? "[dim]Write something about product (optional)[/]" : reviewWriteDescription);
+
+
+        printer.AddRow(new ReviewInputHeaderConsoleRow(
+            getRenderable: () =>
+            {
+                string stars = $"[yellow]{new string('*', reviewWriteStars)}[/][dim]{new string('*', 6 - reviewWriteStars)}[/]";
+                string userDisplay = $"[{StandardRenderables.GoldColorHex}]Write[/]";
+                string header = $"{userDisplay} {stars}";
+
+                return new Markup(header);
+            },
+            onRightArrow: () =>
+            {
+                reviewWriteStars = Math.Clamp(reviewWriteStars + 1, 1, 6);
+                printer.SetBufferDirty();
+            },
+            onLeftArrow: () =>
+            {
+                reviewWriteStars = Math.Clamp(reviewWriteStars - 1, 1, 6);
+                printer.SetBufferDirty();
+            }
+        ), "reviews");
+
+        descriptionLines.ForEach(x => printer.AddRow(new Markup(x).ToBasicConsoleRow(), "reviews"));//UNDONE (+remove input panel class after)
+
+        //TEMP
         printer.AddRow(new InteractableDynamicConsoleRow("Click to post review", onClick), "reviews");
     }
 
@@ -303,5 +306,31 @@ public class ProductViewState : ViewState
 
         fsm.Checkout("productsSearch");
         return false;
+    }
+
+
+    private static List<string> GetWrappedDescription(string description)
+    {
+        description = description.ReplaceLineEndings(" ");
+        List<string> descriptionLines = new();
+        while (description.Length > 0)
+        {
+            const string leftPad = "  ";
+            int width = Math.Max(32, Console.WindowWidth - 8);
+
+            if (description.RemoveMarkup().Length <= width)
+            {
+                descriptionLines.Add(leftPad + description.Trim());
+                break;
+            }
+
+            int takenLength = new string(description.Take(width).ToArray()).LastIndexOf(' ') + 1;
+            if (takenLength == -1) takenLength = width;
+
+            descriptionLines.Add(leftPad + new string(description.Take(takenLength).ToArray()).Trim());
+            description = new(description.Skip(takenLength).ToArray());
+        }
+
+        return descriptionLines;
     }
 }
