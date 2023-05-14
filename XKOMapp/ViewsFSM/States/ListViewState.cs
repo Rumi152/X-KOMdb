@@ -27,11 +27,10 @@ internal class ListViewState: ViewState
         printer.StartContent();
 
 
-        printer.AddRow(new InteractableConsoleRow(new Text("Click to abort"), (row, owner) =>
+        //TODO: change displayed text
+        printer.AddRow(new InteractableConsoleRow(new Text("Click to go back to browsing list"), (row, owner) =>
         {
-            //TODO
-            fsm.RollbackOrDefault("ListBrowseViewState");
-            throw new NotImplementedException();
+            fsm.Checkout("listBrowseViewState");
         }));
         printer.AddRow(new Rule("List").RuleStyle(Style.Parse(StandardRenderables.AquamarineColorHex)).HeavyBorder().ToBasicConsoleRow());
         printer.EnableScrolling();
@@ -139,21 +138,6 @@ internal class ListViewState: ViewState
         base.OnEnter();
 
         printer.ResetCursor();
-        Display();
-    }
-
-    protected override void OnKeystrokePassed(ConsoleKeyInfo info)
-    {
-        base.OnKeystrokePassed(info);
-
-        printer.PassKeystroke(info);
-    }
-
-    protected override void OnKeystrokePassedFinally(ConsoleKeyInfo info)
-    {
-        base.OnKeystrokePassedFinally(info);
-
-        Display();
     }
 
     private static string GetLink()

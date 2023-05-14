@@ -38,7 +38,7 @@ public class ProductViewState : ViewState
         printer.AddRow(new Text(product.Name).ToBasicConsoleRow());
         printer.AddRow(new Markup($"[lime]{product.Price:F2}[/] PLN").ToBasicConsoleRow());
         printer.AddRow(new Markup($"Made by {($"[{StandardRenderables.GrassColorHex}]" + product.Company?.Name.EscapeMarkup() + "[/]") ?? "Unknown company"}").ToBasicConsoleRow());
-        printer.AddRow(new Markup($"[{((product.NumberAvailable == 0) ? "#red" : StandardRenderables.GrassColorHex)}]{product.NumberAvailable}[/] left in magazine").ToBasicConsoleRow());
+        printer.AddRow(new Markup($"[{((product.NumberAvailable == 0) ? "red" : StandardRenderables.GrassColorHex)}]{product.NumberAvailable}[/] left in magazine").ToBasicConsoleRow());
 
         printer.StartGroup("averageStars");
         ShowAverageStars();
@@ -61,21 +61,6 @@ public class ProductViewState : ViewState
         else ShowReviews();
 
         ShowAverageStars();
-        Display();
-    }
-
-    protected override void OnKeystrokePassed(ConsoleKeyInfo info)
-    {
-        base.OnKeystrokePassed(info);
-
-        printer.PassKeystroke(info);
-    }
-
-    protected override void OnKeystrokePassedFinally(ConsoleKeyInfo info)
-    {
-        base.OnKeystrokePassedFinally(info);
-
-        Display();
     }
 
 

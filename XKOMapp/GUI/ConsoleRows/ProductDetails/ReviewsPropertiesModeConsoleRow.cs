@@ -42,10 +42,12 @@ public class ReviewsAndPropertiesModeConsoleRow : ISwitchableConsoleRow, ICustom
     void ISwitchableConsoleRow.OnTurningOff()
     {
         onPropertiesEnter();
+        owner.SetBufferDirty();
     }
 
     void ISwitchableConsoleRow.OnTurningOn()
     {
         onReviewsEnter();
+        owner.SetBufferDirty();
     }
 }

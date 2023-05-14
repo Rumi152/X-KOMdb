@@ -18,23 +18,32 @@ namespace XKOMapp.ViewsFSM
             this.fsm = stateMachine;
         }
 
-        public virtual void OnEnter() => isActiveState = true;
-        public virtual void OnExit() => isActiveState = false;
+        public virtual void OnEnter()
+        {
+            printer.OnBufferReload += Display;
+            isActiveState = true;
+        }
+
+        public virtual void OnExit()
+        {
+            printer.OnBufferReload -= Display;
+            isActiveState = false;
+        }
 
         protected virtual void Display()
         {
             ConsolePrinter.ClearScreen();
-            printer.PrintMemory();
+            printer.PrintBuffer();
         }
 
-        protected virtual void OnKeystrokePassed(ConsoleKeyInfo info) { }
-        protected virtual void OnKeystrokePassedFinally(ConsoleKeyInfo info) { }
-
-        public void PassKeystroke(ConsoleKeyInfo info)
+        public virtual void Tick()
         {
-            OnKeystrokePassed(info);
-            if (isActiveState)
-                OnKeystrokePassedFinally(info);
+            printer.Tick();
+        }
+
+        public virtual void PassKeystroke(ConsoleKeyInfo info)
+        {
+            printer.PassKeystroke(info);
         }
     }
 }

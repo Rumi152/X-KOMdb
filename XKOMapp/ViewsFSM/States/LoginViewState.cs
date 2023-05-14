@@ -62,21 +62,6 @@ namespace XKOMapp.ViewsFSM.States
             base.OnEnter();
 
             printer.ResetCursor();
-            Display();
-        }
-
-        protected override void OnKeystrokePassed(ConsoleKeyInfo info)
-        {
-            base.OnKeystrokePassed(info);
-
-            printer.PassKeystroke(info);
-        }
-
-        protected override void OnKeystrokePassedFinally(ConsoleKeyInfo info)
-        {
-            base.OnKeystrokePassedFinally(info);
-
-            Display();
         }
 
 

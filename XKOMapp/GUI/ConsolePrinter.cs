@@ -1,5 +1,6 @@
 ﻿using Spectre.Console;
 using Spectre.Console.Rendering;
+using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Reflection;
@@ -58,6 +59,8 @@ public class ConsolePrinter
     private readonly List<IConsoleRow> memory = new();
     private readonly List<string?> memoryGroupingKeys = new();
 
+    private bool isBufferDirty = false;
+
     /// <summary>
     /// Current index of row pointed by cursor
     /// <para>Null if there is no content rows</para>
@@ -83,13 +86,16 @@ public class ConsolePrinter
     }
 
 
-    public ConsolePrinter() => ClearMemory();
+    public ConsolePrinter()
+    {
+        ClearMemory();
+        ReloadBuffer();
+    }
 
-    public ConsolePrinter(int cursorStickyStart, int paddingBottom)
+    public ConsolePrinter(int cursorStickyStart, int paddingBottom) : this()
     {
         this.cursorStickyStart = cursorStickyStart;
         this.paddingBottom = paddingBottom;
-        ClearMemory();
     }
 
 
@@ -111,6 +117,8 @@ public class ConsolePrinter
     {
         if (CursorIndex is not null)
             CursorIndex--;
+        else
+            ResetCursor();
 
         ClampCursorUp();
         FinalizeCursorChange();
@@ -123,6 +131,8 @@ public class ConsolePrinter
     {
         if (CursorIndex is not null)
             CursorIndex++;
+        else
+            ResetCursor();
 
         ClampCursorDown();
         FinalizeCursorChange();
@@ -221,6 +231,7 @@ public class ConsolePrinter
         }
 
         previousCursorRow = currentCursorRow;
+        isBufferDirty = true;
     }
 
     /// <summary>
@@ -253,12 +264,15 @@ public class ConsolePrinter
     public void AddRow(IConsoleRow row)
     {
         row.SetOwnership(this);
+
         memory.Add(row);
         memoryGroupingKeys.Add(null);
+
+        SetBufferDirty();
     }
 
     /// <summary>
-    /// Add new row to memory group
+    /// Add new row to memory with grouping
     /// </summary>
     /// <param name="row">ConsoleRow to add</param>
     /// <param name="group">Group to assign row to</param>
@@ -277,6 +291,8 @@ public class ConsolePrinter
             memory.Insert(index + 1, row);
             memoryGroupingKeys.Insert(index + 1, group);
         }
+
+        SetBufferDirty();
     }
 
     /// <summary>
@@ -301,6 +317,8 @@ public class ConsolePrinter
         memory.Clear();
         memoryGroupingKeys.Clear();
         ResetCursor();
+
+        SetBufferDirty();
     }
 
     /// <summary>
@@ -318,6 +336,8 @@ public class ConsolePrinter
                 memory.RemoveAt(index);
                 memoryGroupingKeys.RemoveAt(index);
             });
+
+        SetBufferDirty();
     }
 
     /// <summary>
@@ -336,6 +356,8 @@ public class ConsolePrinter
                 memory.RemoveAt(index);
                 memoryGroupingKeys.RemoveAt(index);
             });
+
+        SetBufferDirty();
     }
 
 
@@ -348,6 +370,27 @@ public class ConsolePrinter
     /// Enables scrolling for current memory starting from this row
     /// </summary>
     public void EnableScrolling() => AddRow(new ScrollerStartMarker());
+
+
+
+    /// <summary>
+    /// Indicates that buffer should be printed on next Tick
+    /// </summary>
+    public void SetBufferDirty()
+    {
+        isBufferDirty = true;
+    }
+
+    /// <summary>
+    /// Method to invoke in loop as Update
+    /// </summary>
+    public void Tick()
+    {
+        if (isBufferDirty)
+            ReloadBuffer();
+
+        //TODO: make dirty memory group system
+    }
 
 
 
@@ -365,7 +408,7 @@ public class ConsolePrinter
     /// <summary>
     /// Reload buffers using memory
     /// </summary>
-    public void ReloadBuffer()
+    private void ReloadBuffer()
     {
         ClearBuffer();
         ClampCursorUp();
@@ -409,14 +452,14 @@ public class ConsolePrinter
             if (!isContent)
             {
                 if (endLineIndex > Console.WindowHeight - 1 - paddingBottom)
-                    return;
+                    break;
 
                 preContent.Add(row.GetRenderContent());
                 continue;
             }
 
             if (endLineIndex - linesShifted > Console.WindowHeight - 1 - paddingBottom)
-                return;
+                break;
 
             string cursor = ">";
             string background = " ";
@@ -428,6 +471,9 @@ public class ConsolePrinter
 
             content.AddRow(new Markup(isHovered ? cursor : background), row.GetRenderContent());
         }
+
+        isBufferDirty = false;
+        OnBufferReload?.Invoke();
     }
 
     /// <summary>
@@ -496,4 +542,11 @@ public class ConsolePrinter
     /// </summary>
     /// <param name="keystrokeInfo">ConsoleKeyInfo of pressed key</param>
     private void PassCustomKeystroke(ConsoleKeyInfo keystrokeInfo) => (currentCursorRow as ICustomKeystrokeListenerConsoleRow)?.ProcessCustomKeystroke(keystrokeInfo);
+
+
+
+    /// <summary>
+    /// Event raised on reload of buffer
+    /// </summary>
+    public event Action? OnBufferReload;
 }
