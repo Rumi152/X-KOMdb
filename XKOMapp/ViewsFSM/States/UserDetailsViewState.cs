@@ -19,12 +19,12 @@ namespace XKOMapp.ViewsFSM.States
         {
             if (!SessionData.IsLoggedIn())
             {
-                fsm.Checkout(new FastLoginViewState(fsm));
+                fsm.Checkout(new FastLoginViewState(fsm, this));
                 return;
             }
             if (SessionData.HasSessionExpired(out loggedUser))
             {
-                fsm.Checkout(new FastLoginViewState(fsm, new Markup("[red]Session expired[/]\n").ToBasicConsoleRow()));
+                fsm.Checkout(new FastLoginViewState(fsm, this, new Markup("[red]Session expired[/]\n").ToBasicConsoleRow()));
                 return;
             }
 
@@ -59,7 +59,7 @@ namespace XKOMapp.ViewsFSM.States
         {
             if (SessionData.HasSessionExpired(out loggedUser))
             {
-                fsm.Checkout(new FastLoginViewState(fsm, new Markup("[red]Session expired[/]").ToBasicConsoleRow()));
+                fsm.Checkout(new FastLoginViewState(fsm, this, new Markup("[red]Session expired[/]").ToBasicConsoleRow()));
                 return;
             }
 

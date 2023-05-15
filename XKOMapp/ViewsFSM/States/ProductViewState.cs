@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Spectre.Console;
+using Spectre.Console.Rendering;
 using System.Diagnostics;
 using System.Text.Json;
 using XKOMapp.GUI;
@@ -164,10 +165,10 @@ public class ProductViewState : ViewState
 
         string header = $"{userDisplay} {stars}";
 
-        var descriptionLines = GetWrappedDescription((review.Description.Length == 0) ? "[dim]Write something about product[/]" : review.Description);
+        var descriptionLines = GetWrappedDescription((review.Description.Length == 0) ? "[dim]No description provided[/]" : review.Description);
 
         printer?.AddRow(new Markup(header).ToBasicConsoleRow(), "reviews-all");
-        descriptionLines.ForEach(x => printer?.AddRow(new Text(x).ToBasicConsoleRow(), "reviews-all"));
+        descriptionLines.ForEach(x => printer?.AddRow(((review.Description.Length == 0) ? (IRenderable)new Markup(x) : new Text(x)).ToBasicConsoleRow(), "reviews-all"));
     }
 
     private void DisplayReviewChart(List<Review> reviews)
@@ -209,7 +210,9 @@ public class ProductViewState : ViewState
 
             if (!SessionData.IsLoggedIn())
             {
-                fsm.Checkout(new FastLoginViewState(fsm,
+                fsm.Checkout(
+                    new FastLoginViewState(fsm,
+                    this,
                     new Markup($"[{StandardRenderables.GrassColorHex}]Log in to write reviews[/]").ToBasicConsoleRow(),
                     new InteractableConsoleRow(new Markup("Click to abort"), (row, owner) => fsm.Checkout(this))));
                 return;
@@ -218,6 +221,7 @@ public class ProductViewState : ViewState
             if (SessionData.HasSessionExpired(out User dbUser))
             {
                 fsm.Checkout(new FastLoginViewState(fsm,
+                    this,
                     new Markup($"[red]Session expired[/] - [{StandardRenderables.GrassColorHex}]Log in to write reviews[/]").ToBasicConsoleRow(),
                     new InteractableConsoleRow(new Markup("Click to abort"), (row, owner) => fsm.Checkout(this))));
                 return;
