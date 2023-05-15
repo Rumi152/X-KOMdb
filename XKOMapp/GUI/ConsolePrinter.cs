@@ -364,8 +364,6 @@ public class ConsolePrinter
                     return true;
 
                 return false;
-
-                //return   (savedGroup.Length >= group.Length && savedGroup[group.Length] == '-');
             })
             .Where(index => memory[index] is not GroupStartMarker)
             .Reverse()

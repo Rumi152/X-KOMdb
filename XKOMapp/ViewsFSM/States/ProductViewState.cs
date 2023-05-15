@@ -52,6 +52,7 @@ public class ProductViewState : ViewState
         printer.StartGroup("reviews-input");
         printer.StartGroup("reviews-descriptionInput");
         printer.StartGroup("reviews-postInput");
+        printer.StartGroup("reviews-postInput-errors");
         printer.StartGroup("reviews-all");
 
         ShowProperties();
@@ -75,11 +76,7 @@ public class ProductViewState : ViewState
 
         isInPropertiesView = true;
         printer.ClearMemoryGroup("properties");
-        printer.ClearMemoryGroup("reviews-chart");
-        printer.ClearMemoryGroup("reviews-input");
-        printer.ClearMemoryGroup("reviews-descriptionInput");
-        printer.ClearMemoryGroup("reviews-postInput");
-        printer.ClearMemoryGroup("reviews-all");
+        printer.ClearMemoryGroup("reviews");
 
         if (product.Properties is null)
         {
@@ -114,11 +111,7 @@ public class ProductViewState : ViewState
 
         isInPropertiesView = false;
         printer.ClearMemoryGroup("properties");
-        printer.ClearMemoryGroup("reviews-chart");
-        printer.ClearMemoryGroup("reviews-input");
-        printer.ClearMemoryGroup("reviews-descriptionInput");
-        printer.ClearMemoryGroup("reviews-postInput");
-        printer.ClearMemoryGroup("reviews-all");
+        printer.ClearMemoryGroup("reviews");
 
         using var context = new XkomContext();
         var reviews = context
@@ -132,14 +125,14 @@ public class ProductViewState : ViewState
         if (reviews.IsNullOrEmpty())
         {
             printer.AddRow(new Text("No reviews yet, share some thought about this product").ToBasicConsoleRow(), "reviews-chart");
-            DisplayReviewInput();
+            DisplayReviewInput(reviews);
             return;
         }
 
         DisplayReviewChart(reviews);
 
-        printer.AddRow(new Text("").ToBasicConsoleRow(), "reviews");
-        DisplayReviewInput();
+        printer.AddRow(new Text("").ToBasicConsoleRow(), "reviews-chart");
+        DisplayReviewInput(reviews);
 
         DisplayAllReviews(reviews);
         ShowAverageStars();
@@ -205,8 +198,9 @@ public class ProductViewState : ViewState
         }
     }
 
-    private void DisplayReviewInput()
+    private void DisplayReviewInput(List<Review> reviews)
     {
+        //TODO (+error disapear timer)
         void onClick(IConsoleRow row, ConsolePrinter? owner)
         {
             if (!AssureProductExists())
@@ -229,22 +223,24 @@ public class ProductViewState : ViewState
             }
 
             using var context = new XkomContext();
-            var converted = (InteractableDynamicConsoleRow)row;
 
-            if (context.Reviews.Include(x => x.User).Include(x => x.Product).Any(x => x.UserId == dbUser.Id && x.ProductId == product.Id))
-            {
-                converted.SetMarkupText("Click to post review [red]Placeholder.ReviewAlreadyWritten[/]");//TODO
-                return;
-            }
+            printer.ClearMemoryGroup("reviews-postInput-errors");
 
             if (reviewWriteStars == 0)
             {
-                converted.SetMarkupText("Click to post review [red]Please select star rating[/]");
+                printer.AddRow(new Markup("[red]Please select star rating[/]").ToBasicConsoleRow(), "reviews-postInput-errors");
                 return;
             }
 
             context.Attach(dbUser);
             context.Attach(product);
+
+            if(context.Reviews.Include(x => x.User).Include(x => x.Product).Any(x => x.UserId == dbUser.Id && x.ProductId == product.Id))
+            {
+                printer.AddRow(new Markup("[red]You have already written review[/]").ToBasicConsoleRow(), "reviews-postInput-errors");
+                return;
+            }
+
             var review = new Review()
             {
                 Product = product,
@@ -257,6 +253,7 @@ public class ProductViewState : ViewState
 
             ShowReviews();
             ShowAverageStars();
+            ShowReviews();
         }
 
         printer.AddRow(new ReviewInputHeaderConsoleRow(
@@ -282,8 +279,9 @@ public class ProductViewState : ViewState
 
         DisplayReviewDescriptionInput();
 
-        //TEMP (+error disapear timer)
-        printer.AddRow(new InteractableDynamicConsoleRow("Click to post review", onClick), "reviews-postInput");
+        //TEMP
+        string acceptButtonText = false && reviews.Any(x => x != null && x.UserId == SessionData.GetUserOffline()?.Id) ? "Click to replace review" : "Click to write review";
+        printer.AddRow(new InteractableConsoleRow(new Markup(acceptButtonText), onClick), "reviews-postInput");
     }
 
     private void DisplayReviewDescriptionInput()
