@@ -21,9 +21,9 @@ internal class Program
         fsm.SaveState("productsSearch", new ProductSearchViewState(fsm));
         fsm.SaveState("listBrowse", new ListBrowseViewState(fsm));
 
-        //fsm.Checkout("productsSearch");
+        fsm.Checkout("productsSearch");
         //fsm.Checkout("listBrowse");
-        fsm.Checkout(new RegisteringViewState(fsm));
+        //fsm.Checkout(new RegisteringViewState(fsm));
 
 
         //checking for input in loop
