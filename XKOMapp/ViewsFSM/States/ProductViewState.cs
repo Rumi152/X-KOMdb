@@ -265,7 +265,8 @@ public class ProductViewState : ViewState
             context.Reviews.Add(review);
             context.SaveChanges();
 
-            ShowReviews();
+            reviewWriteDescription = "";
+            reviewWriteStars = 0;
             ShowAverageStars();
             ShowReviews();
         }
