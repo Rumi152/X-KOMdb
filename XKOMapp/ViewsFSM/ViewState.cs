@@ -10,7 +10,7 @@ namespace XKOMapp.ViewsFSM
 {
     public abstract class ViewState
     {
-        protected ConsolePrinter printer = null!;
+        protected ConsolePrinter? printer = null;
         protected ViewStateMachine fsm { get; private set; }
         protected bool isActiveState { get; private set; }
 
@@ -37,17 +37,17 @@ namespace XKOMapp.ViewsFSM
         protected virtual void Display()
         {
             ConsolePrinter.ClearScreen();
-            printer.PrintBuffer();
+            printer?.PrintBuffer();
         }
 
         public virtual void Tick()
         {
-            printer.Tick();
+            printer?.Tick();
         }
 
         public virtual void PassKeystroke(ConsoleKeyInfo info)
         {
-            printer.PassKeystroke(info);
+            printer?.PassKeystroke(info);
         }
     }
 }

@@ -17,10 +17,6 @@ namespace XKOMapp.ViewsFSM.States
 
         public UserDetailsViewState(ViewStateMachine stateMachine) : base(stateMachine)
         {
-        }
-
-        public override void OnEnter()
-        {
             if (!SessionData.IsLoggedIn())
             {
                 fsm.Checkout(new FastLoginViewState(fsm));
@@ -32,15 +28,6 @@ namespace XKOMapp.ViewsFSM.States
                 return;
             }
 
-            SetupPrinter();
-
-            base.OnEnter();//REFACTOR
-
-        }
-
-
-        private void SetupPrinter()
-        {
             printer = new ConsolePrinter();
 
             printer.AddRow(StandardRenderables.StandardHeader.ToBasicConsoleRow());
@@ -68,6 +55,13 @@ namespace XKOMapp.ViewsFSM.States
             RefreshOrders();
         }
 
+        public override void OnEnter()
+        {
+
+            base.OnEnter();//REFACTOR
+
+        }
+
         private void RefreshOrders()
         {
             if (SessionData.HasSessionExpired(out loggedUser))
@@ -76,7 +70,7 @@ namespace XKOMapp.ViewsFSM.States
                 return;
             }
 
-            printer.ClearMemoryGroup("orders");
+            printer?.ClearMemoryGroup("orders");
 
             using var context = new XkomContext();
             context.Attach(loggedUser);
@@ -98,10 +92,10 @@ namespace XKOMapp.ViewsFSM.States
 
             statusGrouping.ForEach(g =>
             {
-                printer.AddRow(new Text($"{g.Status.Name}:").ToBasicConsoleRow(), "orders");
+                printer?.AddRow(new Text($"{g.Status.Name}:").ToBasicConsoleRow(), "orders");
                 g.Orders.ForEach(order =>
                 {
-                    printer.AddRow(new Text($"  {order.Id}").ToBasicConsoleRow(), "orders");
+                    printer?.AddRow(new Text($"  {order.Id}").ToBasicConsoleRow(), "orders");
                 });
             });
         }
