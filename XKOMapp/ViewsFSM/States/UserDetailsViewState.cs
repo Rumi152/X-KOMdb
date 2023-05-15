@@ -43,10 +43,13 @@ namespace XKOMapp.ViewsFSM.States
 
             printer.EnableScrolling();
 
-            printer.AddRow(new Text(loggedUser.Name).ToBasicConsoleRow());
-            printer.AddRow(new Text(loggedUser.LastName).ToBasicConsoleRow());
-            printer.AddRow(new Text(loggedUser.Email).ToBasicConsoleRow());//TODO add support for long emails
-            printer.AddRow(new Text(loggedUser.Password).ToBasicConsoleRow());//TODO add hiding password
+            const int pad = 9;
+            printer.AddRow(new Text($"{"Name",-pad} : {loggedUser.Name}").ToBasicConsoleRow());
+            printer.AddRow(new Text($"{"Last name",-pad} : {loggedUser.LastName}").ToBasicConsoleRow());
+            printer.AddRow(new Text($"{"Email",-pad} : {new string(loggedUser.Email.Take(Console.WindowWidth - 8 - pad).ToArray())}").ToBasicConsoleRow());//REFACTOR add better support for long emails
+            printer.AddRow(new Text($"{"Password",-pad} : {loggedUser.Password}").ToBasicConsoleRow());//REFACTOR add hiding password
+
+            //TODO edit button unfolding 5 inputs and accept button
 
             var rule = new Rule("Click to refresh orders").RuleStyle(new Style().Foreground(StandardRenderables.AquamarineColor)).HeavyBorder();
             printer.AddRow(new InteractableConsoleRow(rule, (row, onwer) => RefreshOrders()));
