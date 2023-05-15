@@ -6,6 +6,8 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace XKOMapp.GUI.ConsoleRows.ProductDetails;
+
+[Obsolete("Shall be deleted", true)]
 internal class ReviewInputDescriptionConsoleRow : IDeactivableConsoleRow, ICustomCursorConsoleRow, ICustomKeystrokeListenerConsoleRow
 {
     private readonly bool canMouseOver;
@@ -26,8 +28,8 @@ internal class ReviewInputDescriptionConsoleRow : IDeactivableConsoleRow, ICusto
 
     bool ISwitchableConsoleRow.IsActive { get => canMouseOver; set => throw new NotImplementedException(); }
 
-    public string GetCustomCursor() => isMouseOverDescriptionGetter() ? "[" : " ";
-    public string GetCustomCursorBackground() => isMouseOverDescriptionGetter() ? "[" : " ";
+    public string GetCustomCursor() => isMouseOverDescriptionGetter() ? "[[" : " ";
+    public string GetCustomCursorBackground() => isMouseOverDescriptionGetter() ? "[[" : " ";
     public IRenderable GetRenderContent() => throw new NotImplementedException();
     public void SetOwnership(ConsolePrinter owner) => this.owner = owner;
 
