@@ -75,7 +75,7 @@ public class ProductSearchViewState : ViewState
 
     private void RefreshProducts()
     {
-        printer.ClearMemoryGroup("products");
+        printer?.ClearMemoryGroup("products");
 
         using var context = new XkomContext();
 
@@ -100,20 +100,20 @@ public class ProductSearchViewState : ViewState
         };
 
         if (!products.Any())
-            printer.AddRow(new Text("No products matching your criteria were found").ToBasicConsoleRow(), "products");
+            printer?.AddRow(new Text("No products matching your criteria were found").ToBasicConsoleRow(), "products");
 
         products.ToList().ForEach(x =>
         {
             var priceString = x.NumberAvailable > 0 ? $"[lime]{x.Price,-9:F2}[/] PLN" : "[red]Unavailable[/]";
             var companyString = x.Company is null ? new string(' ', 32) : ((x.Company.Name.Length <= 29) ? $"{x.Company.Name,-29}" : $"{x.Company.Name[..30]}...");
             var displayString = $"{x.Name.EscapeMarkup(),-32} | {priceString + new string(' ', 13 - priceString.RemoveMarkup().Length)} | {companyString}";
-            printer.AddRow(new InteractableConsoleRow(new Markup(displayString), (row, printer) => fsm.Checkout(new ProductViewState(fsm, x))), "products");
+            printer?.AddRow(new InteractableConsoleRow(new Markup(displayString), (row, printer) => fsm.Checkout(new ProductViewState(fsm, x))), "products");
         });
     }
 
     private void RefreshCategories()
     {
-        printer.ClearMemoryGroup("categorySearch");
+        printer?.ClearMemoryGroup("categorySearch");
 
         using var context = new XkomContext();
 
@@ -127,7 +127,7 @@ public class ProductSearchViewState : ViewState
         toAdd.Insert(0, new ChoiceMenuChildConsoleRow("All"));
         toAdd.Last().IsOnEnd = true;
 
-        toAdd.ForEach(x => printer.AddRow(x, "categorySearch"));
+        toAdd.ForEach(x => printer?.AddRow(x, "categorySearch"));
         categorySearchChoiceParent.SetChildren(toAdd);
     }
 }

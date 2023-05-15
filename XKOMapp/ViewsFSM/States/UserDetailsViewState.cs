@@ -55,13 +55,6 @@ namespace XKOMapp.ViewsFSM.States
             RefreshOrders();
         }
 
-        public override void OnEnter()
-        {
-
-            base.OnEnter();//REFACTOR
-
-        }
-
         private void RefreshOrders()
         {
             if (SessionData.HasSessionExpired(out loggedUser))

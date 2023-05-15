@@ -12,6 +12,7 @@
         public void SaveState(string stateID, ViewState state) => states.Add(stateID, state);
 
 
+        [Obsolete("This method may produce unexpected result and should replaced by Checkout with previously saved ViewState variable", false)]
         public void RollbackOrDefault(ViewState defaultState)
         {
             if (history.TryPop(out var result))
