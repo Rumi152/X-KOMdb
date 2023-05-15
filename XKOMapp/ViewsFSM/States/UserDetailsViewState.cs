@@ -45,8 +45,8 @@ namespace XKOMapp.ViewsFSM.States
 
             printer.AddRow(new Text(loggedUser.Name).ToBasicConsoleRow());
             printer.AddRow(new Text(loggedUser.LastName).ToBasicConsoleRow());
-            printer.AddRow(new Text(loggedUser.Email).ToBasicConsoleRow());//TODO
-            printer.AddRow(new Text(loggedUser.Password).ToBasicConsoleRow());//TODO
+            printer.AddRow(new Text(loggedUser.Email).ToBasicConsoleRow());//TODO add support for long emails
+            printer.AddRow(new Text(loggedUser.Password).ToBasicConsoleRow());//TODO add hiding password
 
             var rule = new Rule("Click to refresh orders").RuleStyle(new Style().Foreground(StandardRenderables.AquamarineColor)).HeavyBorder();
             printer.AddRow(new InteractableConsoleRow(rule, (row, onwer) => RefreshOrders()));
