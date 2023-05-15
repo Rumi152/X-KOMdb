@@ -15,7 +15,7 @@ public class ProductViewState : ViewState
     private bool isInPropertiesView = true;
 
     private int reviewWriteStars = 0;
-    private string reviewWriteDescription = new('c', 256);
+    private string reviewWriteDescription = "";
 
     public ProductViewState(ViewStateMachine stateMachine, Product product) : base(stateMachine)
     {
@@ -291,8 +291,18 @@ public class ProductViewState : ViewState
         printer.ClearMemoryGroup("reviews-descriptionInput");
 
         var descriptionLines = GetWrappedDescription((reviewWriteDescription.Length == 0) ? "[dim]Write something about product (optional)[/]" : reviewWriteDescription);
-        var descriptionRows = descriptionLines
-            .Select(x => new DeactivatedReviewDescriptionInputConsoleRow(new Markup(x)))
+
+        List<ReviewDescriptionInputConsoleRow> descriptionRows = new();
+        descriptionRows = descriptionLines
+            .Select((x, i) => new ReviewDescriptionInputConsoleRow(
+                renderable: new Markup(x),
+                isFirst: i == 0,
+                isLast: i == descriptionLines.Count - 1,
+                isDescriptionHoveredGetter: () => descriptionRows.Any(x => x.IsHovered),
+                descriptionGetter: () => reviewWriteDescription,
+                descriptionSetter: (description) => reviewWriteDescription = description,
+                onCharacterWrite: () => DisplayReviewDescriptionInput()
+            ))
             .ToList();
 
         descriptionRows.ForEach(x => printer.AddRow(x, "reviews-descriptionInput"));
