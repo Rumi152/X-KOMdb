@@ -19,12 +19,12 @@ namespace XKOMapp.ViewsFSM.States
         {
             if (!SessionData.IsLoggedIn())
             {
-                fsm.Checkout(new FastLoginViewState(fsm, this));
+                fsm.Checkout(new FastLoginViewState(fsm, this, new Markup("Please log in\n").ToBasicConsoleRow(), new InteractableConsoleRow(new Markup("Back to main menu\n"), (_,_) => fsm.Checkout("mainMenu"))));
                 return;
             }
             if (SessionData.HasSessionExpired(out loggedUser))
             {
-                fsm.Checkout(new FastLoginViewState(fsm, this, new Markup("[red]Session expired[/]\n").ToBasicConsoleRow()));
+                fsm.Checkout(new FastLoginViewState(fsm, this, new Markup("[red]Session expired[/]\n").ToBasicConsoleRow(), new InteractableConsoleRow(new Markup("Back to main menu\n"), (_, _) => fsm.Checkout("mainMenu"))));
                 return;
             }
 
