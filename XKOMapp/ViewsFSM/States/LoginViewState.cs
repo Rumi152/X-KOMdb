@@ -44,7 +44,7 @@ namespace XKOMapp.ViewsFSM.States
             printer.AddRow(passwordRow);
 
             printer.AddRow(StandardRenderables.StandardSeparator.ToBasicConsoleRow());
-
+            printer.AddRow(new InteractableConsoleRow(new Markup($"Don't have an account? [{StandardRenderables.GrassColorHex}] Create one[/]"), (row, owner) => fsm.Checkout(new RegisteringViewState(fsm))));
             printer.AddRow(new InteractableConsoleRow(new Text("Log In"), (row, owner) =>
             {
                 if (!TryLogIn())

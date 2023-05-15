@@ -50,7 +50,7 @@ namespace XKOMapp.ViewsFSM.States
             {
                 SessionData.LogOut();
 
-                //fsm.Checkout("mainMenu or login");
+                fsm.Checkout("mainMenu");
             }));
             printer.AddRow(StandardRenderables.StandardSeparator.ToBasicConsoleRow());
 
