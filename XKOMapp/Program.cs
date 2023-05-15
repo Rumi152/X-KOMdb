@@ -22,7 +22,7 @@ internal class Program
         fsm.SaveState("listBrowse", new ListBrowseViewState(fsm));
         fsm.SaveState("mainMenu", new MainMenuViewState(fsm));
 
-        //fsm.Checkout("productsSearch");
+        fsm.Checkout("productsSearch");
         //fsm.Checkout("listBrowse");
         fsm.Checkout("mainMenu");
         //fsm.Checkout(new RegisteringViewState(fsm));

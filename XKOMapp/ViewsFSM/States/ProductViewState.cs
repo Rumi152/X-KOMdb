@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Spectre.Console;
+using System.Diagnostics;
 using System.Text.Json;
 using XKOMapp.GUI;
 using XKOMapp.GUI.ConsoleRows;
@@ -223,6 +224,16 @@ public class ProductViewState : ViewState
             }
 
             using var context = new XkomContext();
+            context.Attach(dbUser);
+            try
+            {
+                context.Attach(product);
+            }
+            catch
+            {
+                //I dont give a shit
+                //please forgive me
+            }
 
             printer.ClearMemoryGroup("reviews-postInput-errors");
 
@@ -232,13 +243,12 @@ public class ProductViewState : ViewState
                 return;
             }
 
-            context.Attach(dbUser);
-            context.Attach(product);
-
-            if(context.Reviews.Include(x => x.User).Include(x => x.Product).Any(x => x.UserId == dbUser.Id && x.ProductId == product.Id))
+            var previousReviews = context.Reviews.Include(x => x.User).Include(x => x.Product).Where(x => x.UserId == dbUser.Id && x.ProductId == product.Id);
+            if (!previousReviews.IsNullOrEmpty())
             {
-                printer.AddRow(new Markup("[red]You have already written review[/]").ToBasicConsoleRow(), "reviews-postInput-errors");
-                return;
+                //printer.AddRow(new Markup("[red]You have already written review[/]").ToBasicConsoleRow(), "reviews-postInput-errors");
+                context.RemoveRange(previousReviews);
+                context.SaveChanges();
             }
 
             var review = new Review()
@@ -280,7 +290,7 @@ public class ProductViewState : ViewState
         DisplayReviewDescriptionInput();
 
         //TEMP
-        string acceptButtonText = false && reviews.Any(x => x != null && x.UserId == SessionData.GetUserOffline()?.Id) ? "Click to replace review" : "Click to write review";
+        string acceptButtonText = reviews.Any(x => x != null && x.UserId == SessionData.GetUserOffline()?.Id) ? "  Click to replace review" : "  Click to write review";
         printer.AddRow(new InteractableConsoleRow(new Markup(acceptButtonText), onClick), "reviews-postInput");
     }
 
