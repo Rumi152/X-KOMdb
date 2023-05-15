@@ -39,7 +39,7 @@ internal class ListViewState: ViewState
 
         printer.AddRow(StandardRenderables.StandardSeparator.ToBasicConsoleRow());
 
-        printer.AddRow(new InteractableConsoleRow(new Text("Delete unavailable"), (row, own) => throw new NotImplementedException())); //TODO deleting unavailavle products
+        //printer.AddRow(new InteractableConsoleRow(new Text("Delete unavailable"), (row, own) => throw new NotImplementedException())); //TODO deleting unavailavle products
         printer.AddRow(new InteractableConsoleRow(new Text("Clone list"), (row, own) =>
         {
             if (!SessionData.IsLoggedIn())

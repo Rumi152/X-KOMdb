@@ -55,7 +55,7 @@ namespace XKOMapp.ViewsFSM.States
 
             printer.AddRow(StandardRenderables.StandardSeparator.ToBasicConsoleRow());
 
-            printer.AddRow(new InteractableConsoleRow(new Text("Log in"), (row, owner) => fsm.Checkout(new LoginViewState(fsm))));
+            printer.AddRow(new InteractableConsoleRow(new Markup($"Already have an account? Try [{StandardRenderables.GrassColorHex}]Log in[/]"), (row, owner) => fsm.Checkout(new LoginViewState(fsm))));
             printer.AddRow(new InteractableConsoleRow(new Text("Create account"), (row, owner) =>
             {
                 if (!ValidateInput())
