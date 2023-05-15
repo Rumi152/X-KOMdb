@@ -28,9 +28,7 @@ namespace XKOMapp.ViewsFSM.States
 
             printer.AddRow(new InteractableConsoleRow(new Text("Click to abort"), (row, owner) =>
             {
-                //TODO
                 fsm.Checkout("mainMenu");
-                throw new NotImplementedException();
             }));
 
             printer.AddRow(new Rule("Logging in").RuleStyle(Style.Parse(StandardRenderables.AquamarineColorHex)).HeavyBorder().ToBasicConsoleRow());
@@ -49,10 +47,9 @@ namespace XKOMapp.ViewsFSM.States
             {
                 if (!TryLogIn())
                     return;
+                
 
-                //TODO
                 fsm.Checkout("mainMenu");
-                throw new NotImplementedException();
             }));
             printer.StartGroup("errors");
         }

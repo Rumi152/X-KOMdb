@@ -20,11 +20,12 @@ internal class Program
         //DONT TOUCH THESE TIMUR
         fsm.SaveState("productsSearch", new ProductSearchViewState(fsm));
         fsm.SaveState("listBrowse", new ListBrowseViewState(fsm));
+        fsm.SaveState("mainMenu", new MainMenuViewState(fsm));
 
         fsm.Checkout("productsSearch");
         //fsm.Checkout("listBrowse");
+        fsm.Checkout("mainMenu");
         //fsm.Checkout(new RegisteringViewState(fsm));
-
 
         //checking for input in loop
         while (true)

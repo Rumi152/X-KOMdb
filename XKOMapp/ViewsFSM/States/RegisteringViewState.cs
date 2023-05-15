@@ -72,6 +72,7 @@ namespace XKOMapp.ViewsFSM.States
                 context.Add(newUser);
                 context.SaveChanges();
 
+                SessionData.TryLogIn(newUser.Email, newUser.Password, out _);
                 fsm.Checkout(new UserDetailsViewState(fsm));
             }));
             printer.StartGroup("errors");
