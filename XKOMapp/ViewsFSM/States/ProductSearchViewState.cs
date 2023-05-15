@@ -22,6 +22,12 @@ public class ProductSearchViewState : ViewState
         printer.AddRow(StandardRenderables.StandardHeader.ToBasicConsoleRow());
         printer.StartContent();
 
+        printer.AddRow(new InteractableConsoleRow(new Text("Back to main menu"), (row, owner) =>
+        {
+            fsm.Checkout("mainMenu");
+        }));
+        printer.AddRow(new Rule("Products").RuleStyle(Style.Parse(StandardRenderables.AquamarineColorHex)).HeavyBorder().ToBasicConsoleRow());
+        
         const int namePadding = 11;
         priceRangeInputConsoleRow = new PriceRangeInputConsoleRow($"{"Price",-namePadding}: ", RefreshProducts, RefreshProducts);
         nameSearchInputRow = new SearchContraintInputConsoleRow($"{"Name",-namePadding}: ", 32, RefreshProducts, RefreshProducts);
