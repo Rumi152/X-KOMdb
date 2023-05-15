@@ -21,13 +21,15 @@ namespace XKOMapp.ViewsFSM
 
         public virtual void OnEnter()
         {
+            if (printer is not null)
             printer.OnBufferReload += Display;
             isActiveState = true;
-            printer.SetBufferDirty();
+            printer?.SetBufferDirty();
         }
 
         public virtual void OnExit()
         {
+            if (printer is not null)
             printer.OnBufferReload -= Display;
             isActiveState = false;
         }

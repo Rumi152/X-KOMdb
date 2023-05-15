@@ -5,7 +5,6 @@ using System.Text.Json;
 using XKOMapp.GUI;
 using XKOMapp.GUI.ConsoleRows;
 using XKOMapp.GUI.ConsoleRows.ProductDetails;
-using XKOMapp.GUI.ConsoleRows.ProductSearching;
 using XKOMapp.Models;
 
 namespace XKOMapp.ViewsFSM.States;
@@ -14,7 +13,9 @@ public class ProductViewState : ViewState
 {
     private readonly Product product;
     private bool isInPropertiesView = true;
-    readonly ReviewInputPanelConsoleRow reviewInputPanel = new ReviewInputPanelConsoleRow();
+
+    private int reviewWriteStars = 0;
+    private string reviewWriteDescription = "";
 
     public ProductViewState(ViewStateMachine stateMachine, Product product) : base(stateMachine)
     {
@@ -47,8 +48,11 @@ public class ProductViewState : ViewState
         printer.EnableScrolling();
 
         printer.StartGroup("properties");
-        printer.StartGroup("reviews");
-        printer.StartGroup("allReviews");
+        printer.StartGroup("reviews-chart");
+        printer.StartGroup("reviews-input");
+        printer.StartGroup("reviews-descriptionInput");
+        printer.StartGroup("reviews-postInput");
+        printer.StartGroup("reviews-all");
 
         ShowProperties();
     }
@@ -71,7 +75,11 @@ public class ProductViewState : ViewState
 
         isInPropertiesView = true;
         printer.ClearMemoryGroup("properties");
-        printer.ClearMemoryGroup("reviews");
+        printer.ClearMemoryGroup("reviews-chart");
+        printer.ClearMemoryGroup("reviews-input");
+        printer.ClearMemoryGroup("reviews-descriptionInput");
+        printer.ClearMemoryGroup("reviews-postInput");
+        printer.ClearMemoryGroup("reviews-all");
 
         if (product.Properties is null)
         {
@@ -106,7 +114,11 @@ public class ProductViewState : ViewState
 
         isInPropertiesView = false;
         printer.ClearMemoryGroup("properties");
-        printer.ClearMemoryGroup("reviews");
+        printer.ClearMemoryGroup("reviews-chart");
+        printer.ClearMemoryGroup("reviews-input");
+        printer.ClearMemoryGroup("reviews-descriptionInput");
+        printer.ClearMemoryGroup("reviews-postInput");
+        printer.ClearMemoryGroup("reviews-all");
 
         using var context = new XkomContext();
         var reviews = context
@@ -119,7 +131,7 @@ public class ProductViewState : ViewState
 
         if (reviews.IsNullOrEmpty())
         {
-            printer.AddRow(new Text("No reviews, share some thought about this product").ToBasicConsoleRow(), "reviews");
+            printer.AddRow(new Text("No reviews yet, share some thought about this product").ToBasicConsoleRow(), "reviews-chart");
             DisplayReviewInput();
             return;
         }
@@ -138,7 +150,7 @@ public class ProductViewState : ViewState
     {
         reviews.ForEach(x =>
         {
-            printer.AddRow(new Text("").ToBasicConsoleRow(), "allReviews");
+            printer.AddRow(new Text("").ToBasicConsoleRow(), "reviews-all");
             DisplayReview(x);
         });
     }
@@ -158,33 +170,10 @@ public class ProductViewState : ViewState
 
         string header = $"{userDisplay} {stars}";
 
-        string description;
-        if (review.Description.Length == 0)
-            description = "[dim]No description provided[/]";
-        else
-            description = review.Description.ReplaceLineEndings(" ");
+        var descriptionLines = GetWrappedDescription((review.Description.Length == 0) ? "[dim]Write something about product[/]" : review.Description);
 
-        List<string> descriptionLines = new();
-        while (description.Length > 0)
-        {
-            const string leftPad = "  ";
-            int width = Math.Max(32, Console.WindowWidth - 8);
-
-            if (description.RemoveMarkup().Length <= width)
-            {
-                descriptionLines.Add(leftPad + description.Trim());
-                break;
-            }
-
-            int takenLength = new string(description.Take(width).ToArray()).LastIndexOf(' ') + 1;
-            if (takenLength == -1) takenLength = width;
-
-            descriptionLines.Add(leftPad + new string(description.Take(takenLength).ToArray()).Trim());
-            description = new(description.Skip(takenLength).ToArray());
-        }
-
-        printer.AddRow(new Markup(header).ToBasicConsoleRow(), "allReviews");
-        descriptionLines.ForEach(x => printer.AddRow(new Text(x).ToBasicConsoleRow(), "allReviews"));
+        printer.AddRow(new Markup(header).ToBasicConsoleRow(), "reviews-all");
+        descriptionLines.ForEach(x => printer.AddRow(new Text(x).ToBasicConsoleRow(), "reviews-all"));
     }
 
     private void DisplayReviewChart(List<Review> reviews)
@@ -212,14 +201,12 @@ public class ProductViewState : ViewState
             string barValue = $"[{StandardRenderables.GoldColorHex}]{new string('-', mappedValues[i])}[/]";
             string numberValue = $"{values[i]}";
 
-            printer.AddRow(new Markup($"{stars} {barValue} {numberValue}").ToBasicConsoleRow(), "reviews");
+            printer.AddRow(new Markup($"{stars} {barValue} {numberValue}").ToBasicConsoleRow(), "reviews-chart");
         }
     }
 
     private void DisplayReviewInput()
     {
-        printer.AddRow(reviewInputPanel, "reviews");
-
         void onClick(IConsoleRow row, ConsolePrinter? owner)
         {
             if (!AssureProductExists())
@@ -250,7 +237,7 @@ public class ProductViewState : ViewState
                 return;
             }
 
-            if (reviewInputPanel.StarRating == 0)
+            if (reviewWriteStars == 0)
             {
                 converted.SetMarkupText("Click to post review [red]Please select star rating[/]");
                 return;
@@ -261,8 +248,8 @@ public class ProductViewState : ViewState
             var review = new Review()
             {
                 Product = product,
-                Description = reviewInputPanel.Description,
-                StarRating = reviewInputPanel.StarRating,
+                Description = reviewWriteDescription,
+                StarRating = reviewWriteStars,
                 User = dbUser
             };
             context.Reviews.Add(review);
@@ -272,7 +259,53 @@ public class ProductViewState : ViewState
             ShowAverageStars();
         }
 
-        printer.AddRow(new InteractableDynamicConsoleRow("Click to post review", onClick), "reviews");
+        printer.AddRow(new ReviewInputHeaderConsoleRow(
+            getRenderable: () =>
+            {
+                string stars = $"[yellow]{new string('*', reviewWriteStars)}[/][dim]{new string('*', 6 - reviewWriteStars)}[/]";
+                string userDisplay = $"[{StandardRenderables.GoldColorHex}]Write[/]";
+                string header = $"{userDisplay} {stars}";
+
+                return new Markup(header);
+            },
+            onRightArrow: () =>
+            {
+                reviewWriteStars = Math.Clamp(reviewWriteStars + 1, 1, 6);
+                printer.SetBufferDirty();
+            },
+            onLeftArrow: () =>
+            {
+                reviewWriteStars = Math.Clamp(reviewWriteStars - 1, 1, 6);
+                printer.SetBufferDirty();
+            }
+        ), "reviews-input");
+
+        DisplayReviewDescriptionInput();
+
+        //TEMP (+error disapear timer)
+        printer.AddRow(new InteractableDynamicConsoleRow("Click to post review", onClick), "reviews-postInput");
+    }
+
+    private void DisplayReviewDescriptionInput()
+    {
+        printer.ClearMemoryGroup("reviews-descriptionInput");
+
+        var descriptionLines = GetWrappedDescription((reviewWriteDescription.Length == 0) ? "[dim]Write something about product (optional)[/]" : reviewWriteDescription);
+
+        List<ReviewDescriptionInputConsoleRow> descriptionRows = new();
+        descriptionRows = descriptionLines
+            .Select((x, i) => new ReviewDescriptionInputConsoleRow(
+                renderable: new Markup(x),
+                isFirst: i == 0,
+                isLast: i == descriptionLines.Count - 1,
+                isDescriptionHoveredGetter: () => descriptionRows.Any(x => x.IsHovered),
+                descriptionGetter: () => reviewWriteDescription,
+                descriptionSetter: (description) => reviewWriteDescription = description,
+                onCharacterWrite: () => DisplayReviewDescriptionInput()
+            ))
+            .ToList();
+
+        descriptionRows.ForEach(x => printer.AddRow(x, "reviews-descriptionInput"));
     }
 
     private void ShowAverageStars()
@@ -303,5 +336,31 @@ public class ProductViewState : ViewState
 
         fsm.Checkout("productsSearch");
         return false;
+    }
+
+
+    private static List<string> GetWrappedDescription(string description)
+    {
+        description = description.ReplaceLineEndings(" ");
+        List<string> descriptionLines = new();
+        while (description.Length > 0)
+        {
+            const string leftPad = "  ";
+            int width = Math.Max(32, Console.WindowWidth - 8);
+
+            if (description.RemoveMarkup().Length <= width)
+            {
+                descriptionLines.Add(leftPad + description.Trim());
+                break;
+            }
+
+            int takenLength = new string(description.Take(width).ToArray()).LastIndexOf(' ');
+            if (takenLength++ == -1) takenLength = width;
+
+            descriptionLines.Add(leftPad + new string(description.Take(takenLength).ToArray()).Trim());
+            description = new(description.Skip(takenLength).ToArray());
+        }
+
+        return descriptionLines;
     }
 }
