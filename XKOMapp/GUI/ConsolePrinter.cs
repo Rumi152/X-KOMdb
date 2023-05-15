@@ -328,7 +328,7 @@ public class ConsolePrinter
     public void DeleteMemoryGroup(string group)
     {
         Enumerable.Range(0, memory.Count)
-            .Where(index => memoryGroupingKeys[index] == group)
+            .Where(index => memoryGroupingKeys[index]?.StartsWith(group) ?? false && memoryGroupingKeys[index][group.Length] == '-')
             .Reverse()
             .ToList()
             .ForEach(index =>
@@ -347,7 +347,26 @@ public class ConsolePrinter
     public void ClearMemoryGroup(string group)
     {
         Enumerable.Range(0, memory.Count)
-            .Where(index => memoryGroupingKeys[index] == group)
+            .Where(index =>
+            {
+                var savedGroup = memoryGroupingKeys[index];
+
+                if (savedGroup is null)
+                    return false;
+
+                if(!savedGroup.StartsWith(group))
+                    return false;
+
+                if (savedGroup.Length == group.Length)
+                    return true;
+
+                if (savedGroup[group.Length] == '-')
+                    return true;
+
+                return false;
+
+                //return   (savedGroup.Length >= group.Length && savedGroup[group.Length] == '-');
+            })
             .Where(index => memory[index] is not GroupStartMarker)
             .Reverse()
             .ToList()
