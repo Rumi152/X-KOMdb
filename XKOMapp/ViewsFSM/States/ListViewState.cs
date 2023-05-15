@@ -17,7 +17,7 @@ namespace XKOMapp.ViewsFSM.States;
 internal class ListViewState: ViewState
 {
     private readonly List list;
-    ListNameInputConsoleRow nameRow;
+    private readonly ListNameInputConsoleRow nameRow;
     public ListViewState(ViewStateMachine stateMachine, List list) : base(stateMachine)
     {
         this.list = list;
@@ -45,7 +45,7 @@ internal class ListViewState: ViewState
             if (!SessionData.IsLoggedIn())
             {
                 fsm.Checkout(new FastLoginViewState(fsm,
-                    new Markup($"[{StandardRenderables.GrassColorHex}]Log in to clone list[/]").ToBasicConsoleRow(),
+                    this, new Markup($"[{StandardRenderables.GrassColorHex}]Log in to clone list[/]").ToBasicConsoleRow(),
                     new InteractableConsoleRow(new Markup("Click to abort"), (row, owner) => fsm.Checkout(this))));
                 return;
             }
@@ -53,7 +53,7 @@ internal class ListViewState: ViewState
             if (SessionData.HasSessionExpired(out User dbUser))
             {
                 fsm.Checkout(new FastLoginViewState(fsm,
-                    new Markup($"[red]Session expired[/] - [{StandardRenderables.GrassColorHex}]Log in to clone list[/]").ToBasicConsoleRow(),
+                    this, new Markup($"[red]Session expired[/] - [{StandardRenderables.GrassColorHex}]Log in to clone list[/]").ToBasicConsoleRow(),
                     new InteractableConsoleRow(new Markup("Click to abort"), (row, owner) => fsm.Checkout(this))));
                 return;
             }
@@ -74,7 +74,7 @@ internal class ListViewState: ViewState
             if (!SessionData.IsLoggedIn())
             {
                 fsm.Checkout(new FastLoginViewState(fsm,
-                    new Markup($"[{StandardRenderables.GrassColorHex}]Log in to delete list[/]").ToBasicConsoleRow(),
+                    this, new Markup($"[{StandardRenderables.GrassColorHex}]Log in to delete list[/]").ToBasicConsoleRow(),
                     new InteractableConsoleRow(new Markup("Click to abort"), (row, owner) => fsm.Checkout(this))));
                 return;
             }
@@ -82,7 +82,7 @@ internal class ListViewState: ViewState
             if (SessionData.HasSessionExpired(out User dbUser))
             {
                 fsm.Checkout(new FastLoginViewState(fsm,
-                    new Markup($"[red]Session expired[/] - [{StandardRenderables.GrassColorHex}]Log in to delete list[/]").ToBasicConsoleRow(),
+                    this, new Markup($"[red]Session expired[/] - [{StandardRenderables.GrassColorHex}]Log in to delete list[/]").ToBasicConsoleRow(),
                     new InteractableConsoleRow(new Markup("Click to abort"), (row, owner) => fsm.Checkout(this))));
                 return;
             }
@@ -102,7 +102,7 @@ internal class ListViewState: ViewState
             if (!SessionData.IsLoggedIn())
             {
                 fsm.Checkout(new FastLoginViewState(fsm,
-                    new Markup($"[{StandardRenderables.GrassColorHex}]Log in to create list[/]").ToBasicConsoleRow(),
+                    this, new Markup($"[{StandardRenderables.GrassColorHex}]Log in to create list[/]").ToBasicConsoleRow(),
                     new InteractableConsoleRow(new Markup("Click to abort"), (row, owner) => fsm.Checkout(this))));
                 return;
             }
@@ -110,7 +110,7 @@ internal class ListViewState: ViewState
             if (SessionData.HasSessionExpired(out User dbUser))
             {
                 fsm.Checkout(new FastLoginViewState(fsm,
-                    new Markup($"[red]Session expired[/] - [{StandardRenderables.GrassColorHex}]Log in to create list[/]").ToBasicConsoleRow(),
+                    this, new Markup($"[red]Session expired[/] - [{StandardRenderables.GrassColorHex}]Log in to create list[/]").ToBasicConsoleRow(),
                     new InteractableConsoleRow(new Markup("Click to abort"), (row, owner) => fsm.Checkout(this))));
                 return;
             }
@@ -135,14 +135,14 @@ internal class ListViewState: ViewState
     {
         base.OnEnter();
 
-        printer.ResetCursor();
+        printer?.ResetCursor();
     }
 
     private static string GetLink()
     {
         string link = "https://www.x-kom.pl/list/";
         var random = new Random();
-        List<int> notAvailalbe = new List<int> { 58, 59, 60, 61, 62, 63, 64, 91, 92, 93, 94, 95, 96 };
+        List<int> notAvailalbe = new() { 58, 59, 60, 61, 62, 63, 64, 91, 92, 93, 94, 95, 96 };
 
         while (link.Length < 128)
         {
@@ -162,7 +162,7 @@ internal class ListViewState: ViewState
 
     private bool ValidateInput()
     {
-        printer.ClearMemoryGroup("errors");
+        printer?.ClearMemoryGroup("errors");
 
         bool isValid = true;
 
@@ -172,12 +172,12 @@ internal class ListViewState: ViewState
             return isValid;
         if (name.Length < 2)
         {
-            printer.AddRow(new Markup("[red]Name is too short[/]").ToBasicConsoleRow(), "errors");
+            printer?.AddRow(new Markup("[red]Name is too short[/]").ToBasicConsoleRow(), "errors");
             isValid = false;
         }
         else if (name.Length > 32)
         {
-            printer.AddRow(new Markup("[red]Name is too long[/]").ToBasicConsoleRow(), "errors");
+            printer?.AddRow(new Markup("[red]Name is too long[/]").ToBasicConsoleRow(), "errors");
             isValid = false;
         }
         return isValid;

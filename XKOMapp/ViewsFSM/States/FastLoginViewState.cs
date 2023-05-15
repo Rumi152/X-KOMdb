@@ -19,7 +19,7 @@ namespace XKOMapp.ViewsFSM.States
         private readonly EmailInputConsoleRow emailRow;
         private readonly PasswordInputConsoleRow passwordRow;
 
-        public FastLoginViewState(ViewStateMachine stateMachine, params IConsoleRow[] additionalRows) : base(stateMachine)
+        public FastLoginViewState(ViewStateMachine stateMachine, ViewState rollbackTarget, params IConsoleRow[] additionalRows) : base(stateMachine)
         {
             printer = new ConsolePrinter();
 
@@ -46,7 +46,7 @@ namespace XKOMapp.ViewsFSM.States
                 if (!TryLogIn())
                     return;
 
-                fsm.RollbackOrDefault(this); //TODO
+                fsm.Checkout(rollbackTarget);
             }));
             printer.StartGroup("errors");
         }
@@ -54,7 +54,7 @@ namespace XKOMapp.ViewsFSM.States
 
         private bool TryLogIn()
         {
-            printer.ClearMemoryGroup("errors");
+            printer?.ClearMemoryGroup("errors");
 
             string email = emailRow.CurrentInput;
             string password = passwordRow.CurrentInput;
@@ -62,7 +62,7 @@ namespace XKOMapp.ViewsFSM.States
             if (SessionData.TryLogIn(email, password, out _))
                 return true;
 
-            printer.AddRow(new Markup("[red]Wrong password and/or email[/]").ToBasicConsoleRow(), "errors");
+            printer?.AddRow(new Markup("[red]Wrong password and/or email[/]").ToBasicConsoleRow(), "errors");
             return false;
         }
     }
