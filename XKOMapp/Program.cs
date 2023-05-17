@@ -27,13 +27,13 @@ internal class Program
         //checking for input in loop
         while (true)
         {
-            fsm?.Tick();
-
             if (Console.KeyAvailable)
             {
                 var info = Console.ReadKey(true);
                 fsm?.PassKeystroke(info);
             }
+
+            fsm?.Tick();
         }
     }
 }
