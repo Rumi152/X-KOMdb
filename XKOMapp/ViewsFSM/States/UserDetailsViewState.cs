@@ -13,18 +13,16 @@ namespace XKOMapp.ViewsFSM.States
 {
     internal class UserDetailsViewState : ViewState
     {
-        private User loggedUser = null!;
-
         public UserDetailsViewState(ViewStateMachine stateMachine) : base(stateMachine)
         {
-            if (!SessionData.IsLoggedIn())
+            if (SessionData.HasSessionExpired(out var loggedUser))
             {
-                fsm.Checkout(new FastLoginViewState(fsm, this, new Markup("Please log in\n").ToBasicConsoleRow(), new InteractableConsoleRow(new Markup("Back to main menu\n"), (_,_) => fsm.Checkout("mainMenu"))));
-                return;
-            }
-            if (SessionData.HasSessionExpired(out loggedUser))
-            {
-                fsm.Checkout(new FastLoginViewState(fsm, this, new Markup("[red]Session expired[/]\n").ToBasicConsoleRow(), new InteractableConsoleRow(new Markup("Back to main menu\n"), (_, _) => fsm.Checkout("mainMenu"))));
+                fsm.Checkout(new FastLoginViewState(fsm,
+                    markupMessage: $"[red]Session expired[/]",
+                    loginRollbackTarget: new UserDetailsViewState(fsm),
+                    abortRollbackTarget: fsm.GetSavedState("mainMenu"),
+                    abortMarkupMessage: "Back to main menu"
+                ));
                 return;
             }
 
@@ -37,7 +35,7 @@ namespace XKOMapp.ViewsFSM.States
             {
                 SessionData.LogOut();
 
-                fsm.Checkout("mainMenu");
+                fsm.Checkout(new LoginViewState(fsm));
             }));
             printer.AddRow(StandardRenderables.StandardSeparator.ToBasicConsoleRow());
 
@@ -50,6 +48,7 @@ namespace XKOMapp.ViewsFSM.States
             printer.AddRow(new Text($"{"Password",-pad} : {loggedUser.Password}").ToBasicConsoleRow());//REFACTOR add hiding password
 
             //TODO edit button unfolding 5 inputs and accept button
+            //TODO implement deleting account
 
             var rule = new Rule("Click to refresh orders").RuleStyle(new Style().Foreground(StandardRenderables.AquamarineColor)).HeavyBorder();
             printer.AddRow(new InteractableConsoleRow(rule, (row, onwer) => RefreshOrders()));
@@ -60,9 +59,14 @@ namespace XKOMapp.ViewsFSM.States
 
         private void RefreshOrders()
         {
-            if (SessionData.HasSessionExpired(out loggedUser))
+            if (SessionData.HasSessionExpired(out var loggedUser))
             {
-                fsm.Checkout(new FastLoginViewState(fsm, this, new Markup("[red]Session expired[/]").ToBasicConsoleRow()));
+                fsm.Checkout(new FastLoginViewState(fsm,
+                    markupMessage: $"[red]Session expired[/]",
+                    loginRollbackTarget: new UserDetailsViewState(fsm),
+                    abortRollbackTarget: fsm.GetSavedState("mainMenu"),
+                    abortMarkupMessage: "Back to main menu"
+                ));
                 return;
             }
 

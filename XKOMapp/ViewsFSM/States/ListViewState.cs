@@ -42,19 +42,14 @@ internal class ListViewState: ViewState
         //printer.AddRow(new InteractableConsoleRow(new Text("Delete unavailable"), (row, own) => throw new NotImplementedException())); //TODO deleting unavailavle products
         printer.AddRow(new InteractableConsoleRow(new Text("Clone list"), (row, own) =>
         {
-            if (!SessionData.IsLoggedIn())
-            {
-                fsm.Checkout(new FastLoginViewState(fsm,
-                    this, new Markup($"[{StandardRenderables.GrassColorHex}]Log in to clone list[/]").ToBasicConsoleRow(),
-                    new InteractableConsoleRow(new Markup("Click to abort"), (row, owner) => fsm.Checkout(this))));
-                return;
-            }
-
             if (SessionData.HasSessionExpired(out User dbUser))
             {
                 fsm.Checkout(new FastLoginViewState(fsm,
-                    this, new Markup($"[red]Session expired[/] - [{StandardRenderables.GrassColorHex}]Log in to clone list[/]").ToBasicConsoleRow(),
-                    new InteractableConsoleRow(new Markup("Click to abort"), (row, owner) => fsm.Checkout(this))));
+                    markupMessage: $"[red]Session expired[/] - [{StandardRenderables.GrassColorHex}]Log in to clone list[/]",
+                    loginRollbackTarget: fsm.GetSavedState("listBrowse"),
+                    abortRollbackTarget: fsm.GetSavedState("mainMenu"),
+                    abortMarkupMessage: "Back to main menu"
+                ));
                 return;
             }
 
@@ -69,21 +64,16 @@ internal class ListViewState: ViewState
             context.Add(clonedList);
             context.SaveChanges();
         }));
-        printer.AddRow(new InteractableConsoleRow(new Markup("[red]Delete list[/]"), (row, own) => 
+        printer.AddRow(new InteractableConsoleRow(new Markup("[red]Delete list[/]"), (row, own) =>
         {
-            if (!SessionData.IsLoggedIn())
-            {
-                fsm.Checkout(new FastLoginViewState(fsm,
-                    this, new Markup($"[{StandardRenderables.GrassColorHex}]Log in to delete list[/]").ToBasicConsoleRow(),
-                    new InteractableConsoleRow(new Markup("Click to abort"), (row, owner) => fsm.Checkout(this))));
-                return;
-            }
-
             if (SessionData.HasSessionExpired(out User dbUser))
             {
                 fsm.Checkout(new FastLoginViewState(fsm,
-                    this, new Markup($"[red]Session expired[/] - [{StandardRenderables.GrassColorHex}]Log in to delete list[/]").ToBasicConsoleRow(),
-                    new InteractableConsoleRow(new Markup("Click to abort"), (row, owner) => fsm.Checkout(this))));
+                    markupMessage: $"[red]Session expired[/] - [{StandardRenderables.GrassColorHex}]Log in to delete list[/]",
+                    loginRollbackTarget: fsm.GetSavedState("listBrowse"),
+                    abortRollbackTarget: fsm.GetSavedState("mainMenu"),
+                    abortMarkupMessage: "Back to main menu"
+                ));
                 return;
             }
 
@@ -99,19 +89,14 @@ internal class ListViewState: ViewState
         }));
         printer.AddRow(new InteractableConsoleRow(new Markup("[green]Save changes[/]"), (row, own) =>
         {
-            if (!SessionData.IsLoggedIn())
-            {
-                fsm.Checkout(new FastLoginViewState(fsm,
-                    this, new Markup($"[{StandardRenderables.GrassColorHex}]Log in to create list[/]").ToBasicConsoleRow(),
-                    new InteractableConsoleRow(new Markup("Click to abort"), (row, owner) => fsm.Checkout(this))));
-                return;
-            }
-
             if (SessionData.HasSessionExpired(out User dbUser))
             {
                 fsm.Checkout(new FastLoginViewState(fsm,
-                    this, new Markup($"[red]Session expired[/] - [{StandardRenderables.GrassColorHex}]Log in to create list[/]").ToBasicConsoleRow(),
-                    new InteractableConsoleRow(new Markup("Click to abort"), (row, owner) => fsm.Checkout(this))));
+                    markupMessage: $"[red]Session expired[/] - [{StandardRenderables.GrassColorHex}]Log in to create list[/]",
+                    loginRollbackTarget: fsm.GetSavedState("listBrowse"),
+                    abortRollbackTarget: fsm.GetSavedState("mainMenu"),
+                    abortMarkupMessage: "Back to main menu"
+                ));
                 return;
             }
 

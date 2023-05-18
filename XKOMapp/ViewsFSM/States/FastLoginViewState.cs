@@ -19,34 +19,33 @@ namespace XKOMapp.ViewsFSM.States
         private readonly EmailInputConsoleRow emailRow;
         private readonly PasswordInputConsoleRow passwordRow;
 
-        public FastLoginViewState(ViewStateMachine stateMachine, ViewState rollbackTarget, params IConsoleRow[] additionalRows) : base(stateMachine)
+        public FastLoginViewState(ViewStateMachine stateMachine, string markupMessage, ViewState loginRollbackTarget,  ViewState abortRollbackTarget, string loginMarkupMessage = "Log in", string abortMarkupMessage = "Click to abort") : base(stateMachine)
         {
             printer = new ConsolePrinter();
 
             printer.AddRow(StandardRenderables.StandardHeader.ToBasicConsoleRow());
             printer.StartContent();
 
-            foreach (var extraRow in additionalRows)
-                printer.AddRow(extraRow);
+            printer.AddRow(new Markup(markupMessage).ToBasicConsoleRow());
+            printer.AddRow(new InteractableConsoleRow(new Markup(abortMarkupMessage), (_, _) => fsm.Checkout(abortRollbackTarget)));
 
             printer.AddRow(new Rule("Logging in").RuleStyle(Style.Parse(StandardRenderables.AquamarineColorHex)).HeavyBorder().ToBasicConsoleRow());
             printer.EnableScrolling();
 
             const int labelPad = 8;
             emailRow = new EmailInputConsoleRow($"{"Email",-labelPad} : ", 256);
-            printer.AddRow(emailRow);
-
             passwordRow = new PasswordInputConsoleRow($"{"Password",-labelPad} : ", 32);
+            printer.AddRow(emailRow);
             printer.AddRow(passwordRow);
 
             printer.AddRow(StandardRenderables.StandardSeparator.ToBasicConsoleRow());
 
-            printer.AddRow(new InteractableConsoleRow(new Text("Log In"), (row, owner) =>
+            printer.AddRow(new InteractableConsoleRow(new Markup(loginMarkupMessage), (row, owner) =>
             {
                 if (!TryLogIn())
                     return;
 
-                fsm.Checkout(rollbackTarget);
+                fsm.Checkout(loginRollbackTarget);
             }));
             printer.StartGroup("errors");
         }

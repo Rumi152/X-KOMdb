@@ -39,21 +39,17 @@ internal class ListCreateViewState : ViewState
 
         printer.AddRow(new InteractableConsoleRow(new Text("Add new list"), (row, owner) =>
         {
-            if (!SessionData.IsLoggedIn())
-            {
-                fsm.Checkout(new FastLoginViewState(fsm,
-                    this, new Markup($"[{StandardRenderables.GrassColorHex}]Log in to add list[/]").ToBasicConsoleRow(),
-                    new InteractableConsoleRow(new Markup("Click to abort"), (row, owner) => fsm.Checkout(this))));
-                return;
-            }
-
             if (SessionData.HasSessionExpired(out User dbUser))
             {
                 fsm.Checkout(new FastLoginViewState(fsm,
-                    this, new Markup($"[red]Session expired[/] - [{StandardRenderables.GrassColorHex}]Log in to add list[/]").ToBasicConsoleRow(),
-                    new InteractableConsoleRow(new Markup("Click to abort"), (row, owner) => fsm.Checkout(this))));
+                    markupMessage: $"[red]Session expired[/] - [{StandardRenderables.GrassColorHex}]Log in to add list[/]",
+                    loginRollbackTarget: this,
+                    abortRollbackTarget: fsm.GetSavedState("mainMenu"),
+                    abortMarkupMessage: "Back to main menu"
+                ));
                 return;
             }
+
             if (!ValidateInput())
                 return;
 

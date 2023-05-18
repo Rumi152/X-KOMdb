@@ -22,21 +22,18 @@ internal class Program
         fsm.SaveState("listBrowse", new ListBrowseViewState(fsm));
         fsm.SaveState("mainMenu", new MainMenuViewState(fsm));
 
-        fsm.Checkout("productsSearch");
-        //fsm.Checkout("listBrowse");
         fsm.Checkout("mainMenu");
-        //fsm.Checkout(new RegisteringViewState(fsm));
 
         //checking for input in loop
         while (true)
         {
-            fsm?.Tick();
-
             if (Console.KeyAvailable)
             {
                 var info = Console.ReadKey(true);
                 fsm?.PassKeystroke(info);
             }
+
+            fsm?.Tick();
         }
     }
 }
