@@ -3,13 +3,15 @@
     public class ViewStateMachine
     {
         private readonly Dictionary<string, ViewState> states = new();
-        private readonly Stack<ViewState> history = new Stack<ViewState>();
+        private readonly Stack<ViewState> history = new();
         public ViewState? CurrentState { get; private set; } = null;
 
         public void PassKeystroke(ConsoleKeyInfo info) => CurrentState?.PassKeystroke(info);
         public void Tick() => CurrentState?.Tick();
 
         public void SaveState(string stateID, ViewState state) => states.Add(stateID, state);
+
+        public ViewState GetSavedState(string stateID) => states[stateID];
 
 
         [Obsolete("This method may produce unexpected result and should replaced by Checkout with previously saved ViewState variable", false)]

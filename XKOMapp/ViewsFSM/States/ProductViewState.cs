@@ -209,20 +209,23 @@ public class ProductViewState : ViewState
 
             if (!SessionData.IsLoggedIn())
             {
-                fsm.Checkout(
-                    new FastLoginViewState(fsm,
-                    this,
-                    new Markup($"[{StandardRenderables.GrassColorHex}]Log in to write reviews[/]").ToBasicConsoleRow(),
-                    new InteractableConsoleRow(new Markup("Click to abort"), (row, owner) => fsm.Checkout(this))));
+                fsm.Checkout(new FastLoginViewState(fsm,
+                    markupMessage: $"[{StandardRenderables.GrassColorHex}]Log in to write reviews[/]",
+                    rollbackTarget: this,
+                    abortTarget: this,
+                    abortMarkupMessage: "Click to abort"
+                ));
                 return;
             }
 
             if (SessionData.HasSessionExpired(out User dbUser))
             {
                 fsm.Checkout(new FastLoginViewState(fsm,
-                    this,
-                    new Markup($"[red]Session expired[/] - [{StandardRenderables.GrassColorHex}]Log in to write reviews[/]").ToBasicConsoleRow(),
-                    new InteractableConsoleRow(new Markup("Click to abort"), (row, owner) => fsm.Checkout(this))));
+                    markupMessage: $"[red]Session expired[/] - [{StandardRenderables.GrassColorHex}]Log in to write reviews[/]",
+                    rollbackTarget: this,
+                    abortTarget: this,
+                    abortMarkupMessage: "Click to abort"
+                ));
                 return;
             }
 

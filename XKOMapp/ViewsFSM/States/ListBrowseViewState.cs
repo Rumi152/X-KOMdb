@@ -29,19 +29,14 @@ internal class ListBrowseViewState : ViewState
 
         printer.AddRow(new InteractableConsoleRow(new Text("Add new list"), (row, owner) =>
         {
-            if (!SessionData.IsLoggedIn())
-            {
-                fsm.Checkout(new FastLoginViewState(fsm,
-                    this, new Markup($"[{StandardRenderables.GrassColorHex}]Log in to add list[/]").ToBasicConsoleRow(),
-                    new InteractableConsoleRow(new Markup("Back to browsing"), (row, owner) => fsm.Checkout(this))));
-                return;
-            }
-
             if (SessionData.HasSessionExpired(out User dbUser))
             {
                 fsm.Checkout(new FastLoginViewState(fsm,
-                    this, new Markup($"[red]Session expired[/] - [{StandardRenderables.GrassColorHex}]Log in to add list[/]").ToBasicConsoleRow(),
-                    new InteractableConsoleRow(new Markup("Back to browsing"), (row, owner) => fsm.Checkout(this))));
+                    markupMessage: $"[red]Session expired[/] - [{StandardRenderables.GrassColorHex}]Log in to add list[/]",
+                    rollbackTarget: this,
+                    abortTarget: fsm.GetSavedState("mainMenu"),
+                    abortMarkupMessage: "Back to main menu"
+                ));
                 return;
             }
 
@@ -65,21 +60,17 @@ internal class ListBrowseViewState : ViewState
 
     private void RefreshLists()
     {
-        if (!SessionData.IsLoggedIn())
-        {
-            fsm.Checkout(new FastLoginViewState(fsm,
-                this, new Markup($"[{StandardRenderables.GrassColorHex}]Log in to browse list[/]").ToBasicConsoleRow(),
-                new InteractableConsoleRow(new Markup("Click to abort"), (row, owner) => fsm.Checkout(this))));
-            return;
-        }
-
         if (SessionData.HasSessionExpired(out User dbUser))
         {
             fsm.Checkout(new FastLoginViewState(fsm,
-                this, new Markup($"[red]Session expired[/] - [{StandardRenderables.GrassColorHex}]Log in to browse list[/]").ToBasicConsoleRow(),
-                new InteractableConsoleRow(new Markup("Click to abort"), (row, owner) => fsm.Checkout(this))));
+                markupMessage: "[red]Session expired[/]",
+                rollbackTarget: this,
+                abortTarget: fsm.GetSavedState("mainMenu"),
+                abortMarkupMessage: "Back to main menu"
+            ));
             return;
         }
+
         printer?.ClearMemoryGroup("lists");
         using var context = new XkomContext();
         context.Attach(dbUser);
@@ -91,19 +82,14 @@ internal class ListBrowseViewState : ViewState
         {
             printer?.AddRow(new InteractableConsoleRow(new Markup(x.Name), (row, printer) =>
             {
-                if (!SessionData.IsLoggedIn())
-                {
-                    fsm.Checkout(new FastLoginViewState(fsm,
-                        this, new Markup($"[{StandardRenderables.GrassColorHex}]Log in to edit list[/]").ToBasicConsoleRow(),
-                        new InteractableConsoleRow(new Markup("Back to browsing"), (row, owner) => fsm.Checkout(this))));
-                    return;
-                }
-
                 if (SessionData.HasSessionExpired(out User dbUser))
                 {
                     fsm.Checkout(new FastLoginViewState(fsm,
-                        this, new Markup($"[red]Session expired[/] - [{StandardRenderables.GrassColorHex}]Log in to edit list[/]").ToBasicConsoleRow(),
-                        new InteractableConsoleRow(new Markup("Back to browsing"), (row, owner) => fsm.Checkout(this))));
+                        markupMessage: $"[red]Session expired[/] - [{StandardRenderables.GrassColorHex}]Log in to edit list[/]",
+                        rollbackTarget: this,
+                        abortTarget: fsm.GetSavedState("mainMenu"),
+                        abortMarkupMessage: "Back to main menu"
+                    ));
                     return;
                 }
 

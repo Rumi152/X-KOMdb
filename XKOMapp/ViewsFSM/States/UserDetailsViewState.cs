@@ -17,14 +17,14 @@ namespace XKOMapp.ViewsFSM.States
 
         public UserDetailsViewState(ViewStateMachine stateMachine) : base(stateMachine)
         {
-            if (!SessionData.IsLoggedIn())
-            {
-                fsm.Checkout(new FastLoginViewState(fsm, this, new Markup("Please log in\n").ToBasicConsoleRow(), new InteractableConsoleRow(new Markup("Back to main menu\n"), (_,_) => fsm.Checkout("mainMenu"))));
-                return;
-            }
             if (SessionData.HasSessionExpired(out loggedUser))
             {
-                fsm.Checkout(new FastLoginViewState(fsm, this, new Markup("[red]Session expired[/]\n").ToBasicConsoleRow(), new InteractableConsoleRow(new Markup("Back to main menu\n"), (_, _) => fsm.Checkout("mainMenu"))));
+                fsm.Checkout(new FastLoginViewState(fsm,
+                    markupMessage: $"[red]Session expired[/]",
+                    rollbackTarget: this,
+                    abortTarget: fsm.GetSavedState("mainMenu"),
+                    abortMarkupMessage: "Back to main menu"
+                ));
                 return;
             }
 
@@ -62,7 +62,12 @@ namespace XKOMapp.ViewsFSM.States
         {
             if (SessionData.HasSessionExpired(out loggedUser))
             {
-                fsm.Checkout(new FastLoginViewState(fsm, this, new Markup("[red]Session expired[/]").ToBasicConsoleRow()));
+                fsm.Checkout(new FastLoginViewState(fsm,
+                    markupMessage: $"[red]Session expired[/]",
+                    rollbackTarget: this,
+                    abortTarget: fsm.GetSavedState("mainMenu"),
+                    abortMarkupMessage: "Back to main menu"
+                ));
                 return;
             }
 
