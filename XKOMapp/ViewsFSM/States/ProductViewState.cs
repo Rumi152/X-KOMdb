@@ -80,7 +80,7 @@ public class ProductViewState : ViewState
         printer?.ClearMemoryGroup("properties");
         printer?.ClearMemoryGroup("reviews");
 
-        if (product.Properties.IsNullOrEmpty())
+        if (product.Properties?.IsNullOrEmpty() ?? true)
         {
             printer?.AddRow(new Text("Product has no properties").ToBasicConsoleRow(), "properties");
             return;
