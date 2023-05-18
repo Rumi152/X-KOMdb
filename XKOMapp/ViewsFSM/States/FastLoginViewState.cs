@@ -19,7 +19,7 @@ namespace XKOMapp.ViewsFSM.States
         private readonly EmailInputConsoleRow emailRow;
         private readonly PasswordInputConsoleRow passwordRow;
 
-        public FastLoginViewState(ViewStateMachine stateMachine, string markupMessage, ViewState rollbackTarget,  ViewState abortTarget, string loginMarkupMessage = "Log in", string abortMarkupMessage = "Click to abort") : base(stateMachine)
+        public FastLoginViewState(ViewStateMachine stateMachine, string markupMessage, ViewState loginRollbackTarget,  ViewState abortRollbackTarget, string loginMarkupMessage = "Log in", string abortMarkupMessage = "Click to abort") : base(stateMachine)
         {
             printer = new ConsolePrinter();
 
@@ -27,7 +27,7 @@ namespace XKOMapp.ViewsFSM.States
             printer.StartContent();
 
             printer.AddRow(new Markup(markupMessage).ToBasicConsoleRow());
-            printer.AddRow(new InteractableConsoleRow(new Markup(abortMarkupMessage), (_, _) => fsm.Checkout(abortTarget)));
+            printer.AddRow(new InteractableConsoleRow(new Markup(abortMarkupMessage), (_, _) => fsm.Checkout(abortRollbackTarget)));
 
             printer.AddRow(new Rule("Logging in").RuleStyle(Style.Parse(StandardRenderables.AquamarineColorHex)).HeavyBorder().ToBasicConsoleRow());
             printer.EnableScrolling();
@@ -45,7 +45,7 @@ namespace XKOMapp.ViewsFSM.States
                 if (!TryLogIn())
                     return;
 
-                fsm.Checkout(rollbackTarget);
+                fsm.Checkout(loginRollbackTarget);
             }));
             printer.StartGroup("errors");
         }

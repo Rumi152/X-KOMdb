@@ -13,16 +13,14 @@ namespace XKOMapp.ViewsFSM.States
 {
     internal class UserDetailsViewState : ViewState
     {
-        private User loggedUser = null!;
-
         public UserDetailsViewState(ViewStateMachine stateMachine) : base(stateMachine)
         {
-            if (SessionData.HasSessionExpired(out loggedUser))
+            if (SessionData.HasSessionExpired(out var loggedUser))
             {
                 fsm.Checkout(new FastLoginViewState(fsm,
                     markupMessage: $"[red]Session expired[/]",
-                    rollbackTarget: this,
-                    abortTarget: fsm.GetSavedState("mainMenu"),
+                    loginRollbackTarget: new UserDetailsViewState(fsm),
+                    abortRollbackTarget: fsm.GetSavedState("mainMenu"),
                     abortMarkupMessage: "Back to main menu"
                 ));
                 return;
@@ -37,7 +35,7 @@ namespace XKOMapp.ViewsFSM.States
             {
                 SessionData.LogOut();
 
-                fsm.Checkout("mainMenu");
+                fsm.Checkout(new LoginViewState(fsm));
             }));
             printer.AddRow(StandardRenderables.StandardSeparator.ToBasicConsoleRow());
 
@@ -60,12 +58,12 @@ namespace XKOMapp.ViewsFSM.States
 
         private void RefreshOrders()
         {
-            if (SessionData.HasSessionExpired(out loggedUser))
+            if (SessionData.HasSessionExpired(out var loggedUser))
             {
                 fsm.Checkout(new FastLoginViewState(fsm,
                     markupMessage: $"[red]Session expired[/]",
-                    rollbackTarget: this,
-                    abortTarget: fsm.GetSavedState("mainMenu"),
+                    loginRollbackTarget: new UserDetailsViewState(fsm),
+                    abortRollbackTarget: fsm.GetSavedState("mainMenu"),
                     abortMarkupMessage: "Back to main menu"
                 ));
                 return;

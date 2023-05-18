@@ -80,7 +80,7 @@ public class ProductViewState : ViewState
         printer?.ClearMemoryGroup("properties");
         printer?.ClearMemoryGroup("reviews");
 
-        if (product.Properties is null)
+        if (product.Properties.IsNullOrEmpty())
         {
             printer?.AddRow(new Text("Product has no properties").ToBasicConsoleRow(), "properties");
             return;
@@ -211,8 +211,8 @@ public class ProductViewState : ViewState
             {
                 fsm.Checkout(new FastLoginViewState(fsm,
                     markupMessage: $"[{StandardRenderables.GrassColorHex}]Log in to write reviews[/]",
-                    rollbackTarget: this,
-                    abortTarget: this,
+                    loginRollbackTarget: this,
+                    abortRollbackTarget: this,
                     abortMarkupMessage: "Click to abort"
                 ));
                 return;
@@ -222,8 +222,8 @@ public class ProductViewState : ViewState
             {
                 fsm.Checkout(new FastLoginViewState(fsm,
                     markupMessage: $"[red]Session expired[/] - [{StandardRenderables.GrassColorHex}]Log in to write reviews[/]",
-                    rollbackTarget: this,
-                    abortTarget: this,
+                    loginRollbackTarget: this,
+                    abortRollbackTarget: this,
                     abortMarkupMessage: "Click to abort"
                 ));
                 return;

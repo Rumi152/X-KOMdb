@@ -43,8 +43,8 @@ internal class ListCreateViewState : ViewState
             {
                 fsm.Checkout(new FastLoginViewState(fsm,
                     markupMessage: $"[red]Session expired[/] - [{StandardRenderables.GrassColorHex}]Log in to add list[/]",
-                    rollbackTarget: this,
-                    abortTarget: fsm.GetSavedState("mainMenu"),
+                    loginRollbackTarget: this,
+                    abortRollbackTarget: fsm.GetSavedState("mainMenu"),
                     abortMarkupMessage: "Back to main menu"
                 ));
                 return;

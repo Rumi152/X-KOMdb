@@ -46,8 +46,8 @@ internal class ListViewState: ViewState
             {
                 fsm.Checkout(new FastLoginViewState(fsm,
                     markupMessage: $"[red]Session expired[/] - [{StandardRenderables.GrassColorHex}]Log in to clone list[/]",
-                    rollbackTarget: this,
-                    abortTarget: fsm.GetSavedState("mainMenu"),
+                    loginRollbackTarget: fsm.GetSavedState("listBrowse"),
+                    abortRollbackTarget: fsm.GetSavedState("mainMenu"),
                     abortMarkupMessage: "Back to main menu"
                 ));
                 return;
@@ -70,8 +70,8 @@ internal class ListViewState: ViewState
             {
                 fsm.Checkout(new FastLoginViewState(fsm,
                     markupMessage: $"[red]Session expired[/] - [{StandardRenderables.GrassColorHex}]Log in to delete list[/]",
-                    rollbackTarget: this,
-                    abortTarget: fsm.GetSavedState("mainMenu"),
+                    loginRollbackTarget: fsm.GetSavedState("listBrowse"),
+                    abortRollbackTarget: fsm.GetSavedState("mainMenu"),
                     abortMarkupMessage: "Back to main menu"
                 ));
                 return;
@@ -93,8 +93,8 @@ internal class ListViewState: ViewState
             {
                 fsm.Checkout(new FastLoginViewState(fsm,
                     markupMessage: $"[red]Session expired[/] - [{StandardRenderables.GrassColorHex}]Log in to create list[/]",
-                    rollbackTarget: this,
-                    abortTarget: fsm.GetSavedState("mainMenu"),
+                    loginRollbackTarget: fsm.GetSavedState("listBrowse"),
+                    abortRollbackTarget: fsm.GetSavedState("mainMenu"),
                     abortMarkupMessage: "Back to main menu"
                 ));
                 return;

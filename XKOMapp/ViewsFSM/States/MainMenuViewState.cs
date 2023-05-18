@@ -28,11 +28,11 @@ internal class MainMenuViewState : ViewState
     public override void OnEnter()
     {
         base.OnEnter();
-        printer.ClearMemoryGroup("options");
+        printer?.ClearMemoryGroup("options");
         if (!SessionData.IsLoggedIn())
-            printer.AddRow(new InteractableConsoleRow(new Text("Log in"), (row, own) => fsm.Checkout(new LoginViewState(fsm))), "options");
+            printer?.AddRow(new InteractableConsoleRow(new Text("Log in"), (row, own) => fsm.Checkout(new LoginViewState(fsm))), "options");
         else
-            printer.AddRow(new InteractableConsoleRow(new Text("Account view"), (row, own) => fsm.Checkout(new UserDetailsViewState(fsm))), "options");
+            printer?.AddRow(new InteractableConsoleRow(new Text("Account view"), (row, own) => fsm.Checkout(new UserDetailsViewState(fsm))), "options");
     }
 }
 
