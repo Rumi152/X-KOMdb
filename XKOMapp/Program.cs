@@ -5,7 +5,6 @@ using XKOMapp.ViewsFSM;
 using XKOMapp.ViewsFSM.States;
 
 namespace XKOMapp;
-
 internal class Program
 {
     static void Main(string[] args)
@@ -14,7 +13,6 @@ internal class Program
         Console.Title = "X-KOMapp";
         Console.BackgroundColor = ConsoleColor.Black;
         Console.ForegroundColor = ConsoleColor.White;
-
 
         var fsm = new ViewStateMachine();
         //DONT TOUCH THESE TIMUR
@@ -27,13 +25,20 @@ internal class Program
         //checking for input in loop
         while (true)
         {
-            if (Console.KeyAvailable)
+            try
             {
-                var info = Console.ReadKey(true);
-                fsm?.PassKeystroke(info);
+                if (Console.KeyAvailable)
+                {
+                    var info = Console.ReadKey(true);
+                    fsm?.PassKeystroke(info);
+                }
+              
+                fsm?.Tick();
             }
-
-            fsm?.Tick();
+            catch (Exception ex)
+            {
+                fsm?.Checkout(new ErrorViewState(fsm, ex));
+            }
         }
     }
 }
