@@ -27,13 +27,13 @@ internal class Program
         {
             try
             {
-                fsm?.Tick();
-
                 if (Console.KeyAvailable)
                 {
                     var info = Console.ReadKey(true);
                     fsm?.PassKeystroke(info);
                 }
+              
+                fsm?.Tick();
             }
             catch (Exception ex)
             {

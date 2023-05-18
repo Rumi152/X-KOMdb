@@ -49,7 +49,7 @@ namespace XKOMapp.ViewsFSM.States
                     return;
                 
 
-                fsm.Checkout("mainMenu");
+                fsm.Checkout(new UserDetailsViewState(fsm));
             }));
             printer.StartGroup("errors");
         }
@@ -58,13 +58,13 @@ namespace XKOMapp.ViewsFSM.States
         {
             base.OnEnter();
 
-            printer.ResetCursor();
+            printer?.ResetCursor();
         }
 
 
         private bool TryLogIn()
         {
-            printer.ClearMemoryGroup("errors");
+            printer?.ClearMemoryGroup("errors");
 
             string email = emailRow.CurrentInput;
             string password = passwordRow.CurrentInput;
@@ -72,7 +72,7 @@ namespace XKOMapp.ViewsFSM.States
             if (SessionData.TryLogIn(email, password, out _))
                 return true;
 
-            printer.AddRow(new Markup("[red]Wrong password and/or email[/]").ToBasicConsoleRow(), "errors");
+            printer?.AddRow(new Markup("[red]Wrong password and/or email[/]").ToBasicConsoleRow(), "errors");
             return false;
         }
     }

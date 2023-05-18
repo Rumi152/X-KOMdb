@@ -80,7 +80,7 @@ public class ProductViewState : ViewState
         printer?.ClearMemoryGroup("properties");
         printer?.ClearMemoryGroup("reviews");
 
-        if (product.Properties is null)
+        if (product.Properties?.IsNullOrEmpty() ?? true)
         {
             printer?.AddRow(new Text("Product has no properties").ToBasicConsoleRow(), "properties");
             return;
@@ -209,20 +209,23 @@ public class ProductViewState : ViewState
 
             if (!SessionData.IsLoggedIn())
             {
-                fsm.Checkout(
-                    new FastLoginViewState(fsm,
-                    this,
-                    new Markup($"[{StandardRenderables.GrassColorHex}]Log in to write reviews[/]").ToBasicConsoleRow(),
-                    new InteractableConsoleRow(new Markup("Click to abort"), (row, owner) => fsm.Checkout(this))));
+                fsm.Checkout(new FastLoginViewState(fsm,
+                    markupMessage: $"[{StandardRenderables.GrassColorHex}]Log in to write reviews[/]",
+                    loginRollbackTarget: this,
+                    abortRollbackTarget: this,
+                    abortMarkupMessage: "Click to abort"
+                ));
                 return;
             }
 
             if (SessionData.HasSessionExpired(out User dbUser))
             {
                 fsm.Checkout(new FastLoginViewState(fsm,
-                    this,
-                    new Markup($"[red]Session expired[/] - [{StandardRenderables.GrassColorHex}]Log in to write reviews[/]").ToBasicConsoleRow(),
-                    new InteractableConsoleRow(new Markup("Click to abort"), (row, owner) => fsm.Checkout(this))));
+                    markupMessage: $"[red]Session expired[/] - [{StandardRenderables.GrassColorHex}]Log in to write reviews[/]",
+                    loginRollbackTarget: this,
+                    abortRollbackTarget: this,
+                    abortMarkupMessage: "Click to abort"
+                ));
                 return;
             }
 
