@@ -48,6 +48,7 @@ namespace XKOMapp.ViewsFSM.States
             printer.AddRow(new Text($"{"Password",-pad} : {loggedUser.Password}").ToBasicConsoleRow());//REFACTOR add hiding password
 
             //TODO edit button unfolding 5 inputs and accept button
+            //TODO implement deleting account
 
             var rule = new Rule("Click to refresh orders").RuleStyle(new Style().Foreground(StandardRenderables.AquamarineColor)).HeavyBorder();
             printer.AddRow(new InteractableConsoleRow(rule, (row, onwer) => RefreshOrders()));
