@@ -32,7 +32,10 @@ internal class MainMenuViewState : ViewState
         if (!SessionData.IsLoggedIn())
             printer?.AddRow(new InteractableConsoleRow(new Text("Log in"), (row, own) => fsm.Checkout(new LoginViewState(fsm))), "options");
         else
+        {
             printer?.AddRow(new InteractableConsoleRow(new Text("Account view"), (row, own) => fsm.Checkout(new UserDetailsViewState(fsm))), "options");
+            printer?.AddRow(new InteractableConsoleRow(new Text("Your lists"), (row, own) => fsm.Checkout("listBrowse")), "options");
+        }
     }
 }
 
