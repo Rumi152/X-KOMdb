@@ -1,7 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore.Metadata.Internal;
-using Spectre.Console;
+﻿using Spectre.Console;
 using Spectre.Console.Rendering;
-using System.Diagnostics.Metrics;
 
 namespace XKOMapp.GUI.ConsoleRows.User
 {
@@ -9,7 +7,7 @@ namespace XKOMapp.GUI.ConsoleRows.User
     {
         private readonly string markupLabel;
         private readonly int maxLength;
-        ConsolePrinter owner = null!;
+        private ConsolePrinter owner = null!;
 
         public string CurrentInput { get; private set; } = "";
         private bool isHovered;
@@ -43,7 +41,7 @@ namespace XKOMapp.GUI.ConsoleRows.User
             if (char.IsWhiteSpace(letter))
                 return;
 
-            if (letter > 126 || letter < 32)
+            if (letter is > (char)126 or < (char)32)
                 return;
 
             CurrentInput += letter;

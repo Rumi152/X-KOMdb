@@ -1,15 +1,8 @@
 ﻿using Spectre.Console;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Reflection;
-using System.Text;
-using System.Text.RegularExpressions;
-using System.Threading.Tasks;
-using XKOMapp.GUI.ConsoleRows;
 using XKOMapp.GUI;
-using XKOMapp.Models;
+using XKOMapp.GUI.ConsoleRows;
 using XKOMapp.GUI.ConsoleRows.List;
+using XKOMapp.Models;
 
 namespace XKOMapp.ViewsFSM.States;
 
@@ -23,7 +16,7 @@ internal class ListCreateViewState : ViewState
 
         printer.AddRow(StandardRenderables.StandardHeader.ToBasicConsoleRow());
         printer.StartContent();
-        
+
         printer.AddRow(new InteractableConsoleRow(new Text("Click to abort"), (row, owner) =>
         {
             fsm.Checkout("listBrowse");
@@ -53,9 +46,9 @@ internal class ListCreateViewState : ViewState
             if (!ValidateInput())
                 return;
 
-            using var context = new XkomContext();
+            using XkomContext context = new();
             context.Attach(dbUser);
-            var newList = new List()
+            List newList = new()
             {
                 Name = nameRow.CurrentInput,
                 Link = GetLink(),
@@ -79,10 +72,10 @@ internal class ListCreateViewState : ViewState
     private static string GetLink()
     {
         string link = "https://www.x-kom.pl/list/";
-        var random = new Random();
+        Random random = new();
         List<int> notAvailalbe = new() { 58, 59, 60, 61, 62, 63, 64, 91, 92, 93, 94, 95, 96 };
 
-        while (link.Length<128)
+        while (link.Length < 128)
         {
             int randomNumber = random.Next(48, 122);
             char a = Convert.ToChar(randomNumber);
@@ -91,10 +84,10 @@ internal class ListCreateViewState : ViewState
                 link += a;
             }
         }
-        using (var context = new XkomContext())
+        using (XkomContext context = new())
             if (context.Lists.Any(x => x.Link == link))
                 return GetLink();
-        
+
         return link;
     }
 

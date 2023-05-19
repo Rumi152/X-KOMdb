@@ -8,7 +8,7 @@ namespace XKOMapp.GUI.ConsoleRows
         {
         }
 
-        bool isFocused = false;
+        private bool isFocused = false;
         bool ISwitchableConsoleRow.IsActive { get => isFocused; set => isFocused = value; }
 
         void ISwitchableConsoleRow.OnTurningOff()

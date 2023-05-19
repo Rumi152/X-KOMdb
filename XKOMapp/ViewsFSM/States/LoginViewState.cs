@@ -1,16 +1,7 @@
 ﻿using Spectre.Console;
-using Spectre.Console.Rendering;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Net.Http.Headers;
-using System.Text;
-using System.Text.RegularExpressions;
-using System.Threading.Tasks;
 using XKOMapp.GUI;
 using XKOMapp.GUI.ConsoleRows;
 using XKOMapp.GUI.ConsoleRows.User;
-using XKOMapp.Models;
 
 namespace XKOMapp.ViewsFSM.States
 {
@@ -47,7 +38,7 @@ namespace XKOMapp.ViewsFSM.States
             {
                 if (!TryLogIn())
                     return;
-                
+
 
                 fsm.Checkout(new UserDetailsViewState(fsm));
             }));

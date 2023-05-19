@@ -1,20 +1,11 @@
 ﻿using Spectre.Console;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Text.RegularExpressions;
-using System.Threading.Tasks;
-using XKOMapp.GUI.ConsoleRows.User;
-using XKOMapp.GUI.ConsoleRows;
 using XKOMapp.GUI;
-using XKOMapp.Models;
+using XKOMapp.GUI.ConsoleRows;
 using XKOMapp.GUI.ConsoleRows.List;
-using XKOMapp.GUI.ConsoleRows.ProductSearching;
-using System.Security.Cryptography.X509Certificates;
+using XKOMapp.Models;
 namespace XKOMapp.ViewsFSM.States;
 
-internal class ListViewState: ViewState
+internal class ListViewState : ViewState
 {
     private readonly List list;
     private readonly ListNameInputConsoleRow nameRow;
@@ -53,9 +44,9 @@ internal class ListViewState: ViewState
                 return;
             }
 
-            using var context = new XkomContext();
+            using XkomContext context = new();
             context.Attach(dbUser);
-            var clonedList = new List()
+            List clonedList = new()
             {
                 Name = $"{list.Name}-copy",
                 Link = GetLink(),
@@ -77,8 +68,8 @@ internal class ListViewState: ViewState
                 return;
             }
 
-            using var context = new XkomContext();
-            var deleteList = context.Lists.SingleOrDefault(x => x.Id == list.Id);
+            using XkomContext context = new();
+            List? deleteList = context.Lists.SingleOrDefault(x => x.Id == list.Id);
             if (deleteList != null)
             {
                 context.Remove(deleteList);
@@ -104,8 +95,8 @@ internal class ListViewState: ViewState
                 return;
             if (nameRow.CurrentInput.Length != 0)
             {
-                using var context = new XkomContext();
-                var updatelist = context.Lists.First(x => x.Id == list.Id);
+                using XkomContext context = new();
+                List updatelist = context.Lists.First(x => x.Id == list.Id);
                 updatelist.Name = nameRow.CurrentInput;
                 context.SaveChanges();
             }
@@ -126,7 +117,7 @@ internal class ListViewState: ViewState
     private static string GetLink()
     {
         string link = "https://www.x-kom.pl/list/";
-        var random = new Random();
+        Random random = new();
         List<int> notAvailalbe = new() { 58, 59, 60, 61, 62, 63, 64, 91, 92, 93, 94, 95, 96 };
 
         while (link.Length < 128)
@@ -138,7 +129,7 @@ internal class ListViewState: ViewState
                 link += a;
             }
         }
-        using (var context = new XkomContext())
+        using (XkomContext context = new())
             if (context.Lists.Any(x => x.Link == link))
                 return GetLink();
 

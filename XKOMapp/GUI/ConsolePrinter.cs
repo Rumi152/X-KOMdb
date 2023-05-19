@@ -1,9 +1,5 @@
 ﻿using Spectre.Console;
 using Spectre.Console.Rendering;
-using System.Diagnostics;
-using System.Diagnostics.CodeAnalysis;
-using System.Linq;
-using System.Reflection;
 using XKOMapp.GUI.ConsoleRows;
 
 namespace XKOMapp.GUI;
@@ -72,7 +68,7 @@ public class ConsolePrinter
     {
         get
         {
-            var x = memory.FindIndex(x => x is ContentStartMarker);
+            int x = memory.FindIndex(x => x is ContentStartMarker);
             return x == -1 ? null : x;
         }
     }
@@ -80,7 +76,7 @@ public class ConsolePrinter
     {
         get
         {
-            var x = memory.FindIndex(x => x is ScrollerStartMarker);
+            int x = memory.FindIndex(x => x is ScrollerStartMarker);
             return x == -1 ? null : x;
         }
     }
@@ -144,7 +140,7 @@ public class ConsolePrinter
     /// </summary>
     private void ClampCursorUp()
     {
-        var availableIndexes = GetAvailableCursorIndexes();
+        List<int> availableIndexes = GetAvailableCursorIndexes();
 
         if (availableIndexes.Count == 0)
         {
@@ -157,7 +153,7 @@ public class ConsolePrinter
         if (availableIndexes.Contains(CursorIndex.Value))
             return;
 
-        var previousIndex = CursorIndex;
+        int? previousIndex = CursorIndex;
         CursorIndex = availableIndexes
             .Where(index => index < previousIndex)
             .LastOrDefault(-1);
@@ -176,7 +172,7 @@ public class ConsolePrinter
     /// </summary>
     private void ClampCursorDown()
     {
-        var availableIndexes = GetAvailableCursorIndexes();
+        List<int> availableIndexes = GetAvailableCursorIndexes();
 
         if (availableIndexes.Count == 0)
         {
@@ -189,7 +185,7 @@ public class ConsolePrinter
         if (availableIndexes.Contains(CursorIndex.Value))
             return;
 
-        var previousIndex = CursorIndex;
+        int? previousIndex = CursorIndex;
         CursorIndex = availableIndexes
             .Where(index => index > previousIndex)
             .FirstOrDefault(-1);
@@ -207,10 +203,7 @@ public class ConsolePrinter
     /// </summary>
     private void FinalizeCursorChange()
     {
-        if (CursorIndex is null)
-            currentCursorRow = null;
-        else
-            currentCursorRow = memory[CursorIndex.Value];
+        currentCursorRow = CursorIndex is null ? null : memory[CursorIndex.Value];
 
         if (previousCursorRow == currentCursorRow)
             return;
@@ -243,17 +236,14 @@ public class ConsolePrinter
         if (contentStart is null)
             return new List<int>();
 
-        var active = Enumerable.Range(0, memory.Count)
+        IEnumerable<int> active = Enumerable.Range(0, memory.Count)
             .Where(index => index >= contentStart && (memory[index] is not IDeactivableConsoleRow converted || converted.IsActive));
 
-        var focused = Enumerable.Range(0, memory.Count)
+        IEnumerable<int> focused = Enumerable.Range(0, memory.Count)
             .Where(index => memory[index] is IFocusableConsoleRow converted && converted.IsActive)
             .Intersect(active);
 
-        if (focused.Any())
-            return focused.ToList();
-
-        return active.ToList();
+        return focused.Any() ? focused.ToList() : active.ToList();
     }
 
 
@@ -280,7 +270,7 @@ public class ConsolePrinter
     {
         row.SetOwnership(this);
 
-        var index = memoryGroupingKeys.FindLastIndex(x => x == group);
+        int index = memoryGroupingKeys.FindLastIndex(x => x == group);
         if (index == -1)
         {
             memory.Add(row);
@@ -328,7 +318,24 @@ public class ConsolePrinter
     public void DeleteMemoryGroup(string group)
     {
         Enumerable.Range(0, memory.Count)
-            .Where(index => memoryGroupingKeys[index]?.StartsWith(group) ?? false && memoryGroupingKeys[index][group.Length] == '-')
+            .Where(index =>
+            {
+                string? savedGroup = memoryGroupingKeys[index];
+
+                if (savedGroup is null)
+                    return false;
+
+                if (!savedGroup.StartsWith(group))
+                    return false;
+
+                if (savedGroup.Length == group.Length)
+                    return true;
+
+                if (savedGroup[group.Length] == '-')
+                    return true;
+
+                return false;
+            })
             .Reverse()
             .ToList()
             .ForEach(index =>
@@ -349,12 +356,12 @@ public class ConsolePrinter
         Enumerable.Range(0, memory.Count)
             .Where(index =>
             {
-                var savedGroup = memoryGroupingKeys[index];
+                string? savedGroup = memoryGroupingKeys[index];
 
                 if (savedGroup is null)
                     return false;
 
-                if(!savedGroup.StartsWith(group))
+                if (!savedGroup.StartsWith(group))
                     return false;
 
                 if (savedGroup.Length == group.Length)
@@ -450,7 +457,7 @@ public class ConsolePrinter
             bool isContent = contentStart is not null && index >= contentStart;
             bool isScrollable = scrollingStart is not null && index >= scrollingStart;
             int lineSpan = (row as ICustomLineSpanConsoleRow)?.GetRenderHeight() ?? 1;
-            bool isHovered = (row == currentCursorRow);
+            bool isHovered = row == currentCursorRow;
 
             int startLineIndex = endLineIndex;
             endLineIndex = lineSpan + startLineIndex;
@@ -530,7 +537,7 @@ public class ConsolePrinter
     /// <param name="keystrokeInfo">ConsoleKeyInfo of pressed key</param>
     public void PassKeystroke(ConsoleKeyInfo keystrokeInfo)
     {
-        var key = keystrokeInfo.Key;
+        ConsoleKey key = keystrokeInfo.Key;
 
         if (key != DownKey && key != UpKey && key != InteractionKey)
         {

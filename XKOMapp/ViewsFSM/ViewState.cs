@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using XKOMapp.GUI;
-using XKOMapp.Models;
+﻿using XKOMapp.GUI;
 
 namespace XKOMapp.ViewsFSM
 {
@@ -16,13 +10,13 @@ namespace XKOMapp.ViewsFSM
 
         protected ViewState(ViewStateMachine stateMachine)
         {
-            this.fsm = stateMachine;
+            fsm = stateMachine;
         }
 
         public virtual void OnEnter()
         {
             if (printer is not null)
-            printer.OnBufferReload += Display;
+                printer.OnBufferReload += Display;
             isActiveState = true;
             printer?.SetBufferDirty();
         }
@@ -30,7 +24,7 @@ namespace XKOMapp.ViewsFSM
         public virtual void OnExit()
         {
             if (printer is not null)
-            printer.OnBufferReload -= Display;
+                printer.OnBufferReload -= Display;
             isActiveState = false;
         }
 

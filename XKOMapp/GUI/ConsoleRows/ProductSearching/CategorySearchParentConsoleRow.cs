@@ -1,11 +1,5 @@
 ﻿using Spectre.Console;
 using Spectre.Console.Rendering;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using XKOMapp.Models;
 
 namespace XKOMapp.GUI.ConsoleRows.ProductSearching;
 
@@ -37,7 +31,7 @@ public class ChoiceMenuParentConsoleRow : ICustomCursorConsoleRow, ISwitchableCo
 
     public void SetChildren(List<ChoiceMenuChildConsoleRow> newChildren)
     {
-        this.children = newChildren;
+        children = newChildren;
         children.ForEach(x => x.SetParent(this));
         choiceIndex = Math.Clamp(choiceIndex, 0, children.Count);
     }
@@ -96,15 +90,15 @@ public class ChoiceMenuParentConsoleRow : ICustomCursorConsoleRow, ISwitchableCo
         if (!char.IsLetterOrDigit(keystrokeInfo.KeyChar))
             return;
 
-        var x = children.FindIndex(x => x.category.StartsWith((keystrokeInfo.KeyChar.ToString()), true, null));
+        int x = children.FindIndex(x => x.category.StartsWith(keystrokeInfo.KeyChar.ToString(), true, null));
 
         if (x == -1)
             return;
 
-        if(x == choiceIndex)
+        if (x == choiceIndex)
             return;
 
-        var temp = choiceIndex;
+        int temp = choiceIndex;
         for (int i = x; i < temp; i++)
         {
             owner.CursorUp();
@@ -144,7 +138,7 @@ public class ChoiceMenuParentConsoleRow : ICustomCursorConsoleRow, ISwitchableCo
 
         children.ForEach(x => ((IHideableConsoleRow)x).TurnOff());
 
-        var firstIndex = Enumerable.Range(0, children.Count)
+        int firstIndex = Enumerable.Range(0, children.Count)
             .ToList()
             .FindIndex(index => index > choiceIndex - childrenStickyStart || index > children.Count - childrenDisplaySize);
 

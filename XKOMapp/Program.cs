@@ -1,20 +1,17 @@
-﻿using Spectre.Console;
-using XKOMapp.GUI;
-using XKOMapp.Models;
-using XKOMapp.ViewsFSM;
+﻿using XKOMapp.ViewsFSM;
 using XKOMapp.ViewsFSM.States;
 
 namespace XKOMapp;
 internal class Program
 {
-    static void Main(string[] args)
+    private static void Main(string[] args)
     {
         Console.CursorVisible = false;
         Console.Title = "X-KOMapp";
         Console.BackgroundColor = ConsoleColor.Black;
         Console.ForegroundColor = ConsoleColor.White;
 
-        var fsm = new ViewStateMachine();
+        ViewStateMachine? fsm = new();
         //DONT TOUCH THESE TIMUR
         fsm.SaveState("productsSearch", new ProductSearchViewState(fsm));
         fsm.SaveState("listBrowse", new ListBrowseViewState(fsm));
@@ -29,10 +26,10 @@ internal class Program
             {
                 if (Console.KeyAvailable)
                 {
-                    var info = Console.ReadKey(true);
+                    ConsoleKeyInfo info = Console.ReadKey(true);
                     fsm?.PassKeystroke(info);
                 }
-              
+
                 fsm?.Tick();
             }
             catch (Exception ex)

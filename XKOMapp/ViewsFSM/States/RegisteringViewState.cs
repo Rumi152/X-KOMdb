@@ -1,12 +1,5 @@
 ﻿using Spectre.Console;
-using Spectre.Console.Rendering;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Net.Http.Headers;
-using System.Text;
 using System.Text.RegularExpressions;
-using System.Threading.Tasks;
 using XKOMapp.GUI;
 using XKOMapp.GUI.ConsoleRows;
 using XKOMapp.GUI.ConsoleRows.User;
@@ -61,8 +54,8 @@ namespace XKOMapp.ViewsFSM.States
                 if (!ValidateInput())
                     return;
 
-                using var context = new XkomContext();
-                var newUser = new User()
+                using XkomContext context = new();
+                User newUser = new()
                 {
                     Name = nameRow.CurrentInput,
                     LastName = surnameRow.CurrentInput,
@@ -98,12 +91,12 @@ namespace XKOMapp.ViewsFSM.States
             string password = passwordRow.CurrentInput;
             string passwordConfirm = passwordConfirmRow.CurrentInput;
 
-            if(email.Length < 3)
+            if (email.Length < 3)
             {
                 printer.AddRow(new Markup("[red]Email is too short[/]").ToBasicConsoleRow(), "errors");
                 isValid = false;
             }
-            else if(email.Length > 256)
+            else if (email.Length > 256)
             {
                 printer.AddRow(new Markup("[red]Email is too long[/]").ToBasicConsoleRow(), "errors");
                 isValid = false;
@@ -115,22 +108,20 @@ namespace XKOMapp.ViewsFSM.States
             }
             else
             {
-                using (var context = new XkomContext())
+                using XkomContext context = new();
+                if (context.Users.Any(x => x.Email == email))
                 {
-                    if (context.Users.Any(x => x.Email == email))
-                    {
-                        printer.AddRow(new Markup("[red]Email is already used[/]").ToBasicConsoleRow(), "errors");
-                        isValid = false;
-                    }
+                    printer.AddRow(new Markup("[red]Email is already used[/]").ToBasicConsoleRow(), "errors");
+                    isValid = false;
                 }
             }
 
-            if(password.Length < 6)
+            if (password.Length < 6)
             {
                 printer.AddRow(new Markup("[red]Password must be at least 6 characters[/]").ToBasicConsoleRow(), "errors");
                 isValid = false;
             }
-            else if(password.Length > 64)
+            else if (password.Length > 64)
             {
                 printer.AddRow(new Markup("[red]Password cannot be longer than 64 characters[/]").ToBasicConsoleRow(), "errors");
                 isValid = false;
@@ -151,7 +142,7 @@ namespace XKOMapp.ViewsFSM.States
                 isValid = false;
             }
 
-            if(password != passwordConfirm)
+            if (password != passwordConfirm)
             {
                 printer.AddRow(new Markup("[red]Password must match[/]").ToBasicConsoleRow(), "errors");
                 isValid = false;

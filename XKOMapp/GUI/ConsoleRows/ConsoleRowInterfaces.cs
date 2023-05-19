@@ -72,7 +72,7 @@ public interface ICustomCursorConsoleRow : IConsoleRow
 public interface IModesConsoleRow : IConsoleRow
 {
     public int ModeIndex { get; protected set; }
-    public int ModesCount { get;}
+    public int ModesCount { get; }
 
     public void IncrementModeIndex()
     {

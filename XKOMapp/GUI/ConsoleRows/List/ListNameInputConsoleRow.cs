@@ -1,10 +1,5 @@
-﻿using Spectre.Console.Rendering;
-using Spectre.Console;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using Spectre.Console;
+using Spectre.Console.Rendering;
 
 namespace XKOMapp.GUI.ConsoleRows.List;
 
@@ -12,7 +7,7 @@ internal class ListNameInputConsoleRow : ICustomCursorConsoleRow, ICustomKeystro
 {
     private readonly string markupLabel;
     private readonly int maxLength;
-    ConsolePrinter owner = null!;
+    private ConsolePrinter owner = null!;
 
     public string CurrentInput { get; private set; } = "";
     private bool isHovered;

@@ -1,5 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore.Metadata.Internal;
-using Spectre.Console;
+﻿using Spectre.Console;
 using Spectre.Console.Rendering;
 
 namespace XKOMapp.GUI.ConsoleRows.User
@@ -8,7 +7,7 @@ namespace XKOMapp.GUI.ConsoleRows.User
     {
         private readonly string markupLabel;
         private readonly int maxLength;
-        ConsolePrinter owner = null!;
+        private ConsolePrinter owner = null!;
 
         public string CurrentInput { get; private set; } = "";
         private bool isHovered;

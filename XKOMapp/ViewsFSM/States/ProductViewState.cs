@@ -2,7 +2,6 @@
 using Microsoft.IdentityModel.Tokens;
 using Spectre.Console;
 using Spectre.Console.Rendering;
-using System.Diagnostics;
 using System.Text.Json;
 using XKOMapp.GUI;
 using XKOMapp.GUI.ConsoleRows;
@@ -89,7 +88,7 @@ public class ProductViewState : ViewState
         try
         {
             Dictionary<string, object> properties = JsonSerializer.Deserialize<Dictionary<string, object>>(product.Properties)!;
-            var longestKey = properties.Keys.Max(x => x.Length);
+            int longestKey = properties.Keys.Max(x => x.Length);
             properties.ToList().ForEach(x =>
             {
                 string valueToPrint = x.Value switch
@@ -115,7 +114,7 @@ public class ProductViewState : ViewState
         printer?.ClearMemoryGroup("properties");
         printer?.ClearMemoryGroup("reviews");
 
-        using var context = new XkomContext();
+        using XkomContext context = new();
         var reviews = context
             .Reviews
             .Include(x => x.Product)
@@ -155,17 +154,14 @@ public class ProductViewState : ViewState
         int? offlineUserID = SessionData.GetUserOffline()?.Id;
         string stars = $"[yellow]{new string('*', review.StarRating)}[/][dim]{new string('*', 6 - review.StarRating)}[/]";
 
-        string userDisplay;
-        if (review.User is null)
-            userDisplay = $"[[ deleted user ]]";
-        else if (review.UserId == offlineUserID)
-            userDisplay = $"[{StandardRenderables.GoldColorHex}]You[/]";
-        else
-            userDisplay = $"{review.User.Name} {review.User.LastName}";
-
+        string userDisplay = review.User is null
+            ? $"[[ deleted user ]]"
+            : review.UserId == offlineUserID
+                ? $"[{StandardRenderables.GoldColorHex}]You[/]"
+                : $"{review.User.Name} {review.User.LastName}";
         string header = $"{userDisplay} {stars}";
 
-        var descriptionLines = GetWrappedDescription((review.Description.Length == 0) ? "[dim]No description provided[/]" : review.Description);
+        List<string> descriptionLines = GetWrappedDescription((review.Description.Length == 0) ? "[dim]No description provided[/]" : review.Description);
 
         printer?.AddRow(new Markup(header).ToBasicConsoleRow(), "reviews-all");
         descriptionLines.ForEach(x => printer?.AddRow(((review.Description.Length == 0) ? (IRenderable)new Markup(x) : new Text(x)).ToBasicConsoleRow(), "reviews-all"));
@@ -176,7 +172,7 @@ public class ProductViewState : ViewState
         const int chartWidth = 32;
         //doin' meth
         //get count of every start rating given
-        List<int> values = Enumerable.Range(1, 6)
+        var values = Enumerable.Range(1, 6)
             .Select(x => reviews.Where(review => review.StarRating == x).Count())
             .ToList();
 
@@ -184,7 +180,7 @@ public class ProductViewState : ViewState
         int maxValue = values.Max();
 
         //map these amounts into 0..32 range
-        List<int> mappedValues = values
+        var mappedValues = values
             .Select(x => x / (float)maxValue * chartWidth)
             .Select(x => (int)Math.Ceiling(x))
             .ToList();
@@ -229,7 +225,7 @@ public class ProductViewState : ViewState
                 return;
             }
 
-            using var context = new XkomContext();
+            using XkomContext context = new();
             context.Attach(dbUser);
             try
             {
@@ -249,7 +245,7 @@ public class ProductViewState : ViewState
                 return;
             }
 
-            var previousReviews = context.Reviews.Include(x => x.User).Include(x => x.Product).Where(x => x.UserId == dbUser.Id && x.ProductId == product.Id);
+            IQueryable<Review> previousReviews = context.Reviews.Include(x => x.User).Include(x => x.Product).Where(x => x.UserId == dbUser.Id && x.ProductId == product.Id);
             if (!previousReviews.IsNullOrEmpty())
             {
                 //printer.AddRow(new Markup("[red]You have already written review[/]").ToBasicConsoleRow(), "reviews-postInput-errors");
@@ -257,7 +253,7 @@ public class ProductViewState : ViewState
                 context.SaveChanges();
             }
 
-            var review = new Review()
+            Review review = new()
             {
                 Product = product,
                 Description = reviewWriteDescription,
@@ -304,7 +300,7 @@ public class ProductViewState : ViewState
     {
         printer?.ClearMemoryGroup("reviews-descriptionInput");
 
-        var descriptionLines = GetWrappedDescription((reviewWriteDescription.Length == 0) ? "[dim]Write something about product (optional)[/]" : reviewWriteDescription);
+        List<string> descriptionLines = GetWrappedDescription((reviewWriteDescription.Length == 0) ? "[dim]Write something about product (optional)[/]" : reviewWriteDescription);
 
         List<ReviewDescriptionInputConsoleRow> descriptionRows = new();
         descriptionRows = descriptionLines
@@ -326,9 +322,9 @@ public class ProductViewState : ViewState
     {
         printer?.ClearMemoryGroup("averageStars");
 
-        using (var context = new XkomContext())
+        using (XkomContext context = new())
         {
-            var avgStars = context.Products
+            double avgStars = context.Products
                 .Where(x => x.Id == product.Id)
                 .Include(x => x.Reviews)
                 .Select(x => x.Reviews)
@@ -343,7 +339,7 @@ public class ProductViewState : ViewState
 
     private bool AssureProductExists()
     {
-        using var context = new XkomContext();
+        using XkomContext context = new();
 
         if (context.Products.Any(x => x.Id == product.Id))
             return true;

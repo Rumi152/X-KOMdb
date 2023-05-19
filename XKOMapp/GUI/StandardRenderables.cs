@@ -1,5 +1,4 @@
-﻿using System;
-using Spectre.Console;
+﻿using Spectre.Console;
 using Spectre.Console.Rendering;
 using XKOMapp.GUI.ConsoleRows;
 
@@ -27,12 +26,12 @@ public static class StandardRenderables
         return new BasicConsoleRow(renderable);
     }
 
-    public static Color GoldColor => new Color(0xFF, 0xA6, 0x00);
+    public static Color GoldColor => new(0xFF, 0xA6, 0x00);
     public static string GoldColorHex => "#FFA600";
 
-    public static Color AquamarineColor => new Color(0x0E, 0x8F, 0x75);
+    public static Color AquamarineColor => new(0x0E, 0x8F, 0x75);
     public static string AquamarineColorHex => "#0E8F75";
 
-    public static Color GrassColor => new Color(0x96, 0xFA, 0x96);
+    public static Color GrassColor => new(0x96, 0xFA, 0x96);
     public static string GrassColorHex => "#96fa96";
 }

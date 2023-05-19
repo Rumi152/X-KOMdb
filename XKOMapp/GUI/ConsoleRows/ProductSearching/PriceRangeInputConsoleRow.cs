@@ -1,6 +1,5 @@
 ﻿using Spectre.Console;
 using Spectre.Console.Rendering;
-using XKOMapp.GUI;
 
 namespace XKOMapp.GUI.ConsoleRows.ProductSearching;
 
@@ -39,10 +38,10 @@ internal class PriceRangeInputConsoleRow : IModesConsoleRow, ICustomKeystrokeLis
 
     public IRenderable GetRenderContent()
     {
-        var style1 = modeIndex == 0 && isHovered ? "[underline]" : "";
-        var styleEnd1 = modeIndex == 0 && isHovered ? "[/]" : "";
-        var style2 = modeIndex == 1 && isHovered ? "[underline]" : "";
-        var styleEnd2 = modeIndex == 1 && isHovered ? "[/]" : "";
+        string style1 = modeIndex == 0 && isHovered ? "[underline]" : "";
+        string styleEnd1 = modeIndex == 0 && isHovered ? "[/]" : "";
+        string style2 = modeIndex == 1 && isHovered ? "[underline]" : "";
+        string styleEnd2 = modeIndex == 1 && isHovered ? "[/]" : "";
         return new Markup($"{preTextMarkup}{style1}{LowestPrice,-6}{styleEnd1} - {style2}{HighestPrice,-6}{styleEnd2} PLN");
     }
 
@@ -94,7 +93,7 @@ internal class PriceRangeInputConsoleRow : IModesConsoleRow, ICustomKeystrokeLis
 
     public void OnInteraction()
     {
-        if(modeIndex == 0)
+        if (modeIndex == 0)
             ((IModesConsoleRow)this).IncrementModeIndex();
         else
             ((IModesConsoleRow)this).DecrementModeIndex();

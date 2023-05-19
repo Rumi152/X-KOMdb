@@ -7,7 +7,7 @@ public class BasicConsoleRow : IConsoleRow
     protected readonly IRenderable renderContent;
     protected ConsolePrinter? owner;
 
-    public BasicConsoleRow(IRenderable renderable) => this.renderContent = renderable;
+    public BasicConsoleRow(IRenderable renderable) => renderContent = renderable;
 
     public IRenderable GetRenderContent() => renderContent;
 

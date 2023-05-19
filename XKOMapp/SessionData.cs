@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Security.Cryptography;
-using System.Text;
-using System.Threading.Tasks;
-using XKOMapp.Models;
+﻿using XKOMapp.Models;
 
 namespace XKOMapp
 {
@@ -14,7 +8,7 @@ namespace XKOMapp
 
         public static bool TryLogIn(string email, string password, out User loggedUser)
         {
-            using var context = new XkomContext();
+            using XkomContext context = new();
 
             loggedUser = context.Users.SingleOrDefault(x => x.Email == email && x.Password == password)!;
             if (loggedUser is null)
@@ -38,7 +32,7 @@ namespace XKOMapp
             if (!IsLoggedIn())
                 return true;
 
-            using var context = new XkomContext();
+            using XkomContext context = new();
             loggedUser = context.Users.SingleOrDefault(x => x.Id == offlineUserRecord!.Id && x.Email == offlineUserRecord.Email && x.Password == offlineUserRecord.Password)!;
 
             if (loggedUser is null)
@@ -50,7 +44,7 @@ namespace XKOMapp
 
         public static void RefreshOfflineUserRecord()
         {
-            if (HasSessionExpired(out var user))
+            if (HasSessionExpired(out User? user))
                 return;
 
             offlineUserRecord = user;

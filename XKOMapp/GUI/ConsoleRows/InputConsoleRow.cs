@@ -1,17 +1,12 @@
 ﻿using Spectre.Console;
 using Spectre.Console.Rendering;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace XKOMapp.GUI.ConsoleRows
 {
     public class InputConsoleRow : ICustomKeystrokeListenerConsoleRow
     {
         public string CurrentInput { get; private set; } = "";
-        
+
         private ConsolePrinter? owner;
 
         public IRenderable GetRenderContent()
@@ -21,7 +16,7 @@ namespace XKOMapp.GUI.ConsoleRows
 
         public void ProcessCustomKeystroke(ConsoleKeyInfo keystrokeInfo)
         {
-            var letter = keystrokeInfo.KeyChar;
+            char letter = keystrokeInfo.KeyChar;
             if (char.IsLetterOrDigit(letter))
                 CurrentInput += letter;
 

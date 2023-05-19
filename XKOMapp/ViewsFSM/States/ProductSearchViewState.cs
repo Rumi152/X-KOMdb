@@ -27,7 +27,7 @@ public class ProductSearchViewState : ViewState
             fsm.Checkout("mainMenu");
         }));
         printer.AddRow(new Rule("Products").RuleStyle(Style.Parse(StandardRenderables.AquamarineColorHex)).HeavyBorder().ToBasicConsoleRow());
-        
+
         const int namePadding = 11;
         priceRangeInputConsoleRow = new PriceRangeInputConsoleRow($"{"Price",-namePadding}: ", RefreshProducts, RefreshProducts);
         nameSearchInputRow = new SearchContraintInputConsoleRow($"{"Name",-namePadding}: ", 32, RefreshProducts, RefreshProducts);
@@ -77,13 +77,13 @@ public class ProductSearchViewState : ViewState
     {
         printer?.ClearMemoryGroup("products");
 
-        using var context = new XkomContext();
+        using XkomContext context = new();
 
-        var noPriceContraints = priceRangeInputConsoleRow.LowestPrice.Length == 0 && priceRangeInputConsoleRow.HighestPrice.Length == 0;
-        var noCompanyConstraints = companySearchInputRow.currentInput.Length == 0;
-        var noCategoryConstraints = categorySearchChoiceParent.GetCurrentCategory() == "All";
+        bool noPriceContraints = priceRangeInputConsoleRow.LowestPrice.Length == 0 && priceRangeInputConsoleRow.HighestPrice.Length == 0;
+        bool noCompanyConstraints = companySearchInputRow.currentInput.Length == 0;
+        bool noCategoryConstraints = categorySearchChoiceParent.GetCurrentCategory() == "All";
 
-        var products = context.Products
+        IQueryable<Product> products = context.Products
             .Where(x => x.Name.Contains(nameSearchInputRow.currentInput))
             .Include(x => x.Company)
                 .Where(x => noCompanyConstraints || (x.Company != null && x.Company.Name.Contains(companySearchInputRow.currentInput)))
@@ -104,9 +104,9 @@ public class ProductSearchViewState : ViewState
 
         products.ToList().ForEach(x =>
         {
-            var priceString = x.NumberAvailable > 0 ? $"[lime]{x.Price,-9:F2}[/] PLN" : "[red]Unavailable[/]";
-            var companyString = x.Company is null ? new string(' ', 32) : ((x.Company.Name.Length <= 29) ? $"{x.Company.Name,-29}" : $"{x.Company.Name[..30]}...");
-            var displayString = $"{x.Name.EscapeMarkup(),-32} | {priceString + new string(' ', 13 - priceString.RemoveMarkup().Length)} | {companyString}";
+            string priceString = x.NumberAvailable > 0 ? $"[lime]{x.Price,-9:F2}[/] PLN" : "[red]Unavailable[/]";
+            string companyString = x.Company is null ? new string(' ', 32) : ((x.Company.Name.Length <= 29) ? $"{x.Company.Name,-29}" : $"{x.Company.Name[..30]}...");
+            string displayString = $"{x.Name.EscapeMarkup(),-32} | {priceString + new string(' ', 13 - priceString.RemoveMarkup().Length)} | {companyString}";
             printer?.AddRow(new InteractableConsoleRow(new Markup(displayString), (row, printer) => fsm.Checkout(new ProductViewState(fsm, x))), "products");
         });
     }
@@ -115,9 +115,9 @@ public class ProductSearchViewState : ViewState
     {
         printer?.ClearMemoryGroup("categorySearch");
 
-        using var context = new XkomContext();
+        using XkomContext context = new();
 
-        List<ChoiceMenuChildConsoleRow> toAdd = context
+        var toAdd = context
             .ProductCategories
             .Select(x => x.Name)
             .OrderBy(x => x)

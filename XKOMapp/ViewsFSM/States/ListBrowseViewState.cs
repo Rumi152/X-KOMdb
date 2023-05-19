@@ -1,14 +1,7 @@
 ﻿using Spectre.Console;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using XKOMapp.GUI.ConsoleRows;
 using XKOMapp.GUI;
-using Microsoft.EntityFrameworkCore.Update.Internal;
+using XKOMapp.GUI.ConsoleRows;
 using XKOMapp.Models;
-using Microsoft.EntityFrameworkCore;
 
 namespace XKOMapp.ViewsFSM.States;
 internal class ListBrowseViewState : ViewState
@@ -72,9 +65,9 @@ internal class ListBrowseViewState : ViewState
         }
 
         printer?.ClearMemoryGroup("lists");
-        using var context = new XkomContext();
+        using XkomContext context = new();
         context.Attach(dbUser);
-        var lists = context.Lists.Where(x => x.User == dbUser);
+        IQueryable<List> lists = context.Lists.Where(x => x.User == dbUser);
         if (!lists.Any())
             printer?.AddRow(new Text("No lists were found").ToBasicConsoleRow(), "lists");
 

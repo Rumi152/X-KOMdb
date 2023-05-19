@@ -1,11 +1,5 @@
 ﻿using Spectre.Console;
 using Spectre.Console.Rendering;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using XKOMapp.Models;
 
 namespace XKOMapp.GUI.ConsoleRows.ProductSearching
 {
@@ -30,7 +24,7 @@ namespace XKOMapp.GUI.ConsoleRows.ProductSearching
 
         public IRenderable GetRenderContent()
         {
-            var end = isHovered ? "[blink]_[/]" : "";
+            string end = isHovered ? "[blink]_[/]" : "";
             return new Markup(markupPreText + currentInput.EscapeMarkup() + end);
         }
 
