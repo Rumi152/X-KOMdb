@@ -21,7 +21,6 @@ internal class ListViewState: ViewState
     public ListViewState(ViewStateMachine stateMachine, List list) : base(stateMachine)
     {
         this.list = list;
-        printer = new ConsolePrinter();
 
         printer.AddRow(StandardRenderables.StandardHeader.ToBasicConsoleRow());
         printer.StartContent();

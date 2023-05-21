@@ -26,8 +26,6 @@ public class ProductViewState : ViewState
         if (!AssureProductExists())
             return;
 
-        printer = new ConsolePrinter();
-
         printer.AddRow(StandardRenderables.StandardHeader.ToBasicConsoleRow());
         printer.StartContent();
 

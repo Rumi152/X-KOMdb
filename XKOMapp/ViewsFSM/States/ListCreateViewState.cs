@@ -19,8 +19,6 @@ internal class ListCreateViewState : ViewState
 
     public ListCreateViewState(ViewStateMachine stateMachine) : base(stateMachine)
     {
-        printer = new ConsolePrinter();
-
         printer.AddRow(StandardRenderables.StandardHeader.ToBasicConsoleRow());
         printer.StartContent();
         

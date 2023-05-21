@@ -26,8 +26,6 @@ namespace XKOMapp.ViewsFSM.States
                 return;
             }
 
-            printer = new ConsolePrinter();
-
             printer.AddRow(StandardRenderables.StandardHeader.ToBasicConsoleRow());
             printer.StartContent();
             printer.AddRow(new InteractableConsoleRow(new Text("Back to main menu"), (row, owner) => fsm.Checkout("mainMenu")));

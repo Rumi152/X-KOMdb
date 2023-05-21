@@ -17,8 +17,6 @@ public class ProductSearchViewState : ViewState
 
     public ProductSearchViewState(ViewStateMachine stateMachine) : base(stateMachine)
     {
-        printer = new ConsolePrinter(5, 0);
-
         printer.AddRow(StandardRenderables.StandardHeader.ToBasicConsoleRow());
         printer.StartContent();
 

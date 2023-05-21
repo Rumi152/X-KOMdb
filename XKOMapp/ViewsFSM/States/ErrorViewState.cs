@@ -13,8 +13,6 @@ internal class ErrorViewState : ViewState
 {
     public ErrorViewState(ViewStateMachine stateMachine, Exception exception) : base(stateMachine)
     {
-        printer = new ConsolePrinter();
-
         printer.AddRow(StandardRenderables.StandardHeader.ToBasicConsoleRow());
         printer.StartContent();
 
