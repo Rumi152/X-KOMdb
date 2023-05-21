@@ -8,40 +8,40 @@ namespace XKOMapp.ViewsFSM
         protected readonly ViewStateMachine fsm;
         protected bool IsActiveState { get; private set; }
 
+        private bool printerBuilt = false;
+
         protected ViewState(ViewStateMachine stateMachine)
         {
             fsm = stateMachine;
         }
 
+        protected abstract void InitialBuildPrinter(ConsolePrinter printer);
+
         public virtual void OnEnter()
         {
-            if (printer is not null)
-                printer.OnBufferReload += Display;
-            IsActiveState = true;
-            printer?.SetBufferDirty();
-        }
+            if (!printerBuilt)
+            {
+                InitialBuildPrinter(printer);
+                printerBuilt = true;
+            }
 
+            printer.OnBufferReload += Display;
+            IsActiveState = true;
+            printer.SetBufferDirty();
+        }
         public virtual void OnExit()
         {
-            if (printer is not null)
-                printer.OnBufferReload -= Display;
+            printer.OnBufferReload -= Display;
             IsActiveState = false;
         }
 
-        protected virtual void Display()
+        protected void Display()
         {
             ConsolePrinter.ClearScreen();
-            printer?.PrintBuffer();
+            printer.PrintBuffer();
         }
 
-        public virtual void Tick()
-        {
-            printer?.Tick();
-        }
-
-        public virtual void PassKeystroke(ConsoleKeyInfo info)
-        {
-            printer?.PassKeystroke(info);
-        }
+        public virtual void Tick() => printer.Tick();
+        public virtual void PassKeystroke(ConsoleKeyInfo info) => printer.PassKeystroke(info);
     }
 }
