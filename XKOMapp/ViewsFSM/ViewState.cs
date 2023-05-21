@@ -15,18 +15,19 @@ namespace XKOMapp.ViewsFSM
             fsm = stateMachine;
         }
 
-        protected abstract void InitialBuildPrinter(ConsolePrinter printer);
+        protected abstract void InitialPrinterBuild(ConsolePrinter printer);
 
         public virtual void OnEnter()
         {
+            IsActiveState = true;
+
             if (!printerBuilt)
             {
-                InitialBuildPrinter(printer);
+                InitialPrinterBuild(printer);
                 printerBuilt = true;
             }
 
             printer.OnBufferReload += Display;
-            IsActiveState = true;
             printer.SetBufferDirty();
         }
         public virtual void OnExit()
