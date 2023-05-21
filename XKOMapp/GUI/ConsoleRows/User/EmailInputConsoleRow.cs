@@ -19,7 +19,7 @@ namespace XKOMapp.GUI.ConsoleRows.User
             this.maxLength = maxLength;
         }
 
-        public IRenderable GetRenderContent() => new Markup($"{markupLabel}{CurrentInput.Substring(Math.Max(CurrentInput.Length - 64, 0)).EscapeMarkup()}{(isHovered ? "[blink]_[/]" : "")}");
+        public IRenderable GetRenderContent() => new Markup($"{markupLabel}{CurrentInput[Math.Max(CurrentInput.Length - 64, 0)..].EscapeMarkup()}{(isHovered ? "[blink]_[/]" : "")}");
         public void SetOwnership(ConsolePrinter owner) => this.owner = owner;
 
 

@@ -21,8 +21,6 @@ namespace XKOMapp.ViewsFSM.States
 
         public FastLoginViewState(ViewStateMachine stateMachine, string markupMessage, ViewState loginRollbackTarget,  ViewState abortRollbackTarget, string loginMarkupMessage = "Log in", string abortMarkupMessage = "Click to abort") : base(stateMachine)
         {
-            printer = new ConsolePrinter();
-
             printer.AddRow(StandardRenderables.StandardHeader.ToBasicConsoleRow());
             printer.StartContent();
 

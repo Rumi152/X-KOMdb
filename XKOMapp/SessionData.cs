@@ -42,7 +42,10 @@ namespace XKOMapp
             loggedUser = context.Users.SingleOrDefault(x => x.Id == offlineUserRecord!.Id && x.Email == offlineUserRecord.Email && x.Password == offlineUserRecord.Password)!;
 
             if (loggedUser is null)
+            {
+                LogOut();
                 return true;
+            }
 
             offlineUserRecord = loggedUser;
             return false;
