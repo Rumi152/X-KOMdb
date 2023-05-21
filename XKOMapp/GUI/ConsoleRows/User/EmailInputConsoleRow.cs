@@ -4,6 +4,7 @@ using Spectre.Console.Rendering;
 
 namespace XKOMapp.GUI.ConsoleRows.User
 {
+    //TODO better long emails support
     internal class EmailInputConsoleRow : ICustomCursorConsoleRow, ICustomKeystrokeListenerConsoleRow, IHoverConsoleRow, IInteractableConsoleRow
     {
         private readonly string markupLabel;
@@ -66,5 +67,8 @@ namespace XKOMapp.GUI.ConsoleRows.User
         public void OnHoverEnd() => isHovered = false;
 
         public void OnInteraction() => owner.CursorDown();
+
+
+        public void ResetInput() => CurrentInput = "";
     }
 }

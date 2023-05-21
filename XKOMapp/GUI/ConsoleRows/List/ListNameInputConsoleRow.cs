@@ -65,5 +65,12 @@ internal class ListNameInputConsoleRow : ICustomCursorConsoleRow, ICustomKeystro
     public void OnHoverEnd() => isHovered = false;
 
     public void OnInteraction() => owner.CursorDown();
+
+
+    public void ResetInput()
+    {
+        CurrentInput = "";
+        owner.SetBufferDirty();
+    }
 }
 

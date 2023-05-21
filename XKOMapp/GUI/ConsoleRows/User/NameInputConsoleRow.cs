@@ -62,5 +62,8 @@ namespace XKOMapp.GUI.ConsoleRows.User
         public void OnHoverEnd() => isHovered = false;
 
         public void OnInteraction() => owner.CursorDown();
+
+
+        public void ResetInput() => CurrentInput = "";
     }
 }
