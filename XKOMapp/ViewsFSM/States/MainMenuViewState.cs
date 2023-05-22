@@ -25,7 +25,7 @@ internal class MainMenuViewState : ViewState
 
         printer.AddRow(new InteractableConsoleRow(new Text("Find products"), (row, own) => fsm.Checkout("productsSearch")));
 
-        printer.AddRow(new Rule("Account").RuleStyle(new Style(StandardRenderables.AquamarineColor, null, null, "https://www.google.com/")).ToBasicConsoleRow());
+        printer.AddRow(new Rule("Account").RuleStyle(new Style(StandardRenderables.AquamarineColor)).ToBasicConsoleRow());
 
         printer.StartGroup("options-account");
     }
