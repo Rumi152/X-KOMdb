@@ -15,24 +15,26 @@ namespace XKOMapp.ViewsFSM.States;
 
 internal class ListCreateViewState : ViewState
 {
-    private readonly ListNameInputConsoleRow nameRow;
+    const int labelPad = 4;
+    private readonly ListNameInputConsoleRow nameRow = new($"{"Name",-labelPad} : ", 32);
 
     public ListCreateViewState(ViewStateMachine stateMachine) : base(stateMachine)
     {
-        printer = new ConsolePrinter();
+    }
 
+    protected override void InitialPrinterBuild(ConsolePrinter printer)
+    {
         printer.AddRow(StandardRenderables.StandardHeader.ToBasicConsoleRow());
         printer.StartContent();
-        
+
         printer.AddRow(new InteractableConsoleRow(new Text("Click to abort"), (row, owner) =>
         {
             fsm.Checkout("listBrowse");
         }));
+
         printer.AddRow(new Rule("Create list").RuleStyle(Style.Parse(StandardRenderables.AquamarineColorHex)).HeavyBorder().ToBasicConsoleRow());
         printer.EnableScrolling();
 
-        const int labelPad = 16;
-        nameRow = new ListNameInputConsoleRow($"{"Name",-labelPad} : ", 32);
         printer.AddRow(nameRow);
 
         printer.AddRow(StandardRenderables.StandardSeparator.ToBasicConsoleRow());
@@ -66,6 +68,7 @@ internal class ListCreateViewState : ViewState
 
             fsm.Checkout(new ListViewState(fsm, newList));
         }));
+
         printer.StartGroup("errors");
     }
 
@@ -73,7 +76,9 @@ internal class ListCreateViewState : ViewState
     {
         base.OnEnter();
 
-        printer?.ResetCursor();
+        nameRow.ResetInput();
+        printer.ClearMemoryGroup("errors");
+        printer.ResetCursor();
     }
 
     private static string GetLink()
@@ -100,22 +105,22 @@ internal class ListCreateViewState : ViewState
 
     private bool ValidateInput()
     {
-        printer?.ClearMemoryGroup("errors");
-
-        bool isValid = true;
+        printer.ClearMemoryGroup("errors");
 
         string name = nameRow.CurrentInput;
 
         if (name.Length < 2)
         {
-            printer?.AddRow(new Markup("[red]Name is too short[/]").ToBasicConsoleRow(), "errors");
-            isValid = false;
+            printer.AddRow(new Markup("[red]Name is too short[/]").ToBasicConsoleRow(), "errors");
+            return false;
         }
-        else if (name.Length > 32)
+
+        if (name.Length > 32)
         {
-            printer?.AddRow(new Markup("[red]Name is too long[/]").ToBasicConsoleRow(), "errors");
-            isValid = false;
+            printer.AddRow(new Markup("[red]Name is too long[/]").ToBasicConsoleRow(), "errors");
+            return false;
         }
-        return isValid;
+
+        return true;
     }
 }

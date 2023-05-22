@@ -4,6 +4,7 @@ using Spectre.Console.Rendering;
 
 namespace XKOMapp.GUI.ConsoleRows.User
 {
+    //REFACTOR better long emails support
     internal class EmailInputConsoleRow : ICustomCursorConsoleRow, ICustomKeystrokeListenerConsoleRow, IHoverConsoleRow, IInteractableConsoleRow
     {
         private readonly string markupLabel;
@@ -19,7 +20,7 @@ namespace XKOMapp.GUI.ConsoleRows.User
             this.maxLength = maxLength;
         }
 
-        public IRenderable GetRenderContent() => new Markup($"{markupLabel}{CurrentInput.Substring(Math.Max(CurrentInput.Length - 64, 0)).EscapeMarkup()}{(isHovered ? "[blink]_[/]" : "")}");
+        public IRenderable GetRenderContent() => new Markup($"{markupLabel}{CurrentInput[Math.Max(CurrentInput.Length - 64, 0)..].EscapeMarkup()}{(isHovered ? "[blink]_[/]" : "")}");
         public void SetOwnership(ConsolePrinter owner) => this.owner = owner;
 
 
@@ -66,5 +67,8 @@ namespace XKOMapp.GUI.ConsoleRows.User
         public void OnHoverEnd() => isHovered = false;
 
         public void OnInteraction() => owner.CursorDown();
+
+
+        public void ResetInput() => CurrentInput = "";
     }
 }

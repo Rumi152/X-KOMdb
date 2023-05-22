@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.EntityFrameworkCore;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Security.Cryptography;
@@ -16,7 +17,7 @@ namespace XKOMapp
         {
             using var context = new XkomContext();
 
-            loggedUser = context.Users.SingleOrDefault(x => x.Email == email && x.Password == password)!;
+            loggedUser = context.Users.AsNoTracking().SingleOrDefault(x => x.Email == email && x.Password == password)!;
             if (loggedUser is null)
                 return false;
 
@@ -39,10 +40,13 @@ namespace XKOMapp
                 return true;
 
             using var context = new XkomContext();
-            loggedUser = context.Users.SingleOrDefault(x => x.Id == offlineUserRecord!.Id && x.Email == offlineUserRecord.Email && x.Password == offlineUserRecord.Password)!;
+            loggedUser = context.Users.AsNoTracking().SingleOrDefault(x => x.Id == offlineUserRecord!.Id && x.Email == offlineUserRecord.Email && x.Password == offlineUserRecord.Password)!;
 
             if (loggedUser is null)
+            {
+                LogOut();
                 return true;
+            }
 
             offlineUserRecord = loggedUser;
             return false;

@@ -44,11 +44,11 @@ public class ConsolePrinter
     /// <summary>
     /// Number of rows after which screen starts to scroll
     /// </summary>
-    private readonly int cursorStickyStart = 5;
+    private int cursorStickyStart = 5;
     /// <summary>
     /// Number of rows left at bottom of screen
     /// </summary>
-    private readonly int paddingBottom = 0;
+    private int paddingBottom = 0;
 
     public readonly ConsoleKey InteractionKey = ConsoleKey.Enter;
     public readonly ConsoleKey UpKey = ConsoleKey.UpArrow;
@@ -92,11 +92,9 @@ public class ConsolePrinter
         ReloadBuffer();
     }
 
-    public ConsolePrinter(int cursorStickyStart, int paddingBottom) : this()
-    {
-        this.cursorStickyStart = cursorStickyStart;
-        this.paddingBottom = paddingBottom;
-    }
+    public void SetScrollingDelay(int lines) => cursorStickyStart = lines;
+
+    public void SetPaddingBottom(int lines) => paddingBottom = lines;
 
 
     /// <summary>
@@ -328,7 +326,24 @@ public class ConsolePrinter
     public void DeleteMemoryGroup(string group)
     {
         Enumerable.Range(0, memory.Count)
-            .Where(index => memoryGroupingKeys[index]?.StartsWith(group) ?? false && memoryGroupingKeys[index][group.Length] == '-')
+            .Where(index =>
+            {
+                var savedGroup = memoryGroupingKeys[index];
+
+                if (savedGroup is null)
+                    return false;
+
+                if (!savedGroup.StartsWith(group))
+                    return false;
+
+                if (savedGroup.Length == group.Length)
+                    return true;
+
+                if (savedGroup[group.Length] == '-')
+                    return true;
+
+                return false;
+            })
             .Reverse()
             .ToList()
             .ForEach(index =>
@@ -354,7 +369,7 @@ public class ConsolePrinter
                 if (savedGroup is null)
                     return false;
 
-                if(!savedGroup.StartsWith(group))
+                if (!savedGroup.StartsWith(group))
                     return false;
 
                 if (savedGroup.Length == group.Length)

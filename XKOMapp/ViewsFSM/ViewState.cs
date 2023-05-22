@@ -1,53 +1,48 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using XKOMapp.GUI;
-using XKOMapp.Models;
+﻿using XKOMapp.GUI;
 
 namespace XKOMapp.ViewsFSM
 {
     public abstract class ViewState
     {
-        protected ConsolePrinter? printer = null;
-        protected ViewStateMachine fsm { get; private set; }
-        protected bool isActiveState { get; private set; }
+        protected readonly ConsolePrinter printer = new();
+        protected readonly ViewStateMachine fsm;
+        protected bool IsActiveState { get; private set; }
+
+        private bool printerBuilt = false;
 
         protected ViewState(ViewStateMachine stateMachine)
         {
-            this.fsm = stateMachine;
+            fsm = stateMachine;
         }
+
+        protected abstract void InitialPrinterBuild(ConsolePrinter printer);
 
         public virtual void OnEnter()
         {
-            if (printer is not null)
-            printer.OnBufferReload += Display;
-            isActiveState = true;
-            printer?.SetBufferDirty();
-        }
+            IsActiveState = true;
 
+            if (!printerBuilt)
+            {
+                InitialPrinterBuild(printer);
+                printerBuilt = true;
+            }
+
+            printer.OnBufferReload += Display;
+            printer.SetBufferDirty();
+        }
         public virtual void OnExit()
         {
-            if (printer is not null)
             printer.OnBufferReload -= Display;
-            isActiveState = false;
+            IsActiveState = false;
         }
 
-        protected virtual void Display()
+        protected void Display()
         {
             ConsolePrinter.ClearScreen();
-            printer?.PrintBuffer();
+            printer.PrintBuffer();
         }
 
-        public virtual void Tick()
-        {
-            printer?.Tick();
-        }
-
-        public virtual void PassKeystroke(ConsoleKeyInfo info)
-        {
-            printer?.PassKeystroke(info);
-        }
+        public virtual void Tick() => printer.Tick();
+        public virtual void PassKeystroke(ConsoleKeyInfo info) => printer.PassKeystroke(info);
     }
 }
