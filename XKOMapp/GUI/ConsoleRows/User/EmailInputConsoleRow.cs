@@ -4,7 +4,7 @@ using Spectre.Console.Rendering;
 
 namespace XKOMapp.GUI.ConsoleRows.User
 {
-    //TODO better long emails support
+    //REFACTOR better long emails support
     internal class EmailInputConsoleRow : ICustomCursorConsoleRow, ICustomKeystrokeListenerConsoleRow, IHoverConsoleRow, IInteractableConsoleRow
     {
         private readonly string markupLabel;

@@ -67,7 +67,7 @@ internal class ListViewState : ViewState
             context.Add(clonedList);
             context.SaveChanges();
 
-            //TODO checkout this
+            //TODO checkout cloned list
         }));
         printer.AddRow(new InteractableConsoleRow(new Markup("[red]Delete list[/]"), (row, own) =>
         {
