@@ -16,13 +16,18 @@ namespace XKOMapp.ViewsFSM.States
 {
     internal class RegisteringViewState : ViewState
     {
-        private readonly NameInputConsoleRow nameRow;
-        private readonly NameInputConsoleRow surnameRow;
-        private readonly EmailInputConsoleRow emailRow;
-        private readonly PasswordInputConsoleRow passwordRow;
-        private readonly PasswordInputConsoleRow passwordConfirmRow;
+        const int labelPad = 16;
+        private readonly NameInputConsoleRow nameRow = new($"{"Name",-labelPad} : ", 32);
+        private readonly NameInputConsoleRow surnameRow = new($"{"Last name",-labelPad} : ", 32);
+        private readonly EmailInputConsoleRow emailRow = new($"{"Email",-labelPad} : ", 256);
+        private readonly PasswordInputConsoleRow passwordRow = new($"{"Password",-labelPad} : ", 32);
+        private readonly PasswordInputConsoleRow passwordConfirmRow = new($"{"Confirm password",-labelPad} : ", 32);
 
         public RegisteringViewState(ViewStateMachine stateMachine) : base(stateMachine)
+        {
+        }
+
+        protected override void InitialPrinterBuild(ConsolePrinter printer)
         {
             printer.AddRow(StandardRenderables.StandardHeader.ToBasicConsoleRow());
             printer.StartContent();
@@ -35,20 +40,10 @@ namespace XKOMapp.ViewsFSM.States
             printer.AddRow(new Rule("Registering").RuleStyle(Style.Parse(StandardRenderables.AquamarineColorHex)).HeavyBorder().ToBasicConsoleRow());
             printer.EnableScrolling();
 
-            const int labelPad = 16;
-            nameRow = new NameInputConsoleRow($"{"Name",-labelPad} : ", 32);
             printer.AddRow(nameRow);
-
-            surnameRow = new NameInputConsoleRow($"{"Last name",-labelPad} : ", 32);
             printer.AddRow(surnameRow);
-
-            emailRow = new EmailInputConsoleRow($"{"Email",-labelPad} : ", 256);
             printer.AddRow(emailRow);
-
-            passwordRow = new PasswordInputConsoleRow($"{"Password",-labelPad} : ", 32);
             printer.AddRow(passwordRow);
-
-            passwordConfirmRow = new PasswordInputConsoleRow($"{"Confirm password",-labelPad} : ", 32);
             printer.AddRow(passwordConfirmRow);
 
             printer.AddRow(StandardRenderables.StandardSeparator.ToBasicConsoleRow());
@@ -80,9 +75,14 @@ namespace XKOMapp.ViewsFSM.States
         {
             base.OnEnter();
 
+            nameRow.ResetInput();
+            surnameRow.ResetInput();
+            emailRow.ResetInput();
+            passwordRow.ResetInput();
+            passwordConfirmRow.ResetInput();
+
             printer.ResetCursor();
         }
-
 
         private bool ValidateInput()
         {

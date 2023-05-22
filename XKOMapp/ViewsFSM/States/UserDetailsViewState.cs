@@ -15,17 +15,10 @@ namespace XKOMapp.ViewsFSM.States
     {
         public UserDetailsViewState(ViewStateMachine stateMachine) : base(stateMachine)
         {
-            if (SessionData.HasSessionExpired(out var loggedUser))
-            {
-                fsm.Checkout(new FastLoginViewState(fsm,
-                    markupMessage: $"[red]Session expired[/]",
-                    loginRollbackTarget: new UserDetailsViewState(fsm),
-                    abortRollbackTarget: fsm.GetSavedState("mainMenu"),
-                    abortMarkupMessage: "Back to main menu"
-                ));
-                return;
-            }
+        }
 
+        protected override void InitialPrinterBuild(ConsolePrinter printer)
+        {
             printer.AddRow(StandardRenderables.StandardHeader.ToBasicConsoleRow());
             printer.StartContent();
             printer.AddRow(new InteractableConsoleRow(new Text("Back to main menu"), (row, owner) => fsm.Checkout("mainMenu")));
@@ -39,11 +32,7 @@ namespace XKOMapp.ViewsFSM.States
 
             printer.EnableScrolling();
 
-            const int pad = 9;
-            printer.AddRow(new Text($"{"Name",-pad} : {loggedUser.Name}").ToBasicConsoleRow());
-            printer.AddRow(new Text($"{"Last name",-pad} : {loggedUser.LastName}").ToBasicConsoleRow());
-            printer.AddRow(new Text($"{"Email",-pad} : {new string(loggedUser.Email.Take(Console.WindowWidth - 8 - pad).ToArray())}").ToBasicConsoleRow());//REFACTOR add better support for long emails
-            printer.AddRow(new Text($"{"Password",-pad} : {loggedUser.Password}").ToBasicConsoleRow());//REFACTOR add hiding password
+            printer.StartGroup("credentials");
 
             //TODO edit button unfolding 5 inputs and accept button
             //TODO implement deleting account
@@ -52,6 +41,28 @@ namespace XKOMapp.ViewsFSM.States
             printer.AddRow(new InteractableConsoleRow(rule, (row, onwer) => RefreshOrders()));
 
             printer.StartGroup("orders");
+        }
+
+        public override void OnEnter()
+        {
+            if (SessionData.HasSessionExpired(out var loggedUser))
+            {
+                fsm.Checkout(new FastLoginViewState(fsm,
+                    markupMessage: $"[red]Session expired[/]",
+                    loginRollbackTarget: new UserDetailsViewState(fsm),
+                    abortRollbackTarget: fsm.GetSavedState("mainMenu"),
+                    abortMarkupMessage: "Back to main menu"
+                ));
+                return;
+            }
+
+            base.OnEnter();
+
+            printer.ClearMemoryGroup("credentials");
+
+            RefreshCredentials(loggedUser);
+
+            printer.ResetCursor();
             RefreshOrders();
         }
 
@@ -96,6 +107,15 @@ namespace XKOMapp.ViewsFSM.States
                     printer?.AddRow(new Text($"  {order.Id}").ToBasicConsoleRow(), "orders");
                 });
             });
+        }
+
+        private void RefreshCredentials(User user)
+        {
+            const int pad = 9;
+            printer.AddRow(new Text($"{"Name",-pad} : {user.Name}").ToBasicConsoleRow(), "credentials");
+            printer.AddRow(new Text($"{"Last name",-pad} : {user.LastName}").ToBasicConsoleRow(), "credentials");
+            printer.AddRow(new Text($"{"Email",-pad} : {new string(user.Email.Take(Console.WindowWidth - 8 - pad).ToArray())}").ToBasicConsoleRow(), "credentials");//REFACTOR add better support for long emails
+            printer.AddRow(new Text($"{"Password",-pad} : {user.Password}").ToBasicConsoleRow(), "credentials");//REFACTOR add hiding password
         }
     }
 }

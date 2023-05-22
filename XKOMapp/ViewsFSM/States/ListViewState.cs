@@ -14,14 +14,18 @@ using XKOMapp.GUI.ConsoleRows.ProductSearching;
 using System.Security.Cryptography.X509Certificates;
 namespace XKOMapp.ViewsFSM.States;
 
-internal class ListViewState: ViewState
+internal class ListViewState : ViewState
 {
     private readonly List list;
     private readonly ListNameInputConsoleRow nameRow;
     public ListViewState(ViewStateMachine stateMachine, List list) : base(stateMachine)
     {
         this.list = list;
+        nameRow = new($"Name: {list.Name} | New name: ", 32);
+    }
 
+    protected override void InitialPrinterBuild(ConsolePrinter printer)
+    {
         printer.AddRow(StandardRenderables.StandardHeader.ToBasicConsoleRow());
         printer.StartContent();
 
@@ -32,20 +36,20 @@ internal class ListViewState: ViewState
         printer.AddRow(new Rule("List").RuleStyle(Style.Parse(StandardRenderables.AquamarineColorHex)).HeavyBorder().ToBasicConsoleRow());
         printer.EnableScrolling();
 
-        nameRow = new ListNameInputConsoleRow($"Name: {list.Name} | New name: ", 32);
         printer.AddRow(nameRow);
-        printer.AddRow(new BasicConsoleRow(new Text($"Link: {list.Link}")));
+        
+        printer.AddRow(new BasicConsoleRow(new Text($"Link: {list.Link}"))); //TODO long display support
 
         printer.AddRow(StandardRenderables.StandardSeparator.ToBasicConsoleRow());
 
-        //printer.AddRow(new InteractableConsoleRow(new Text("Delete unavailable"), (row, own) => throw new NotImplementedException())); //TODO deleting unavailavle products
+        printer.AddRow(new InteractableConsoleRow(new Text("Delete unavailable"), (row, own) => throw new NotImplementedException())); //TODO deleting unavailavle products
         printer.AddRow(new InteractableConsoleRow(new Text("Clone list"), (row, own) =>
         {
             if (SessionData.HasSessionExpired(out User dbUser))
             {
                 fsm.Checkout(new FastLoginViewState(fsm,
                     markupMessage: $"[red]Session expired[/] - [{StandardRenderables.GrassColorHex}]Log in to clone list[/]",
-                    loginRollbackTarget: fsm.GetSavedState("listBrowse"),
+                    loginRollbackTarget: this,
                     abortRollbackTarget: fsm.GetSavedState("mainMenu"),
                     abortMarkupMessage: "Back to main menu"
                 ));
@@ -62,6 +66,8 @@ internal class ListViewState: ViewState
             };
             context.Add(clonedList);
             context.SaveChanges();
+
+            //TODO checkout this
         }));
         printer.AddRow(new InteractableConsoleRow(new Markup("[red]Delete list[/]"), (row, own) =>
         {
@@ -69,7 +75,7 @@ internal class ListViewState: ViewState
             {
                 fsm.Checkout(new FastLoginViewState(fsm,
                     markupMessage: $"[red]Session expired[/] - [{StandardRenderables.GrassColorHex}]Log in to delete list[/]",
-                    loginRollbackTarget: fsm.GetSavedState("listBrowse"),
+                    loginRollbackTarget: this,
                     abortRollbackTarget: fsm.GetSavedState("mainMenu"),
                     abortMarkupMessage: "Back to main menu"
                 ));
@@ -78,7 +84,7 @@ internal class ListViewState: ViewState
 
             using var context = new XkomContext();
             var deleteList = context.Lists.SingleOrDefault(x => x.Id == list.Id);
-            if (deleteList != null)
+            if (deleteList is not null)
             {
                 context.Remove(deleteList);
                 context.SaveChanges();
@@ -86,13 +92,15 @@ internal class ListViewState: ViewState
 
             fsm.Checkout("listBrowse");
         }));
+
+        //TODO move to click on name input
         printer.AddRow(new InteractableConsoleRow(new Markup("[green]Save changes[/]"), (row, own) =>
         {
             if (SessionData.HasSessionExpired(out User dbUser))
             {
                 fsm.Checkout(new FastLoginViewState(fsm,
                     markupMessage: $"[red]Session expired[/] - [{StandardRenderables.GrassColorHex}]Log in to create list[/]",
-                    loginRollbackTarget: fsm.GetSavedState("listBrowse"),
+                    loginRollbackTarget: this,
                     abortRollbackTarget: fsm.GetSavedState("mainMenu"),
                     abortMarkupMessage: "Back to main menu"
                 ));
@@ -101,15 +109,17 @@ internal class ListViewState: ViewState
 
             if (!ValidateInput())
                 return;
-            if (nameRow.CurrentInput.Length != 0)
+
+            using var context = new XkomContext();
+            var updatelist = context.Lists.SingleOrDefault(x => x.Id == list.Id);
+
+            if(updatelist is not null)
             {
-                using var context = new XkomContext();
-                var updatelist = context.Lists.First(x => x.Id == list.Id);
                 updatelist.Name = nameRow.CurrentInput;
                 context.SaveChanges();
             }
 
-            fsm.Checkout("listBrowse");
+            //TODO rebuild name
         }));
 
         printer.StartGroup("errors");
@@ -119,12 +129,13 @@ internal class ListViewState: ViewState
     {
         base.OnEnter();
 
-        printer?.ResetCursor();
+        printer.ClearMemoryGroup("errors");
+        printer.ResetCursor();
     }
 
     private static string GetLink()
     {
-        string link = "https://www.x-kom.pl/list/";
+        string link = @"https://www.x-kom.pl/list/";
         var random = new Random();
         List<int> notAvailalbe = new() { 58, 59, 60, 61, 62, 63, 64, 91, 92, 93, 94, 95, 96 };
 
@@ -146,25 +157,25 @@ internal class ListViewState: ViewState
 
     private bool ValidateInput()
     {
-        printer?.ClearMemoryGroup("errors");
-
-        bool isValid = true;
+        printer.ClearMemoryGroup("errors");
 
         string name = nameRow.CurrentInput;
 
         if (name.Length == 0)
-            return isValid;
+            return false;
+
         if (name.Length < 2)
         {
-            printer?.AddRow(new Markup("[red]Name is too short[/]").ToBasicConsoleRow(), "errors");
-            isValid = false;
+            printer.AddRow(new Markup("[red]Name is too short[/]").ToBasicConsoleRow(), "errors");
+            return false;
         }
-        else if (name.Length > 32)
+
+        if (name.Length > 32)
         {
-            printer?.AddRow(new Markup("[red]Name is too long[/]").ToBasicConsoleRow(), "errors");
-            isValid = false;
+            printer.AddRow(new Markup("[red]Name is too long[/]").ToBasicConsoleRow(), "errors");
+            return false;
         }
-        return isValid;
+        return true;
     }
 }
 

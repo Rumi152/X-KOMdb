@@ -16,10 +16,26 @@ namespace XKOMapp.ViewsFSM.States
 {
     internal class FastLoginViewState : ViewState
     {
-        private readonly EmailInputConsoleRow emailRow;
-        private readonly PasswordInputConsoleRow passwordRow;
+        private readonly string markupMessage;
+        private readonly ViewState loginRollbackTarget;
+        private readonly ViewState abortRollbackTarget;
+        private readonly string loginMarkupMessage;
+        private readonly string abortMarkupMessage;
+
+        const int labelPad = 8;
+        private readonly EmailInputConsoleRow emailRow = new($"{"Email",-labelPad} : ", 256);
+        private readonly PasswordInputConsoleRow passwordRow = new($"{"Password",-labelPad} : ", 32);
 
         public FastLoginViewState(ViewStateMachine stateMachine, string markupMessage, ViewState loginRollbackTarget,  ViewState abortRollbackTarget, string loginMarkupMessage = "Log in", string abortMarkupMessage = "Click to abort") : base(stateMachine)
+        {
+            this.markupMessage = markupMessage;
+            this.loginRollbackTarget = loginRollbackTarget;
+            this.abortRollbackTarget = abortRollbackTarget;
+            this.loginMarkupMessage = loginMarkupMessage;
+            this.abortMarkupMessage = abortMarkupMessage;
+        }
+
+        protected override void InitialPrinterBuild(ConsolePrinter printer)
         {
             printer.AddRow(StandardRenderables.StandardHeader.ToBasicConsoleRow());
             printer.StartContent();
@@ -30,9 +46,6 @@ namespace XKOMapp.ViewsFSM.States
             printer.AddRow(new Rule("Logging in").RuleStyle(Style.Parse(StandardRenderables.AquamarineColorHex)).HeavyBorder().ToBasicConsoleRow());
             printer.EnableScrolling();
 
-            const int labelPad = 8;
-            emailRow = new EmailInputConsoleRow($"{"Email",-labelPad} : ", 256);
-            passwordRow = new PasswordInputConsoleRow($"{"Password",-labelPad} : ", 32);
             printer.AddRow(emailRow);
             printer.AddRow(passwordRow);
 
@@ -45,13 +58,23 @@ namespace XKOMapp.ViewsFSM.States
 
                 fsm.Checkout(loginRollbackTarget);
             }));
+
             printer.StartGroup("errors");
         }
 
+        public override void OnEnter()
+        {
+            base.OnEnter();
+
+            emailRow.ResetInput();
+            passwordRow.ResetInput();
+            printer.ResetCursor();
+            printer.ClearMemoryGroup("errors");
+        }
 
         private bool TryLogIn()
         {
-            printer?.ClearMemoryGroup("errors");
+            printer.ClearMemoryGroup("errors");
 
             string email = emailRow.CurrentInput;
             string password = passwordRow.CurrentInput;
@@ -59,7 +82,7 @@ namespace XKOMapp.ViewsFSM.States
             if (SessionData.TryLogIn(email, password, out _))
                 return true;
 
-            printer?.AddRow(new Markup("[red]Wrong password and/or email[/]").ToBasicConsoleRow(), "errors");
+            printer.AddRow(new Markup("[red]Wrong password and/or email[/]").ToBasicConsoleRow(), "errors");
             return false;
         }
     }

@@ -13,6 +13,10 @@ internal class MainMenuViewState : ViewState
 {
     public MainMenuViewState(ViewStateMachine stateMachine) : base(stateMachine)
     {
+    }
+
+    protected override void InitialPrinterBuild(ConsolePrinter printer)
+    {
         printer.AddRow(StandardRenderables.StandardHeader.ToBasicConsoleRow());
         printer.StartContent();
 
@@ -21,19 +25,26 @@ internal class MainMenuViewState : ViewState
 
         printer.AddRow(new InteractableConsoleRow(new Text("Find products"), (row, own) => fsm.Checkout("productsSearch")));
 
-        printer.StartGroup("options");
+        printer.AddRow(new Rule("Account").RuleStyle(new Style(StandardRenderables.AquamarineColor, null, null, "https://www.google.com/")).ToBasicConsoleRow());
+
+        printer.StartGroup("options-account");
     }
+
     public override void OnEnter()
     {
         base.OnEnter();
-        printer?.ClearMemoryGroup("options");
+
+        printer.ClearMemoryGroup("options");
+
         if (!SessionData.IsLoggedIn())
-            printer?.AddRow(new InteractableConsoleRow(new Text("Log in"), (row, own) => fsm.Checkout(new LoginViewState(fsm))), "options");
+            printer.AddRow(new InteractableConsoleRow(new Markup($"[{StandardRenderables.GrassColorHex}]Log in[/]"), (row, own) => fsm.Checkout(new LoginViewState(fsm))), "options-account");
         else
         {
-            printer?.AddRow(new InteractableConsoleRow(new Text("Account view"), (row, own) => fsm.Checkout(new UserDetailsViewState(fsm))), "options");
-            printer?.AddRow(new InteractableConsoleRow(new Text("Your lists"), (row, own) => fsm.Checkout("listBrowse")), "options");
+            printer.AddRow(new InteractableConsoleRow(new Text("Account view"), (row, own) => fsm.Checkout(new UserDetailsViewState(fsm))), "options-account");
+            printer.AddRow(new InteractableConsoleRow(new Text("Your lists"), (row, own) => fsm.Checkout("listBrowse")), "options-account");
         }
+
+        printer.ResetCursor();
     }
 }
 
