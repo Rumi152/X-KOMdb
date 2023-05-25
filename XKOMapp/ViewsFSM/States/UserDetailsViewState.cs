@@ -35,7 +35,9 @@ namespace XKOMapp.ViewsFSM.States
             printer.StartGroup("credentials");
 
             //TODO edit button unfolding 5 inputs and accept button
-            //TODO implement deleting account
+
+            printer.StartGroup("deleting-sure");
+            printer.StartGroup("deleting-base");
 
             var rule = new Rule("Click to refresh orders").RuleStyle(new Style().Foreground(StandardRenderables.AquamarineColor)).HeavyBorder();
             printer.AddRow(new InteractableConsoleRow(rule, (row, onwer) => RefreshOrders()));
@@ -58,12 +60,11 @@ namespace XKOMapp.ViewsFSM.States
 
             base.OnEnter();
 
-            printer.ClearMemoryGroup("credentials");
-
+            DisplayDeleteBase();
             RefreshCredentials(loggedUser);
+            RefreshOrders();
 
             printer.ResetCursor();
-            RefreshOrders();
         }
 
         private void RefreshOrders()
@@ -79,7 +80,7 @@ namespace XKOMapp.ViewsFSM.States
                 return;
             }
 
-            printer?.ClearMemoryGroup("orders");
+            printer.ClearMemoryGroup("orders");
 
             using var context = new XkomContext();
             context.Attach(loggedUser);
@@ -101,21 +102,58 @@ namespace XKOMapp.ViewsFSM.States
 
             statusGrouping.ForEach(g =>
             {
-                printer?.AddRow(new Text($"{g.Status.Name}:").ToBasicConsoleRow(), "orders");
+                printer.AddRow(new Text($"{g.Status.Name}:").ToBasicConsoleRow(), "orders");
                 g.Orders.ForEach(order =>
                 {
-                    printer?.AddRow(new Text($"  {order.Id}").ToBasicConsoleRow(), "orders");
+                    printer.AddRow(new Text($"  {order.Id}").ToBasicConsoleRow(), "orders");
                 });
             });
         }
 
         private void RefreshCredentials(User user)
         {
+            printer.ClearMemoryGroup("credentials");
+
             const int pad = 9;
             printer.AddRow(new Text($"{"Name",-pad} : {user.Name}").ToBasicConsoleRow(), "credentials");
             printer.AddRow(new Text($"{"Last name",-pad} : {user.LastName}").ToBasicConsoleRow(), "credentials");
             printer.AddRow(new Text($"{"Email",-pad} : {new string(user.Email.Take(Console.WindowWidth - 8 - pad).ToArray())}").ToBasicConsoleRow(), "credentials");//REFACTOR add better support for long emails
             printer.AddRow(new Text($"{"Password",-pad} : {user.Password}").ToBasicConsoleRow(), "credentials");//REFACTOR add hiding password
+        }
+
+
+        private void DisplayDeleteBase()
+        {
+            printer.ClearMemoryGroup("deleting");
+
+            printer.AddRow(new InteractableConsoleRow(new Markup("[red]Delete account[/]"), (row, onwer) => DisplayDeleteSure()), "deleting-base");
+        }
+
+        private void DisplayDeleteSure()
+        {
+            printer.ClearMemoryGroup("deleting");
+
+            printer.AddRow(new InteractableConsoleRow(new Markup("[red]You sure dawg?[/]"), (row, onwer) =>
+            {
+                if (SessionData.HasSessionExpired(out var loggedUser))
+                {
+                    fsm.Checkout(new FastLoginViewState(fsm,
+                        markupMessage: $"[red]Session expired[/]",
+                        loginRollbackTarget: this,
+                        abortRollbackTarget: fsm.GetSavedState("mainMenu"),
+                        abortMarkupMessage: "Back to main menu"
+                    ));
+                    return;
+                }
+
+                using XkomContext context = new();
+                context.Remove(loggedUser);
+                context.SaveChanges();
+
+                SessionData.LogOut();
+                fsm.Checkout("mainMenu");
+
+            }), "deleting-sure");
         }
     }
 }
