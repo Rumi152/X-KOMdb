@@ -1,10 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Spectre.Console;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using XKOMapp.GUI;
 using XKOMapp.GUI.ConsoleRows;
 using XKOMapp.Models;
@@ -39,7 +34,7 @@ namespace XKOMapp.ViewsFSM.States
             printer.StartGroup("deleting-sure");
             printer.StartGroup("deleting-base");
 
-            var rule = new Rule("Click to refresh orders").RuleStyle(new Style().Foreground(StandardRenderables.AquamarineColor)).HeavyBorder();
+            Rule rule = new Rule("Click to refresh orders").RuleStyle(new Style().Foreground(StandardRenderables.AquamarineColor)).HeavyBorder();
             printer.AddRow(new InteractableConsoleRow(rule, (row, onwer) => RefreshOrders()));
 
             printer.StartGroup("orders");
@@ -47,7 +42,7 @@ namespace XKOMapp.ViewsFSM.States
 
         public override void OnEnter()
         {
-            if (SessionData.HasSessionExpired(out var loggedUser))
+            if (SessionData.HasSessionExpired(out User? loggedUser))
             {
                 fsm.Checkout(new FastLoginViewState(fsm,
                     markupMessage: $"[red]Session expired[/]",
@@ -69,7 +64,7 @@ namespace XKOMapp.ViewsFSM.States
 
         private void RefreshOrders()
         {
-            if (SessionData.HasSessionExpired(out var loggedUser))
+            if (SessionData.HasSessionExpired(out User? loggedUser))
             {
                 fsm.Checkout(new FastLoginViewState(fsm,
                     markupMessage: $"[red]Session expired[/]",
@@ -135,7 +130,7 @@ namespace XKOMapp.ViewsFSM.States
 
             printer.AddRow(new InteractableConsoleRow(new Markup("[red]You sure dawg?[/]"), (row, onwer) =>
             {
-                if (SessionData.HasSessionExpired(out var loggedUser))
+                if (SessionData.HasSessionExpired(out User? loggedUser))
                 {
                     fsm.Checkout(new FastLoginViewState(fsm,
                         markupMessage: $"[red]Session expired[/]",
