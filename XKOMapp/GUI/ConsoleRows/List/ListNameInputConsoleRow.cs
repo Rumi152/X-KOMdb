@@ -12,15 +12,17 @@ internal class ListNameInputConsoleRow : ICustomCursorConsoleRow, ICustomKeystro
 {
     private readonly string markupLabel;
     private readonly int maxLength;
+    private readonly Action oninteraction;
     ConsolePrinter owner = null!;
 
     public string CurrentInput { get; private set; } = "";
     private bool isHovered;
 
-    public ListNameInputConsoleRow(string markupLabel, int maxLength)
+    public ListNameInputConsoleRow(string markupLabel, int maxLength, Action oninteraction)
     {
         this.markupLabel = markupLabel;
         this.maxLength = maxLength;
+        this.oninteraction = oninteraction;
     }
 
     public IRenderable GetRenderContent() => new Markup($"{markupLabel}{CurrentInput.EscapeMarkup()}{(isHovered ? "[blink]_[/]" : "")}");
@@ -64,7 +66,11 @@ internal class ListNameInputConsoleRow : ICustomCursorConsoleRow, ICustomKeystro
     public void OnHoverStart() => isHovered = true;
     public void OnHoverEnd() => isHovered = false;
 
-    public void OnInteraction() => owner.CursorDown();
+    public void OnInteraction()
+    {
+        owner.CursorDown();
+        oninteraction();
+    }
 
 
     public void ResetInput()
