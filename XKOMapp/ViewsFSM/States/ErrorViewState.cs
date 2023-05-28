@@ -24,6 +24,7 @@ internal class ErrorViewState : ViewState
         printer.StartContent();
 
         printer.AddRow(new InteractableConsoleRow(new Text("Back to main menu"), (row, owner) => fsm.Checkout("mainMenu")));
+        printer.AddRow(new InteractableConsoleRow(new Markup("[red]Exit app[/]"), (row, owner) => Environment.Exit(0)));
         GetWrappedMessage(exception.Message).ForEach(x => printer.AddRow(new Text(x).ToBasicConsoleRow()));
     }
 
