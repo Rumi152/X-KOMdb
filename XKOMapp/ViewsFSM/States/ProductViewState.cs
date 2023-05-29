@@ -354,15 +354,7 @@ public class ProductViewState : ViewState
         if (context.Products.Any(x => x.Id == product.Id))
             return false;
 
-
-        printer.ClearMemory();
-
-        printer.AddRow(StandardRenderables.StandardHeader.ToBasicConsoleRow());
-        printer.StartContent();
-
-        printer.AddRow(new Markup("[red]Product you are looking for no longer exists[/]").ToBasicConsoleRow());
-        printer.AddRow(new InteractableConsoleRow(new Text("Back to searching"), (row, owner) => fsm.Checkout("productsSearch")));
-
+        fsm.Checkout(new MessageViewState(fsm, "Product you are looking for no longer exists", fsm.GetSavedState("productsSearch"), "Back to searching"));
         return true;
     }
 
