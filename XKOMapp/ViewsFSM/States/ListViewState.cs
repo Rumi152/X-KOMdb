@@ -12,6 +12,9 @@ using XKOMapp.Models;
 using XKOMapp.GUI.ConsoleRows.List;
 using XKOMapp.GUI.ConsoleRows.ProductSearching;
 using System.Security.Cryptography.X509Certificates;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Internal;
+
 namespace XKOMapp.ViewsFSM.States;
 
 internal class ListViewState : ViewState
@@ -21,7 +24,7 @@ internal class ListViewState : ViewState
     public ListViewState(ViewStateMachine stateMachine, List list) : base(stateMachine)
     {
         this.list = list;
-        nameRow = new($"Name: {list.Name} | New name: ", 32);
+        nameRow = new($"Name: {list.Name} | New name: ", 32, OnNameInputClick);
     }
 
     protected override void InitialPrinterBuild(ConsolePrinter printer)
@@ -37,12 +40,39 @@ internal class ListViewState : ViewState
         printer.EnableScrolling();
 
         printer.AddRow(nameRow);
-        
-        printer.AddRow(new BasicConsoleRow(new Text($"Link: {list.Link}"))); //TODO long display support
 
+        printer.AddRow(new BasicConsoleRow(new Text($"Link: {list.Link}"))); //TODO long display support
+    
         printer.AddRow(StandardRenderables.StandardSeparator.ToBasicConsoleRow());
 
-        printer.AddRow(new InteractableConsoleRow(new Text("Delete unavailable"), (row, own) => throw new NotImplementedException())); //TODO deleting unavailavle products
+        printer.AddRow(new InteractableConsoleRow(new Text("Delete unavailable"), (row, own) =>
+        {
+            if (SessionData.HasSessionExpired(out User dbUser))
+            {
+                fsm.Checkout(new FastLoginViewState(fsm,
+                    markupMessage: $"[red]Session expired[/] - [{StandardRenderables.GrassColorHex}]Log in to delete products[/]",
+                    loginRollbackTarget: this,
+                    abortRollbackTarget: fsm.GetSavedState("mainMenu"),
+                    abortMarkupMessage: "Back to main menu"
+                ));
+                return;
+            }
+
+            using var context = new XkomContext();
+
+            var listProducts = context.ListProducts.Where(x => x.List == list).ToList();
+            var productIds = listProducts.Select(x => x.ProductId).ToList();
+            var unavailableProducts = context.Products.Where(x => productIds.Contains(x.Id) && x.NumberAvailable <= 0).ToList();
+            var productRelationToDelete = listProducts.Where(x => unavailableProducts.Contains(x.Product)).ToList();
+
+            if (productRelationToDelete is not null)
+            {
+                context.RemoveRange(productRelationToDelete);
+                context.SaveChanges();
+            }
+            RefreshProducts();
+        }));
+
         printer.AddRow(new InteractableConsoleRow(new Text("Clone list"), (row, own) =>
         {
             if (SessionData.HasSessionExpired(out User dbUser))
@@ -59,12 +89,28 @@ internal class ListViewState : ViewState
             using var context = new XkomContext();
             context.Attach(dbUser);
             var clonedList = new List()
-            {
+            { 
                 Name = $"{list.Name}-copy",
                 Link = GetLink(),
                 User = dbUser
             };
             context.Add(clonedList);
+
+            var listProducts = context.ListProducts.Where(x => x.List == list).ToList();
+            var productIds = listProducts.Select(x => x.ProductId).ToList();
+            var products = context.Products.Where(x => productIds.Contains(x.Id)).ToList();
+            if (products.Any())
+            {
+                products.ToList().ForEach(x =>
+                {
+                    var newProdList = new ListProduct()
+                    {
+                        ProductId = x.Id,
+                        List = clonedList
+                    };
+                    context.Add(newProdList);
+                });
+            }
             context.SaveChanges();
 
             //TODO checkout cloned list
@@ -93,36 +139,36 @@ internal class ListViewState : ViewState
             fsm.Checkout("listBrowse");
         }));
 
-        //TODO move to click on name input
-        printer.AddRow(new InteractableConsoleRow(new Markup("[green]Save changes[/]"), (row, own) =>
-        {
-            if (SessionData.HasSessionExpired(out User dbUser))
-            {
-                fsm.Checkout(new FastLoginViewState(fsm,
-                    markupMessage: $"[red]Session expired[/] - [{StandardRenderables.GrassColorHex}]Log in to create list[/]",
-                    loginRollbackTarget: this,
-                    abortRollbackTarget: fsm.GetSavedState("mainMenu"),
-                    abortMarkupMessage: "Back to main menu"
-                ));
-                return;
-            }
-
-            if (!ValidateInput())
-                return;
-
-            using var context = new XkomContext();
-            var updatelist = context.Lists.SingleOrDefault(x => x.Id == list.Id);
-
-            if(updatelist is not null)
-            {
-                updatelist.Name = nameRow.CurrentInput;
-                context.SaveChanges();
-            }
-
-            //TODO rebuild name
-        }));
-
+        printer.AddRow(new Rule("Products in this list").RuleStyle(Style.Parse(StandardRenderables.AquamarineColorHex)).HeavyBorder().ToBasicConsoleRow());
+        printer.StartGroup("lists");
         printer.StartGroup("errors");
+    }
+
+    private void OnNameInputClick()
+    {
+        if (SessionData.HasSessionExpired(out User dbUser))
+        {
+            fsm.Checkout(new FastLoginViewState(fsm,
+                markupMessage: $"[red]Session expired[/] - [{StandardRenderables.GrassColorHex}]Log in to save changes[/]",
+                loginRollbackTarget: this,
+                abortRollbackTarget: fsm.GetSavedState("mainMenu"),
+                abortMarkupMessage: "Back to main menu"
+            ));
+            return;
+        }
+
+        if (!ValidateInput())
+            return;
+
+        using var context = new XkomContext();
+        var updatelist = context.Lists.SingleOrDefault(x => x.Id == list.Id);
+
+        if (updatelist is not null)
+        {
+            updatelist.Name = nameRow.CurrentInput;
+            context.SaveChanges();
+        }
+        //TODO rebuild name
     }
 
     public override void OnEnter()
@@ -131,6 +177,7 @@ internal class ListViewState : ViewState
 
         printer.ClearMemoryGroup("errors");
         printer.ResetCursor();
+        RefreshProducts();
     }
 
     private static string GetLink()
@@ -155,7 +202,38 @@ internal class ListViewState : ViewState
         return link;
     }
 
-    private bool ValidateInput()
+    private void RefreshProducts()
+    {
+        printer.ClearMemoryGroup("products");
+
+        using var context = new XkomContext();
+        var listProducts = context.ListProducts.Where(x => x.List == list).ToList();
+        var productIds = listProducts.Select(x => x.ProductId).ToList();
+        var products = context.Products.Where(x => productIds.Contains(x.Id)).ToList();
+
+        if (!products.Any())
+            printer.AddRow(new Text("No products were found").ToBasicConsoleRow(), "products");
+
+        products.ToList().ForEach(x =>
+        {
+            printer.AddRow(new InteractableConsoleRow(new Markup(x.Name), (row, printer) =>
+            {
+                if (SessionData.HasSessionExpired(out User dbUser))
+                {
+                    fsm.Checkout(new FastLoginViewState(fsm,
+                        markupMessage: $"[red]Session expired[/] - [{StandardRenderables.GrassColorHex}]Log in to see product[/]",
+                        loginRollbackTarget: this,
+                        abortRollbackTarget: fsm.GetSavedState("mainMenu"),
+                        abortMarkupMessage: "Back to main menu"
+                    ));
+                    return;
+                }
+
+                fsm.Checkout(new ProductViewState(fsm, x));
+            }), "products");
+        });
+    }
+        private bool ValidateInput()
     {
         printer.ClearMemoryGroup("errors");
 

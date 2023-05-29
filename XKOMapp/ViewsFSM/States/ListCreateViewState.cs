@@ -16,7 +16,7 @@ namespace XKOMapp.ViewsFSM.States;
 internal class ListCreateViewState : ViewState
 {
     const int labelPad = 4;
-    private readonly ListNameInputConsoleRow nameRow = new($"{"Name",-labelPad} : ", 32);
+    private readonly ListNameInputConsoleRow nameRow = new($"{"Name",-labelPad} : ", 32, () => { });
 
     public ListCreateViewState(ViewStateMachine stateMachine) : base(stateMachine)
     {
