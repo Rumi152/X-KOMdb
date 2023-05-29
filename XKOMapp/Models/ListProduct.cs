@@ -11,6 +11,8 @@ public partial class ListProduct
 
     public int ListId { get; set; }
 
+    public int Number { get; set; }
+
     public virtual List List { get; set; } = null!;
 
     public virtual Product Product { get; set; } = null!;

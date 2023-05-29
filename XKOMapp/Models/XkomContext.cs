@@ -48,13 +48,13 @@ public partial class XkomContext : DbContext
     public virtual DbSet<User> Users { get; set; }
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-         => optionsBuilder.UseSqlServer("Data Source=(localdb)\\MSSQLLocalDB;Initial Catalog=XKOM;Trusted_Connection=true");
+        => optionsBuilder.UseSqlServer("Data Source=(localdb)\\MSSQLLocalDB;Initial Catalog=XKOM;Trusted_Connection=true");
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<Cart>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__Cart__3214EC2741799B05");
+            entity.HasKey(e => e.Id).HasName("PK__Cart__3214EC2759B8C9B3");
 
             entity.ToTable("Cart");
 
@@ -65,12 +65,12 @@ public partial class XkomContext : DbContext
             entity.HasOne(d => d.User).WithMany(p => p.Carts)
                 .HasForeignKey(d => d.UserId)
                 .OnDelete(DeleteBehavior.SetNull)
-                .HasConstraintName("FK__Cart__UserID__5070F446");
+                .HasConstraintName("FK__Cart__UserID__5165187F");
         });
 
         modelBuilder.Entity<CartProduct>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__Cart_Pro__3214EC27339FDF69");
+            entity.HasKey(e => e.Id).HasName("PK__Cart_Pro__3214EC2702AACDD1");
 
             entity.ToTable("Cart_Product");
 
@@ -80,20 +80,20 @@ public partial class XkomContext : DbContext
 
             entity.HasOne(d => d.Cart).WithMany(p => p.CartProducts)
                 .HasForeignKey(d => d.CartId)
-                .HasConstraintName("FK__Cart_Prod__CartI__571DF1D5");
+                .HasConstraintName("FK__Cart_Prod__CartI__5812160E");
 
             entity.HasOne(d => d.Product).WithMany(p => p.CartProducts)
                 .HasForeignKey(d => d.ProductId)
-                .HasConstraintName("FK__Cart_Prod__Produ__5629CD9C");
+                .HasConstraintName("FK__Cart_Prod__Produ__571DF1D5");
         });
 
         modelBuilder.Entity<City>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__City__3214EC27CF7EA2F0");
+            entity.HasKey(e => e.Id).HasName("PK__City__3214EC27B0211B15");
 
             entity.ToTable("City");
 
-            entity.HasIndex(e => e.Name, "UQ__City__737584F69BB34E90").IsUnique();
+            entity.HasIndex(e => e.Name, "UQ__City__737584F6875CFD85").IsUnique();
 
             entity.Property(e => e.Id).HasColumnName("ID");
             entity.Property(e => e.Name)
@@ -103,7 +103,7 @@ public partial class XkomContext : DbContext
 
         modelBuilder.Entity<FavouriteProduct>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__Favourit__3214EC2772D2E586");
+            entity.HasKey(e => e.Id).HasName("PK__Favourit__3214EC27E6B63C4E");
 
             entity.ToTable("FavouriteProduct");
 
@@ -113,16 +113,16 @@ public partial class XkomContext : DbContext
 
             entity.HasOne(d => d.Product).WithMany(p => p.FavouriteProducts)
                 .HasForeignKey(d => d.ProductId)
-                .HasConstraintName("FK__Favourite__Produ__5535A963");
+                .HasConstraintName("FK__Favourite__Produ__5629CD9C");
 
             entity.HasOne(d => d.User).WithMany(p => p.FavouriteProducts)
                 .HasForeignKey(d => d.UserId)
-                .HasConstraintName("FK__Favourite__UserI__5441852A");
+                .HasConstraintName("FK__Favourite__UserI__5535A963");
         });
 
         modelBuilder.Entity<List>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__List__3214EC27D518C4BB");
+            entity.HasKey(e => e.Id).HasName("PK__List__3214EC27D9E26BC2");
 
             entity.ToTable("List");
 
@@ -142,12 +142,12 @@ public partial class XkomContext : DbContext
 
             entity.HasOne(d => d.User).WithMany(p => p.Lists)
                 .HasForeignKey(d => d.UserId)
-                .HasConstraintName("FK__List__UserID__5CD6CB2B");
+                .HasConstraintName("FK__List__UserID__5DCAEF64");
         });
 
         modelBuilder.Entity<ListProduct>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__List_Pro__3214EC276A5B1E87");
+            entity.HasKey(e => e.Id).HasName("PK__List_Pro__3214EC2774946BAA");
 
             entity.ToTable("List_Product");
 
@@ -157,22 +157,22 @@ public partial class XkomContext : DbContext
 
             entity.HasOne(d => d.List).WithMany(p => p.ListProducts)
                 .HasForeignKey(d => d.ListId)
-                .HasConstraintName("FK__List_Prod__ListI__59063A47");
+                .HasConstraintName("FK__List_Prod__ListI__59FA5E80");
 
             entity.HasOne(d => d.Product).WithMany(p => p.ListProducts)
                 .HasForeignKey(d => d.ProductId)
-                .HasConstraintName("FK__List_Prod__Produ__5812160E");
+                .HasConstraintName("FK__List_Prod__Produ__59063A47");
         });
 
         modelBuilder.Entity<Order>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__Order__3214EC2761FD9F6D");
+            entity.HasKey(e => e.Id).HasName("PK__Order__3214EC272E8E1FD9");
 
             entity.ToTable("Order");
 
-            entity.HasIndex(e => e.ShipmentInfoId, "UQ__Order__23189E8A5375B384").IsUnique();
+            entity.HasIndex(e => e.ShipmentInfoId, "UQ__Order__23189E8AC796CE9A").IsUnique();
 
-            entity.HasIndex(e => e.CartId, "UQ__Order__51BCD79654D0B774").IsUnique();
+            entity.HasIndex(e => e.CartId, "UQ__Order__51BCD796B87604E2").IsUnique();
 
             entity.Property(e => e.Id).HasColumnName("ID");
             entity.Property(e => e.CartId).HasColumnName("CartID");
@@ -185,30 +185,30 @@ public partial class XkomContext : DbContext
             entity.HasOne(d => d.Cart).WithOne(p => p.Order)
                 .HasForeignKey<Order>(d => d.CartId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK__Order__CartID__5165187F");
+                .HasConstraintName("FK__Order__CartID__52593CB8");
 
             entity.HasOne(d => d.PaymentMethod).WithMany(p => p.Orders)
                 .HasForeignKey(d => d.PaymentMethodId)
-                .HasConstraintName("FK__Order__PaymentMe__534D60F1");
+                .HasConstraintName("FK__Order__PaymentMe__5441852A");
 
             entity.HasOne(d => d.ShipmentInfo).WithOne(p => p.Order)
                 .HasForeignKey<Order>(d => d.ShipmentInfoId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK__Order__ShipmentI__59FA5E80");
+                .HasConstraintName("FK__Order__ShipmentI__5AEE82B9");
 
             entity.HasOne(d => d.Status).WithMany(p => p.Orders)
                 .HasForeignKey(d => d.StatusId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK__Order__StatusID__52593CB8");
+                .HasConstraintName("FK__Order__StatusID__534D60F1");
         });
 
         modelBuilder.Entity<OrderStatus>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__OrderSta__3214EC278EAD2F5C");
+            entity.HasKey(e => e.Id).HasName("PK__OrderSta__3214EC2715C8793E");
 
             entity.ToTable("OrderStatus");
 
-            entity.HasIndex(e => e.Name, "UQ__OrderSta__737584F6EE3D4B83").IsUnique();
+            entity.HasIndex(e => e.Name, "UQ__OrderSta__737584F6C5FD8D12").IsUnique();
 
             entity.Property(e => e.Id).HasColumnName("ID");
             entity.Property(e => e.Name)
@@ -218,11 +218,11 @@ public partial class XkomContext : DbContext
 
         modelBuilder.Entity<PaymentMethod>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__PaymentM__3214EC276180254E");
+            entity.HasKey(e => e.Id).HasName("PK__PaymentM__3214EC2731B91239");
 
             entity.ToTable("PaymentMethod");
 
-            entity.HasIndex(e => e.Name, "UQ__PaymentM__737584F63AF59C27").IsUnique();
+            entity.HasIndex(e => e.Name, "UQ__PaymentM__737584F6993A5A5A").IsUnique();
 
             entity.Property(e => e.Id).HasColumnName("ID");
             entity.Property(e => e.Name)
@@ -232,7 +232,7 @@ public partial class XkomContext : DbContext
 
         modelBuilder.Entity<Product>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__Product__3214EC2770313195");
+            entity.HasKey(e => e.Id).HasName("PK__Product__3214EC2766C6A615");
 
             entity.ToTable("Product");
 
@@ -249,21 +249,21 @@ public partial class XkomContext : DbContext
             entity.HasOne(d => d.Category).WithMany(p => p.Products)
                 .HasForeignKey(d => d.CategoryId)
                 .OnDelete(DeleteBehavior.SetNull)
-                .HasConstraintName("FK__Product__Categor__4CA06362");
+                .HasConstraintName("FK__Product__Categor__4D94879B");
 
             entity.HasOne(d => d.Company).WithMany(p => p.Products)
                 .HasForeignKey(d => d.CompanyId)
                 .OnDelete(DeleteBehavior.SetNull)
-                .HasConstraintName("FK__Product__Company__4D94879B");
+                .HasConstraintName("FK__Product__Company__4E88ABD4");
         });
 
         modelBuilder.Entity<ProductCategory>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__ProductC__3214EC274ED2A90E");
+            entity.HasKey(e => e.Id).HasName("PK__ProductC__3214EC27A03937B8");
 
             entity.ToTable("ProductCategory");
 
-            entity.HasIndex(e => e.Name, "UQ__ProductC__737584F61F90696D").IsUnique();
+            entity.HasIndex(e => e.Name, "UQ__ProductC__737584F6B98C504E").IsUnique();
 
             entity.Property(e => e.Id).HasColumnName("ID");
             entity.Property(e => e.Name)
@@ -273,11 +273,11 @@ public partial class XkomContext : DbContext
 
         modelBuilder.Entity<ProductCompany>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__ProductC__3214EC271C03AD20");
+            entity.HasKey(e => e.Id).HasName("PK__ProductC__3214EC27D9D833EC");
 
             entity.ToTable("ProductCompany");
 
-            entity.HasIndex(e => e.Name, "UQ__ProductC__737584F617CA3C7C").IsUnique();
+            entity.HasIndex(e => e.Name, "UQ__ProductC__737584F6376DB604").IsUnique();
 
             entity.Property(e => e.Id).HasColumnName("ID");
             entity.Property(e => e.Name)
@@ -287,7 +287,7 @@ public partial class XkomContext : DbContext
 
         modelBuilder.Entity<PromoCode>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__PromoCod__3214EC27CDD30F7F");
+            entity.HasKey(e => e.Id).HasName("PK__PromoCod__3214EC279FF6EA53");
 
             entity.ToTable("PromoCode");
 
@@ -303,7 +303,7 @@ public partial class XkomContext : DbContext
 
         modelBuilder.Entity<Review>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__Review__3214EC27359E6E28");
+            entity.HasKey(e => e.Id).HasName("PK__Review__3214EC27FEEE4685");
 
             entity.ToTable("Review");
 
@@ -314,17 +314,17 @@ public partial class XkomContext : DbContext
 
             entity.HasOne(d => d.Product).WithMany(p => p.Reviews)
                 .HasForeignKey(d => d.ProductId)
-                .HasConstraintName("FK__Review__ProductI__4E88ABD4");
+                .HasConstraintName("FK__Review__ProductI__4F7CD00D");
 
             entity.HasOne(d => d.User).WithMany(p => p.Reviews)
                 .HasForeignKey(d => d.UserId)
                 .OnDelete(DeleteBehavior.SetNull)
-                .HasConstraintName("FK__Review__UserID__4F7CD00D");
+                .HasConstraintName("FK__Review__UserID__5070F446");
         });
 
         modelBuilder.Entity<ShipmentInfo>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__Shipment__3214EC27D76959BD");
+            entity.HasKey(e => e.Id).HasName("PK__Shipment__3214EC27D62C6DAC");
 
             entity.ToTable("ShipmentInfo");
 
@@ -337,16 +337,16 @@ public partial class XkomContext : DbContext
             entity.HasOne(d => d.City).WithMany(p => p.ShipmentInfos)
                 .HasForeignKey(d => d.CityId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK__ShipmentI__CityI__5AEE82B9");
+                .HasConstraintName("FK__ShipmentI__CityI__5BE2A6F2");
         });
 
         modelBuilder.Entity<User>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__User__3214EC2716C3D75F");
+            entity.HasKey(e => e.Id).HasName("PK__User__3214EC274C07FC8E");
 
             entity.ToTable("User", tb => tb.HasTrigger("deleteActiveCart"));
 
-            entity.HasIndex(e => e.Email, "UQ__User__A9D105346C0057B3").IsUnique();
+            entity.HasIndex(e => e.Email, "UQ__User__A9D10534FE7D2E17").IsUnique();
 
             entity.HasIndex(e => e.ActiveCartId, "idx_User_NullableUnique")
                 .IsUnique()
@@ -365,7 +365,7 @@ public partial class XkomContext : DbContext
 
             entity.HasOne(d => d.ActiveCart).WithOne(p => p.UserNavigation)
                 .HasForeignKey<User>(d => d.ActiveCartId)
-                .HasConstraintName("FK__User__ActiveCart__5BE2A6F2");
+                .HasConstraintName("FK__User__ActiveCart__5CD6CB2B");
         });
 
         OnModelCreatingPartial(modelBuilder);
