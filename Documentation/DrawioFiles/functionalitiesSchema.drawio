@@ -396,7 +396,7 @@
                 <mxCell id="tu-g_7TpIbmg7pbgviE7-80" value="Edit account informations" style="rounded=1;whiteSpace=wrap;html=1;strokeColor=#d6b656;fontFamily=Helvetica;fontSize=12;fontColor=#000000;fillColor=#fff2cc;" parent="1" vertex="1">
                     <mxGeometry x="2500" y="400" width="120" height="60" as="geometry"/>
                 </mxCell>
-                <mxCell id="tu-g_7TpIbmg7pbgviE7-81" value="Delete account" style="rounded=1;whiteSpace=wrap;html=1;strokeColor=#d6b656;fontFamily=Helvetica;fontSize=12;fontColor=#000000;fillColor=#fff2cc;" parent="1" vertex="1">
+                <mxCell id="tu-g_7TpIbmg7pbgviE7-81" value="Delete account" style="rounded=1;whiteSpace=wrap;html=1;strokeColor=#2D7600;fontFamily=Helvetica;fontSize=12;fontColor=#ffffff;fillColor=#60a917;" parent="1" vertex="1">
                     <mxGeometry x="2500" y="500" width="120" height="60" as="geometry"/>
                 </mxCell>
                 <mxCell id="tu-g_7TpIbmg7pbgviE7-82" value="Log out" style="rounded=1;whiteSpace=wrap;html=1;strokeColor=#2D7600;fontFamily=Helvetica;fontSize=12;fontColor=#ffffff;fillColor=#60a917;" parent="1" vertex="1">

@@ -31,8 +31,7 @@ namespace XKOMapp.ViewsFSM.States
 
             //TODO edit button unfolding 5 inputs and accept button
 
-            printer.StartGroup("deleting-sure");
-            printer.StartGroup("deleting-base");
+            printer.StartGroup("deleting");
 
             Rule rule = new Rule("Click to refresh orders").RuleStyle(new Style().Foreground(StandardRenderables.AquamarineColor)).HeavyBorder();
             printer.AddRow(new InteractableConsoleRow(rule, (row, onwer) => RefreshOrders()));
@@ -121,7 +120,7 @@ namespace XKOMapp.ViewsFSM.States
         {
             printer.ClearMemoryGroup("deleting");
 
-            printer.AddRow(new InteractableConsoleRow(new Markup("[red]Delete account[/]"), (row, onwer) => DisplayDeleteSure()), "deleting-base");
+            printer.AddRow(new InteractableConsoleRow(new Markup("[red]Delete account[/]"), (row, onwer) => DisplayDeleteSure()), "deleting");
         }
 
         private void DisplayDeleteSure()
@@ -148,7 +147,7 @@ namespace XKOMapp.ViewsFSM.States
                 SessionData.LogOut();
                 fsm.Checkout("mainMenu");
 
-            }), "deleting-sure");
+            }), "deleting");
         }
     }
 }
