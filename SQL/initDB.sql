@@ -97,7 +97,8 @@ CREATE TABLE [List_Product]
 (
 	[ID] INT PRIMARY KEY IDENTITY(1,1) NOT NULL,
 	[ProductID] INT NOT NULL,
-	[ListID] INT NOT NULL
+	[ListID] INT NOT NULL,
+	[Number] INT NOT NULL, CHECK(Number>0)
 );
 
 CREATE TABLE [Order]

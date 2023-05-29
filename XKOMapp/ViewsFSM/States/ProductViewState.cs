@@ -35,7 +35,7 @@ public class ProductViewState : ViewState
         printer.AddRow(new InteractableConsoleRow(new Text("Back to searching"), (row, owner) => fsm.Checkout("productsSearch")));
         printer.AddRow(new InteractableConsoleRow(new Text("Add to favourites"), (row, owner) => throw new NotImplementedException()));//TODO implement adding to favourites
         printer.AddRow(new InteractableConsoleRow(new Text("Add to cart"), (row, owner) => throw new NotImplementedException()));//TODO implement adding to cart
-        printer.AddRow(new InteractableConsoleRow(new Text("Add/Remove from list"), (row, owner) => fsm.Checkout(new ProductListViewState(fsm, product))));//TODO implement adding to lists
+        printer.AddRow(new InteractableConsoleRow(new Text("Add to list"), (row, owner) => fsm.Checkout(new ProductListViewState(fsm, product))));
 
         printer.AddRow(new Rule($"{product.Category?.Name} category").HeavyBorder().LeftJustified().RuleStyle(Style.Parse("#0e8f75")).ToBasicConsoleRow());
 
