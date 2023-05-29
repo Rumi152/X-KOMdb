@@ -175,7 +175,7 @@ internal class UserDetailsViewState : ViewState
             }
 
             ShowEditInput();
-            printer.CursorToGroup("editing-button");
+            printer.CursorToGroup("editing-unfold");
 
         }), "editing-button");
     }
@@ -240,6 +240,7 @@ internal class UserDetailsViewState : ViewState
                 SessionData.TryLogIn(email, password, out _);
 
                 HideEditInput();
+                printer.CursorToGroup("editing-button");
 
             }), "editing-unfold");
 
