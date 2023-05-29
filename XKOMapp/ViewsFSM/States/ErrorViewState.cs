@@ -12,10 +12,21 @@ namespace XKOMapp.ViewsFSM.States;
 internal class ErrorViewState : ViewState
 {
     private readonly Exception exception;
+    private readonly ViewState buttonTarget;
+    private readonly string buttonMessage;
 
     public ErrorViewState(ViewStateMachine stateMachine, Exception exception) : base(stateMachine)
     {
         this.exception = exception;
+        this.buttonTarget = fsm.GetSavedState("mainMenu");
+        this.buttonMessage = "Back to main menu";
+    }
+
+    public ErrorViewState(ViewStateMachine stateMachine, Exception exception, ViewState buttonTarget, string buttonMessage) : base(stateMachine)
+    {
+        this.exception = exception;
+        this.buttonTarget = buttonTarget;
+        this.buttonMessage = buttonMessage;
     }
 
     protected override void InitialPrinterBuild(ConsolePrinter printer)
@@ -23,7 +34,7 @@ internal class ErrorViewState : ViewState
         printer.AddRow(StandardRenderables.StandardHeader.ToBasicConsoleRow());
         printer.StartContent();
 
-        printer.AddRow(new InteractableConsoleRow(new Text("Back to main menu"), (row, owner) => fsm.Checkout("mainMenu")));
+        printer.AddRow(new InteractableConsoleRow(new Markup(buttonMessage), (row, owner) => fsm.Checkout(buttonTarget)));
         printer.AddRow(new InteractableConsoleRow(new Markup("[red]Exit app[/]"), (row, owner) => Environment.Exit(0)));
         GetWrappedMessage(exception.Message).ForEach(x => printer.AddRow(new Text(x).ToBasicConsoleRow()));
     }
