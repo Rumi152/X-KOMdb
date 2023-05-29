@@ -123,6 +123,39 @@ public class ConsolePrinter
     }
 
     /// <summary>
+    /// Moves cursor to start of the group if possible
+    /// </summary>
+    /// <param name="group"></param>
+    public void CursorToGroup(string group)
+    {
+        IEnumerable<int> available = GetAvailableCursorIndexes()
+            .Where(index =>
+            {
+                var savedGroup = memoryGroupingKeys[index];
+
+                if (savedGroup is null)
+                    return false;
+
+                if (!savedGroup.StartsWith(group))
+                    return false;
+
+                if (savedGroup.Length == group.Length)
+                    return true;
+
+                if (savedGroup[group.Length] == '-')
+                    return true;
+
+                return false;
+            });
+
+        if(!available.Any())
+            return;
+
+        CursorIndex = available.First();
+        FinalizeCursorChange();
+    }
+
+    /// <summary>
     /// Moves cursor down if possible
     /// </summary>
     public void CursorDown()
