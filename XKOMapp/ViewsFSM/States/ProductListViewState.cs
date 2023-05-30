@@ -18,7 +18,7 @@ internal class ProductListViewState : ViewState
     public ProductListViewState(ViewStateMachine stateMachine, Product product) : base(stateMachine)
     {
         this.product = product;
-        numberInput = new ProductNumberInputConsoleRow($"Number of products: ", 32);
+        numberInput = new ProductNumberInputConsoleRow($"Number of products: ", 5);
     }
     protected override void InitialPrinterBuild(ConsolePrinter printer)
     {
@@ -33,6 +33,7 @@ internal class ProductListViewState : ViewState
         printer.EnableScrolling();
 
         printer.AddRow(numberInput);
+        printer.StartGroup("errors");
 
         printer.AddRow(new InteractableConsoleRow(new Text("Add new list"), (row, owner) =>
         {
@@ -70,6 +71,7 @@ internal class ProductListViewState : ViewState
 
         base.OnEnter();
 
+        printer.ClearMemoryGroup("errors");
         printer.ClearMemoryGroup("lists");
 
         using var context = new XkomContext();
@@ -93,8 +95,12 @@ internal class ProductListViewState : ViewState
                     return;
                 }
 
+                if (!ValidateInput())
+                    return;
+
                 int number = Convert.ToInt32(numberInput.CurrentInput);
                 //todo czekboksy
+
                 using var context = new XkomContext();
                 var newProdList = new ListProduct()
                 {
@@ -109,5 +115,43 @@ internal class ProductListViewState : ViewState
             }), "lists");
         });
     }
+    private bool ValidateInput()
+    {
+        printer.ClearMemoryGroup("errors");
+
+        bool isValid = true;
+
+        int number;
+        string numberString = numberInput.CurrentInput;
+
+        if (numberString == null) 
+        {
+            printer.AddRow(new Markup("[red]This field cannot be empty[/]").ToBasicConsoleRow(), "errors");
+            isValid = false;
+        }
+        else
+        {
+            number = Convert.ToInt32(numberString);
+            if (number <= 0)
+            {
+                printer.AddRow(new Markup("[red]Number is to small[/]").ToBasicConsoleRow(), "errors");
+                isValid = false;
+            }
+            else if (number > product.NumberAvailable)
+            {
+                printer.AddRow(new Markup("[red]Number is to high[/]").ToBasicConsoleRow(), "errors");
+                isValid = false;
+            }
+        }
+
+        if (numberString?.Length < 1)
+        {
+            printer.AddRow(new Markup("[red]Number of products must be greater than 0[/]").ToBasicConsoleRow(), "errors");
+            isValid = false;
+        }
+
+        return isValid;
+    }
+
 }
 
