@@ -184,17 +184,22 @@ internal class UserDetailsViewState : ViewState
     {
         printer.ClearMemoryGroup("editing");
 
-        //TODO make them all focused and with prettier cursor
-
-        printer.AddRow(new InteractableConsoleRow(new Markup($"[red]Cancel[/]"), (row, owner) => HideEditInput()), "editing-unfold");
+        printer.AddRow(
+                new CompositeConsoleRow()
+                .SetRenderable(new Markup($"[red]Cancel[/]"))
+                .SetOnInteraction((row, owner) => HideEditInput())
+                .SetFocused()
+                .SetCursorBackground("┌")
+                .SetCursor("X")
+            , "editing-unfold");
 
         const int labelPad = 16;
-        const string indent = "  ";
-        NameInputConsoleRow nameRow = new($"{indent}{"Name",-labelPad} : ", 32);
-        NameInputConsoleRow surnameRow = new($"{indent}{"Last name",-labelPad} : ", 32);
-        EmailInputConsoleRow emailRow = new($"{indent}{"Email",-labelPad} : ", 256);
-        PasswordInputConsoleRow passwordRow = new($"{indent}{"Password",-labelPad} : ", 32);
-        PasswordInputConsoleRow passwordConfirmRow = new($"{indent}{"Confirm password",-labelPad} : ", 32);
+        const string indent = "";
+        NameInputConsoleRow nameRow = new($"{indent}{"Name",-labelPad} : ", 32, true);
+        NameInputConsoleRow surnameRow = new($"{indent}{"Last name",-labelPad} : ", 32, true);
+        EmailInputConsoleRow emailRow = new($"{indent}{"Email",-labelPad} : ", 256, true);
+        PasswordInputConsoleRow passwordRow = new($"{indent}{"Password",-labelPad} : ", 32, true);
+        PasswordInputConsoleRow passwordConfirmRow = new($"{indent}{"Confirm password",-labelPad} : ", 32, true);
 
         printer.AddRow(nameRow, "editing-unfold");
         printer.AddRow(surnameRow, "editing-unfold");
@@ -202,7 +207,13 @@ internal class UserDetailsViewState : ViewState
         printer.AddRow(passwordRow, "editing-unfold");
         printer.AddRow(passwordConfirmRow, "editing-unfold");
 
-        printer.AddRow(new InteractableConsoleRow(new Markup($"[{StandardRenderables.GrassColorHex}]Accept[/]"), (row, owner) =>
+        printer.AddRow(
+            new CompositeConsoleRow()
+            .SetRenderable(new Markup($"[{StandardRenderables.GrassColorHex}]Accept[/]"))
+            .SetFocused()
+            .SetCursorBackground("└")
+            .SetCursor("X")
+            .SetOnInteraction((row, owner) =>
             {
                 if (SessionData.HasSessionExpired(out User? loggedUser))
                 {
@@ -240,9 +251,11 @@ internal class UserDetailsViewState : ViewState
                 SessionData.TryLogIn(email, password, out _);
 
                 HideEditInput();
+                RefreshCredentials(loggedUser);
                 printer.CursorToGroup("editing-button");
 
-            }), "editing-unfold");
+            })
+        , "editing-unfold");
 
         printer.CursorToGroup("editing-unfold");
     }
@@ -284,7 +297,7 @@ internal class UserDetailsViewState : ViewState
         }
 
 
-        if(password.Length > 0)
+        if (password.Length > 0)
         {
             if (password.Length < 6)
             {
@@ -320,7 +333,7 @@ internal class UserDetailsViewState : ViewState
         }
 
 
-        if(name.Length > 0)
+        if (name.Length > 0)
         {
             if (name.Length < 1)
             {
@@ -335,7 +348,7 @@ internal class UserDetailsViewState : ViewState
         }
 
 
-        if(lastName.Length > 0)
+        if (lastName.Length > 0)
         {
             if (lastName.Length < 1)
             {
