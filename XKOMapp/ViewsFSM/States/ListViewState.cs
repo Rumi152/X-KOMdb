@@ -133,8 +133,8 @@ internal class ListViewState : ViewState
         }));
 
         printer.AddRow(new Rule("Products in this list").RuleStyle(Style.Parse(StandardRenderables.AquamarineColorHex)).HeavyBorder().ToBasicConsoleRow());
-        printer.StartGroup("lists");
         printer.StartGroup("errors");
+        printer.StartGroup("lists");
     }
 
     private void OnNameInputClick()
