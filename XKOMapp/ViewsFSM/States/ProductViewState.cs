@@ -33,7 +33,7 @@ public class ProductViewState : ViewState
         printer.StartContent();
 
         printer.AddRow(new InteractableConsoleRow(new Text("Back to searching"), (row, owner) => fsm.Checkout("productsSearch")));
-        printer.AddRow(new InteractableConsoleRow(new Text("Add to favourites"), (row, owner) => throw new NotImplementedException()));//TODO implement adding to favourites
+        printer.StartGroup("favourite");
         printer.AddRow(new InteractableConsoleRow(new Text("Add to cart"), (row, owner) => throw new NotImplementedException()));//TODO implement adding to cart
         printer.AddRow(new InteractableConsoleRow(new Text("Add to list"), (row, owner) => fsm.Checkout(new ProductListViewState(fsm, product))));
 
@@ -45,7 +45,7 @@ public class ProductViewState : ViewState
         printer.AddRow(new Markup($"[{((product.NumberAvailable == 0) ? "red" : StandardRenderables.GrassColorHex)}]{product.NumberAvailable}[/] left in magazine").ToBasicConsoleRow());
 
         printer.StartGroup("averageStars");
-        ShowAverageStars();
+        RefreshAverageStars();
 
         printer.AddRow(new ReviewsAndPropertiesModeConsoleRow(ShowProperties, ShowReviews));
         printer.EnableScrolling();
@@ -71,7 +71,8 @@ public class ProductViewState : ViewState
         if (isInPropertiesView) ShowProperties();
         else ShowReviews();
 
-        ShowAverageStars();
+        RefreshAverageStars();
+        RefreshFavouriteButton();
     }
 
 
@@ -110,6 +111,7 @@ public class ProductViewState : ViewState
         }
     }
 
+
     private void ShowReviews()
     {
         if (HasProductExpired())
@@ -141,9 +143,8 @@ public class ProductViewState : ViewState
         DisplayReviewInput(reviews);
 
         DisplayAllReviews(reviews);
-        ShowAverageStars();
+        RefreshAverageStars();
     }
-
 
     private void DisplayAllReviews(List<Review> reviews)
     {
@@ -275,7 +276,7 @@ public class ProductViewState : ViewState
 
             reviewWriteDescription = "";
             reviewWriteStars = 0;
-            ShowAverageStars();
+            RefreshAverageStars();
             ShowReviews();
         }
 
@@ -328,7 +329,91 @@ public class ProductViewState : ViewState
         descriptionRows.ForEach(x => printer?.AddRow(x, "reviews-descriptionInput"));
     }
 
-    private void ShowAverageStars()
+
+    private void RefreshFavouriteButton()
+    {
+        printer.ClearMemoryGroup("favourite");
+
+        if (HasProductExpired())
+            return;
+
+        using XkomContext context = new();
+
+        if (SessionData.IsLoggedIn() && context.FavouriteProducts.Any(x => x.ProductId == product.Id && x.UserId == SessionData.GetUserOffline()!.Id))
+            ShowRemoveFavouriteButton();
+        else
+            ShowAddFavouriteButton();
+    }
+
+    private void ShowAddFavouriteButton()
+    {
+        printer.AddRow(new InteractableConsoleRow(new Markup("[yellow dim]*[/]"), (row, owner) =>
+        {
+            if (SessionData.HasSessionExpired(out User loggedUser))
+            {
+                fsm.Checkout(new FastLoginViewState(fsm,
+                    markupMessage: $"[red]Session expired[/] - [{StandardRenderables.GrassColorHex}]Log in to add product to favourites[/]",
+                    loginRollbackTarget: this,
+                    abortRollbackTarget: this,
+                    abortMarkupMessage: "Click to abort"
+                ));
+                return;
+            }
+
+            using XkomContext context = new();
+            //REFACTOR forgive me
+            try { context.Attach(product); }
+            catch (InvalidOperationException) { }
+            try { context.Attach(loggedUser); }
+            catch (InvalidOperationException) { }
+
+            if (!context.FavouriteProducts.Any(x => x.ProductId == product.Id && x.UserId == loggedUser.Id))
+            {
+                context.FavouriteProducts.Add(new FavouriteProduct()
+                {
+                    Product = product,
+                    User = loggedUser
+                });
+                context.SaveChanges();
+            }
+
+            RefreshFavouriteButton();
+
+        }), "favourite");
+    }
+
+    private void ShowRemoveFavouriteButton()
+    {
+        printer.AddRow(new InteractableConsoleRow(new Markup("[yellow]*[/]"), (row, owner) =>
+        {
+            if (SessionData.HasSessionExpired(out User loggedUser))
+            {
+                fsm.Checkout(new FastLoginViewState(fsm,
+                    markupMessage: $"[red]Session expired[/] - [{StandardRenderables.GrassColorHex}]Log in to remove product from favourites[/]",
+                    loginRollbackTarget: this,
+                    abortRollbackTarget: this,
+                    abortMarkupMessage: "Click to abort"
+                ));
+                return;
+            }
+
+            using XkomContext context = new();
+
+            var joinTable = context.FavouriteProducts.SingleOrDefault(x => x.ProductId == product.Id && x.UserId == loggedUser.Id);
+
+            if (joinTable is not null)
+            {
+                context.Remove(joinTable);
+                context.SaveChanges();
+            }
+
+            RefreshFavouriteButton();
+
+        }), "favourite");
+    }
+
+
+    private void RefreshAverageStars()
     {
         printer.ClearMemoryGroup("averageStars");
 

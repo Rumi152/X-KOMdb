@@ -5,7 +5,7 @@ using Spectre.Console.Rendering;
 namespace XKOMapp.GUI.ConsoleRows.User
 {
     //REFACTOR better long emails support
-    internal class EmailInputConsoleRow : ICustomCursorConsoleRow, ICustomKeystrokeListenerConsoleRow, IHoverConsoleRow, IInteractableConsoleRow
+    internal class EmailInputConsoleRow : ICustomCursorConsoleRow, ICustomKeystrokeListenerConsoleRow, IHoverConsoleRow, IInteractableConsoleRow, IFocusableConsoleRow
     {
         private readonly string markupLabel;
         private readonly int maxLength;
@@ -14,10 +14,15 @@ namespace XKOMapp.GUI.ConsoleRows.User
         public string CurrentInput { get; private set; } = "";
         private bool isHovered;
 
-        public EmailInputConsoleRow(string markupLabel, int maxLength)
+
+        private readonly bool isFocused;
+        bool ISwitchableConsoleRow.IsActive { get => isFocused; set => throw new InvalidOperationException(); }
+
+        public EmailInputConsoleRow(string markupLabel, int maxLength, bool isFocused = false)
         {
             this.markupLabel = markupLabel;
             this.maxLength = maxLength;
+            this.isFocused = isFocused;
         }
 
         public IRenderable GetRenderContent() => new Markup($"{markupLabel}{CurrentInput[Math.Max(CurrentInput.Length - 64, 0)..].EscapeMarkup()}{(isHovered ? "[blink]_[/]" : "")}");
@@ -70,5 +75,15 @@ namespace XKOMapp.GUI.ConsoleRows.User
 
 
         public void ResetInput() => CurrentInput = "";
+
+        void ISwitchableConsoleRow.OnTurningOff()
+        {
+            throw new InvalidOperationException();
+        }
+
+        void ISwitchableConsoleRow.OnTurningOn()
+        {
+            throw new InvalidOperationException();
+        }
     }
 }

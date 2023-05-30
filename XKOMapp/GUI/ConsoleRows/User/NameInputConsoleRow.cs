@@ -4,19 +4,25 @@ using Spectre.Console.Rendering;
 
 namespace XKOMapp.GUI.ConsoleRows.User
 {
-    internal class NameInputConsoleRow : ICustomCursorConsoleRow, ICustomKeystrokeListenerConsoleRow, IHoverConsoleRow, IInteractableConsoleRow
+    internal class NameInputConsoleRow : ICustomCursorConsoleRow, ICustomKeystrokeListenerConsoleRow, IHoverConsoleRow, IInteractableConsoleRow, IFocusableConsoleRow
     {
         private readonly string markupLabel;
         private readonly int maxLength;
         ConsolePrinter owner = null!;
 
         public string CurrentInput { get; private set; } = "";
+
         private bool isHovered;
 
-        public NameInputConsoleRow(string markupLabel, int maxLength)
+
+        private readonly bool isFocused;
+        bool ISwitchableConsoleRow.IsActive { get => isFocused; set => throw new InvalidOperationException(); }
+
+        public NameInputConsoleRow(string markupLabel, int maxLength, bool isFocused = false)
         {
             this.markupLabel = markupLabel;
             this.maxLength = maxLength;
+            this.isFocused = isFocused;
         }
 
         public IRenderable GetRenderContent() => new Markup($"{markupLabel}{CurrentInput.EscapeMarkup()}{(isHovered ? "[blink]_[/]" : "")}");
@@ -65,5 +71,15 @@ namespace XKOMapp.GUI.ConsoleRows.User
 
 
         public void ResetInput() => CurrentInput = "";
+
+        void ISwitchableConsoleRow.OnTurningOff()
+        {
+            throw new InvalidOperationException();
+        }
+
+        void ISwitchableConsoleRow.OnTurningOn()
+        {
+            throw new InvalidOperationException();
+        }
     }
 }

@@ -9,8 +9,9 @@ namespace XKOMapp.ViewsFSM.States;
 
 public class ProductSearchViewState : ViewState
 {
-    const int namePadding = 11;
+    const int namePadding = 15;
     private readonly PriceRangeInputConsoleRow priceRangeInputConsoleRow;
+    private readonly FavouritesCheckboxConsoleRow favouritesOnlyInputConsoleRow;
     private readonly SearchContraintInputConsoleRow nameSearchInputRow;
     private readonly SearchContraintInputConsoleRow companySearchInputRow;
     private readonly ChoiceMenuParentConsoleRow categorySearchChoiceParent;
@@ -26,6 +27,7 @@ public class ProductSearchViewState : ViewState
     public ProductSearchViewState(ViewStateMachine stateMachine) : base(stateMachine)
     {
         priceRangeInputConsoleRow = new($"{"Price",-namePadding}: ", RefreshProducts, RefreshProducts);
+        favouritesOnlyInputConsoleRow = new($"{"Only favourites",-namePadding}  ", OnFavouritesOnlyInteraction);
         nameSearchInputRow = new($"{"Name",-namePadding}: ", 32, RefreshProducts, RefreshProducts);
         companySearchInputRow = new($"{"Company",-namePadding}: ", 64, RefreshProducts, RefreshProducts);
         categorySearchChoiceParent = new($"{"Category",-namePadding}: ", 4, 2, RefreshProducts, RefreshCategories);
@@ -46,9 +48,8 @@ public class ProductSearchViewState : ViewState
         }));
         printer.AddRow(new Rule("Products").RuleStyle(Style.Parse(StandardRenderables.AquamarineColorHex)).HeavyBorder().ToBasicConsoleRow());
 
-        //TODO favourites only
-
         printer.AddRow(priceRangeInputConsoleRow);
+        printer.AddRow(favouritesOnlyInputConsoleRow);
         printer.AddRow(nameSearchInputRow);
         printer.AddRow(companySearchInputRow);
         printer.AddRow(categorySearchChoiceParent);
@@ -78,6 +79,9 @@ public class ProductSearchViewState : ViewState
     {
         printer.ClearMemoryGroup("products");
 
+        if (!SessionData.IsLoggedIn())
+            favouritesOnlyInputConsoleRow.Uncheck();
+
         using var context = new XkomContext();
 
         var noPriceContraints = priceRangeInputConsoleRow.LowestPrice.Length == 0 && priceRangeInputConsoleRow.HighestPrice.Length == 0;
@@ -87,9 +91,11 @@ public class ProductSearchViewState : ViewState
         var products = context.Products
             .Where(x => x.Name.Contains(nameSearchInputRow.currentInput))
             .Include(x => x.Company)
-                .Where(x => noCompanyConstraints || (x.Company != null && x.Company.Name.Contains(companySearchInputRow.currentInput)))
             .Include(x => x.Category)
-                .Where(x => noCategoryConstraints || (x.Category != null && x.Category.Name.Contains(categorySearchChoiceParent.GetCurrentCategory())))
+            .Include(x => x.FavouriteProducts)
+            .Where(x => !favouritesOnlyInputConsoleRow.IsChecked || (SessionData.IsLoggedIn() && x.FavouriteProducts.Any(pair => pair.ProductId == x.Id && pair.UserId == SessionData.GetUserOffline()!.Id)))
+            .Where(x => noCompanyConstraints || (x.Company != null && x.Company.Name.Contains(companySearchInputRow.currentInput)))
+            .Where(x => noCategoryConstraints || (x.Category != null && x.Category.Name.Contains(categorySearchChoiceParent.GetCurrentCategory())))
             .Where(x => noPriceContraints || (x.Price >= ((priceRangeInputConsoleRow.LowestPrice.Length == 0) ? 0 : int.Parse(priceRangeInputConsoleRow.LowestPrice)) && x.Price <= ((priceRangeInputConsoleRow.HighestPrice.Length == 0) ? 999_999 : int.Parse(priceRangeInputConsoleRow.HighestPrice))));
 
         products = orderbyChoiceParent.GetCurrentCategory() switch
@@ -136,9 +142,28 @@ public class ProductSearchViewState : ViewState
     private void ResetFilters()
     {
         priceRangeInputConsoleRow.ResetRange();
+        favouritesOnlyInputConsoleRow.Uncheck();
         nameSearchInputRow.ResetInput();
         companySearchInputRow.ResetInput();
         categorySearchChoiceParent.ResetCategory();
         orderbyChoiceParent.ResetCategory();
+    }
+
+
+    private void OnFavouritesOnlyInteraction()
+    {
+        if (favouritesOnlyInputConsoleRow.IsChecked && !SessionData.IsLoggedIn())
+        {
+            favouritesOnlyInputConsoleRow.Uncheck();
+
+            fsm.Checkout(new FastLoginViewState(fsm,
+                markupMessage: $"[{StandardRenderables.GrassColorHex}]Log in to search your favourite products[/]",
+                loginRollbackTarget: this,
+                abortRollbackTarget: this
+            ));
+            return;
+        }
+
+        RefreshProducts();
     }
 }

@@ -14,8 +14,8 @@ internal class Program
         Console.BackgroundColor = ConsoleColor.Black;
         Console.ForegroundColor = ConsoleColor.White;
 
-        var fsm = new ViewStateMachine();
-        //DONT TOUCH THESE TIMUR
+        ViewStateMachine fsm = new ViewStateMachine();
+
         fsm.SaveState("productsSearch", new ProductSearchViewState(fsm));
         fsm.SaveState("listBrowse", new ListBrowseViewState(fsm));
         fsm.SaveState("mainMenu", new MainMenuViewState(fsm));
@@ -30,14 +30,14 @@ internal class Program
                 if (Console.KeyAvailable)
                 {
                     var info = Console.ReadKey(true);
-                    fsm?.PassKeystroke(info);
+                    fsm.PassKeystroke(info);
                 }
               
-                fsm?.Tick();
+                fsm.Tick();
             }
             catch (Exception ex)
             {
-                fsm?.Checkout(new ErrorViewState(fsm, ex));
+                fsm.Checkout(new ErrorViewState(fsm, ex));
             }
         }
     }
