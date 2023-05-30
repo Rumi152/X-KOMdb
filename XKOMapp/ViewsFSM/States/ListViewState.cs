@@ -1,30 +1,19 @@
 ﻿using Spectre.Console;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Text.RegularExpressions;
-using System.Threading.Tasks;
-using XKOMapp.GUI.ConsoleRows.User;
 using XKOMapp.GUI.ConsoleRows;
 using XKOMapp.GUI;
 using XKOMapp.Models;
 using XKOMapp.GUI.ConsoleRows.List;
-using XKOMapp.GUI.ConsoleRows.ProductSearching;
-using System.Security.Cryptography.X509Certificates;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Internal;
+using System.Linq;
 
 namespace XKOMapp.ViewsFSM.States;
 
 internal class ListViewState : ViewState
 {
     private readonly List list;
-    private readonly ListNameInputConsoleRow nameRow;
+    private ListNameInputConsoleRow nameRow = null!;
     public ListViewState(ViewStateMachine stateMachine, List list) : base(stateMachine)
     {
         this.list = list;
-        nameRow = new($"Name: {list.Name} | New name: ", 32, OnNameInputClick);
     }
 
     protected override void InitialPrinterBuild(ConsolePrinter printer)
@@ -39,10 +28,10 @@ internal class ListViewState : ViewState
         printer.AddRow(new Rule("List").RuleStyle(Style.Parse(StandardRenderables.AquamarineColorHex)).HeavyBorder().ToBasicConsoleRow());
         printer.EnableScrolling();
 
-        printer.AddRow(nameRow);
+        printer.StartGroup("name");
 
         printer.AddRow(new BasicConsoleRow(new Text($"Link: {list.Link}"))); //TODO long display support
-    
+
         printer.AddRow(StandardRenderables.StandardSeparator.ToBasicConsoleRow());
 
         printer.AddRow(new InteractableConsoleRow(new Text("Delete unavailable"), (row, own) =>
@@ -57,6 +46,9 @@ internal class ListViewState : ViewState
                 ));
                 return;
             }
+
+            if (HasListExpired())
+                return;
 
             using var context = new XkomContext();
 
@@ -86,10 +78,13 @@ internal class ListViewState : ViewState
                 return;
             }
 
+            if (HasListExpired())
+                return;
+
             using var context = new XkomContext();
             context.Attach(dbUser);
             var clonedList = new List()
-            { 
+            {
                 Name = $"{list.Name}-copy",
                 Link = GetLink(),
                 User = dbUser
@@ -112,8 +107,6 @@ internal class ListViewState : ViewState
                 });
             }
             context.SaveChanges();
-
-            //TODO checkout cloned list
         }));
         printer.AddRow(new InteractableConsoleRow(new Markup("[red]Delete list[/]"), (row, own) =>
         {
@@ -140,8 +133,8 @@ internal class ListViewState : ViewState
         }));
 
         printer.AddRow(new Rule("Products in this list").RuleStyle(Style.Parse(StandardRenderables.AquamarineColorHex)).HeavyBorder().ToBasicConsoleRow());
-        printer.StartGroup("lists");
         printer.StartGroup("errors");
+        printer.StartGroup("lists");
     }
 
     private void OnNameInputClick()
@@ -157,18 +150,19 @@ internal class ListViewState : ViewState
             return;
         }
 
+        if (HasListExpired())
+            return;
+
         if (!ValidateInput())
             return;
 
         using var context = new XkomContext();
-        var updatelist = context.Lists.SingleOrDefault(x => x.Id == list.Id);
+        context.Attach(list);
 
-        if (updatelist is not null)
-        {
-            updatelist.Name = nameRow.CurrentInput;
-            context.SaveChanges();
-        }
-        //TODO rebuild name
+        list.Name = nameRow.CurrentInput;
+        context.SaveChanges();
+
+        RefreshName();
     }
 
     public override void OnEnter()
@@ -178,8 +172,8 @@ internal class ListViewState : ViewState
         printer.ClearMemoryGroup("errors");
         printer.ResetCursor();
         RefreshProducts();
+        RefreshName();
     }
-
     private static string GetLink()
     {
         string link = @"https://www.x-kom.pl/list/";
@@ -201,7 +195,6 @@ internal class ListViewState : ViewState
 
         return link;
     }
-
     private void RefreshProducts()
     {
         printer.ClearMemoryGroup("products");
@@ -213,7 +206,7 @@ internal class ListViewState : ViewState
 
         if (!products.Any())
             printer.AddRow(new Text("No products were found").ToBasicConsoleRow(), "products");
-
+        
         products.ToList().ForEach(x =>
         {
             printer.AddRow(new InteractableConsoleRow(new Markup(x.Name), (row, printer) =>
@@ -233,11 +226,16 @@ internal class ListViewState : ViewState
             }), "products");
         });
     }
-        private bool ValidateInput()
+    private void RefreshName()
     {
-        printer.ClearMemoryGroup("errors");
-
+        printer.ClearMemoryGroup("name");
+        nameRow = new ListNameInputConsoleRow($"Name: {list.Name} | New name: ", 32, OnNameInputClick);
+        printer.AddRow(nameRow, "name");
+    }
+    private bool ValidateInput()
+    {
         string name = nameRow.CurrentInput;
+        printer.ClearMemoryGroup("errors");
 
         if (name.Length == 0)
             return false;
@@ -253,6 +251,17 @@ internal class ListViewState : ViewState
             printer.AddRow(new Markup("[red]Name is too long[/]").ToBasicConsoleRow(), "errors");
             return false;
         }
+        return true;
+    }
+
+    private bool HasListExpired()
+    {
+        using var context = new XkomContext();
+
+        if (context.Lists.Any(x => x.Id == list.Id))
+            return false;
+
+        fsm.Checkout(new MessageViewState(fsm, "List no longer exists", fsm.GetSavedState("listBrowse"), "Back to browsing"));
         return true;
     }
 }

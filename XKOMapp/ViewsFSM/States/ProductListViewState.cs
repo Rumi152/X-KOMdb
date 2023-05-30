@@ -8,14 +8,17 @@ using System.Threading.Tasks;
 using XKOMapp.GUI.ConsoleRows;
 using XKOMapp.GUI;
 using XKOMapp.Models;
+using XKOMapp.GUI.ConsoleRows.ProductList;
 
 namespace XKOMapp.ViewsFSM.States;
 internal class ProductListViewState : ViewState
 {
     private readonly Product product;
+    private ProductNumberInputConsoleRow numberInput;
     public ProductListViewState(ViewStateMachine stateMachine, Product product) : base(stateMachine)
     {
         this.product = product;
+        numberInput = new ProductNumberInputConsoleRow($"Number of products: ", 32);
     }
     protected override void InitialPrinterBuild(ConsolePrinter printer)
     {
@@ -28,6 +31,8 @@ internal class ProductListViewState : ViewState
         }));
         printer.AddRow(new Rule("Lists").RuleStyle(Style.Parse(StandardRenderables.AquamarineColorHex)).HeavyBorder().ToBasicConsoleRow());
         printer.EnableScrolling();
+
+        printer.AddRow(numberInput);
 
         printer.AddRow(new InteractableConsoleRow(new Text("Add new list"), (row, owner) =>
         {
@@ -87,12 +92,15 @@ internal class ProductListViewState : ViewState
                     ));
                     return;
                 }
+
+                int number = Convert.ToInt32(numberInput.CurrentInput);
                 //todo czekboksy
                 using var context = new XkomContext();
                 var newProdList = new ListProduct()
                 {
                     ProductId = product.Id,
                     ListId = x.Id,
+                    Number = number
                 };
                 context.Add(newProdList);
                 context.SaveChanges();
