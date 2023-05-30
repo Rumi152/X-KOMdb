@@ -14,10 +14,11 @@ namespace XKOMapp.ViewsFSM.States;
 internal class ProductListViewState : ViewState
 {
     private readonly Product product;
-    private ProductNumberInputConsoleRow numberInput = null!;
+    private ProductNumberInputConsoleRow numberInput;
     public ProductListViewState(ViewStateMachine stateMachine, Product product) : base(stateMachine)
     {
         this.product = product;
+        numberInput = new ProductNumberInputConsoleRow($"Number of products: ", 32);
     }
     protected override void InitialPrinterBuild(ConsolePrinter printer)
     {
@@ -31,7 +32,6 @@ internal class ProductListViewState : ViewState
         printer.AddRow(new Rule("Lists").RuleStyle(Style.Parse(StandardRenderables.AquamarineColorHex)).HeavyBorder().ToBasicConsoleRow());
         printer.EnableScrolling();
 
-        numberInput = new ProductNumberInputConsoleRow($"Number of products: ", 32);
         printer.AddRow(numberInput);
 
         printer.AddRow(new InteractableConsoleRow(new Text("Add new list"), (row, owner) =>
