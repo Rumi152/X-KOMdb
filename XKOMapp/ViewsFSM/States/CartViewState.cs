@@ -8,6 +8,7 @@ using XKOMapp.GUI.ConsoleRows;
 using XKOMapp.GUI;
 using XKOMapp.Models;
 using System.Net.Sockets;
+using Microsoft.EntityFrameworkCore;
 
 namespace XKOMapp.ViewsFSM.States;
 
@@ -26,22 +27,62 @@ internal class CartViewState : ViewState
         {
             fsm.Checkout("mainMenu");
         }));
-        printer.AddRow(new Rule("Cart").RuleStyle(Style.Parse(StandardRenderables.AquamarineColorHex)).HeavyBorder().ToBasicConsoleRow());
-        printer.EnableScrolling();
+
 
         printer.AddRow(new InteractableConsoleRow(new Text("Go to ordering"), (row, own) => throw new NotImplementedException()));//TODO ordering viewstate
 
+        printer.AddRow(new Rule("Cart").RuleStyle(Style.Parse(StandardRenderables.AquamarineColorHex)).HeavyBorder().ToBasicConsoleRow());
+        printer.EnableScrolling();
 
         printer.StartGroup("products");
-
-
-        
     }
 
     public override void OnEnter()
     {
         base.OnEnter();
+        RefreshProducts();
         printer.ResetCursor();
+    }
+
+
+    private void RefreshProducts()
+    {
+        printer.ClearMemoryGroup("products");
+
+        if (SessionData.HasSessionExpired(out User loggedUser))
+        {
+            fsm.Checkout(new FastLoginViewState(fsm,
+                markupMessage: $"[red]Session expired[/]",
+                loginRollbackTarget: this,
+                abortRollbackTarget: fsm.GetSavedState("mainMenu"),
+                abortMarkupMessage: "Back to main menu"
+            ));
+            return;
+        }
+
+        using XkomContext context = new();
+
+        List<CartProduct> productsCart = context.CartProducts
+            .Include(x => x.Product)
+            .Include(x => x.Product.Company)
+            .Include(x => x.Product.Category)
+            .Where(x => x.CartId == loggedUser.ActiveCartId)
+            .ToList();
+
+        if (productsCart.Any())
+        {
+            printer.AddRow(new BasicConsoleRow(new Markup("You have no products in cart")), "products");
+            return;
+        }
+
+        productsCart.ForEach(x =>
+        {
+            var product = x.Product;
+            var priceString = product.NumberAvailable > 0 ? $"[lime]{product.Price,-9:F2}[/] PLN" : "[red]Unavailable[/]";
+            var companyString = product.Company is null ? new string(' ', 32) : ((product.Company.Name.Length <= 29) ? $"{product.Company.Name,-29}" : $"{product.Company.Name[..30]}...");
+            var displayString = $"{product.Name.EscapeMarkup(),-32} | {priceString + new string(' ', 13 - priceString.RemoveMarkup().Length)} | {companyString}";
+            printer.AddRow(new InteractableConsoleRow(new Markup(displayString), (row, printer) => fsm.Checkout(new ProductViewState(fsm, product, this, "Back to cart"))), "products");
+        });
     }
 }
 
