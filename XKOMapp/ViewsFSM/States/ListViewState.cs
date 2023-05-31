@@ -209,6 +209,7 @@ internal class ListViewState : ViewState
         
         products.ToList().ForEach(x =>
         {
+            //TODO better display (productSearch-like)
             printer.AddRow(new InteractableConsoleRow(new Markup(x.Name), (row, printer) =>
             {
                 if (SessionData.HasSessionExpired(out User dbUser))
@@ -222,7 +223,7 @@ internal class ListViewState : ViewState
                     return;
                 }
 
-                fsm.Checkout(new ProductViewState(fsm, x));
+                fsm.Checkout(new ProductViewState(fsm, x, this, "Back to list"));
             }), "products");
         });
     }
