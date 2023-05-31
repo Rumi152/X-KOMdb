@@ -41,7 +41,6 @@ internal class CartViewState : ViewState
     {
         base.OnEnter();
         RefreshProducts();
-        printer.ResetCursor();
     }
 
 
@@ -69,7 +68,7 @@ internal class CartViewState : ViewState
             .Where(x => x.CartId == loggedUser.ActiveCartId)
             .ToList();
 
-        if (productsCart.Any())
+        if (!productsCart.Any())
         {
             printer.AddRow(new BasicConsoleRow(new Markup("You have no products in cart")), "products");
             return;

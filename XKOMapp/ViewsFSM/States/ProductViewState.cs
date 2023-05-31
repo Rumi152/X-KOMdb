@@ -47,7 +47,65 @@ public class ProductViewState : ViewState
             printer.AddRow(new InteractableConsoleRow(new Markup(backButtonMessage ?? "Back"), (row, owner) => fsm.Checkout(backButtonTarget)));
 
         printer.StartGroup("favourite");
-        printer.AddRow(new InteractableConsoleRow(new Text("Add to cart"), (row, owner) => throw new NotImplementedException()));//TODO implement adding to cart
+        printer.AddRow(new InteractableConsoleRow(new Text("Add to cart"), (row, owner) =>
+        {
+            if (!SessionData.IsLoggedIn())
+            {
+                fsm.Checkout(new FastLoginViewState(fsm,
+                    markupMessage: $"[{StandardRenderables.GrassColorHex}]Log in to use cart[/]",
+                    loginRollbackTarget: this,
+                    abortRollbackTarget: this,
+                    abortMarkupMessage: "Click to abort"
+                ));
+                return;
+            }
+
+            if (SessionData.HasSessionExpired(out User loggedUser))
+            {
+                fsm.Checkout(new FastLoginViewState(fsm,
+                    markupMessage: $"[red]Session expired[/] - [{StandardRenderables.GrassColorHex}]Log in to use cart[/]",
+                    loginRollbackTarget: this,
+                    abortRollbackTarget: this,
+                    abortMarkupMessage: "Click to abort"
+                ));
+                return;
+            }
+
+            using XkomContext context = new();
+
+            //REFACTOR forgive me
+            try { context.Attach(product); }
+            catch (InvalidOperationException) { }
+            try { context.Attach(loggedUser); }
+            catch (InvalidOperationException) { }
+
+            //add new active cart if doesnt exist
+            if (!context.Carts.Any(x => x.Id == loggedUser.ActiveCartId))
+            {
+                var newCart = new Cart()
+                {
+                    User = loggedUser
+                };
+
+                context.Carts.Add(newCart);
+                loggedUser.ActiveCart = newCart;
+            }
+
+            context.SaveChanges();
+
+            Cart activeCart = context.Carts.Single(x => x.Id == loggedUser.ActiveCartId);
+
+            //TEMP add amount handling
+            context.CartProducts.Add(new CartProduct()
+            {
+                Product = product,
+                Cart = activeCart
+            });
+
+            context.SaveChanges();
+
+            fsm.Checkout(new CartViewState(fsm));
+        }));
         printer.AddRow(new InteractableConsoleRow(new Text("Add to list"), (row, owner) => fsm.Checkout(new ProductListViewState(fsm, product))));
 
         printer.AddRow(new Rule($"{product.Category?.Name} category").HeavyBorder().LeftJustified().RuleStyle(Style.Parse("#0e8f75")).ToBasicConsoleRow());
