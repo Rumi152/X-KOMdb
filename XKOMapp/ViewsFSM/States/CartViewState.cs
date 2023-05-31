@@ -30,6 +30,46 @@ internal class CartViewState : ViewState
 
 
         printer.AddRow(new InteractableConsoleRow(new Text("Go to ordering"), (row, own) => throw new NotImplementedException()));//TODO ordering viewstate
+        printer.AddRow(new InteractableConsoleRow(new Text("Empty this cart"), (row, own) =>
+        {
+            if (SessionData.HasSessionExpired(out User loggedUser))
+            {
+                fsm.Checkout(new FastLoginViewState(fsm,
+                    markupMessage: $"[red]Session expired[/]",
+                    loginRollbackTarget: this,
+                    abortRollbackTarget: fsm.GetSavedState("mainMenu"),
+                    abortMarkupMessage: "Back to main menu"
+                ));
+                return;
+            }
+
+            using XkomContext context = new();
+
+            var cartProducts = context.CartProducts.Where(x => x.CartId == loggedUser.ActiveCartId);
+            context.RemoveRange(cartProducts);
+            context.SaveChanges();
+            RefreshProducts();
+        }));
+        printer.AddRow(new InteractableConsoleRow(new Text("Delete unavailable"), (row, own) =>
+        {
+            if (SessionData.HasSessionExpired(out User loggedUser))
+            {
+                fsm.Checkout(new FastLoginViewState(fsm,
+                    markupMessage: $"[red]Session expired[/]",
+                    loginRollbackTarget: this,
+                    abortRollbackTarget: fsm.GetSavedState("mainMenu"),
+                    abortMarkupMessage: "Back to main menu"
+                ));
+                return;
+            }
+
+            using XkomContext context = new();
+
+            var cartProducts = context.CartProducts.Where(x => x.CartId == loggedUser.ActiveCartId && x.Product.NumberAvailable <= 0);
+            context.RemoveRange(cartProducts);
+            context.SaveChanges();
+            RefreshProducts();
+        }));
 
         printer.AddRow(new Rule("Cart").RuleStyle(Style.Parse(StandardRenderables.AquamarineColorHex)).HeavyBorder().ToBasicConsoleRow());
         printer.EnableScrolling();
@@ -77,9 +117,12 @@ internal class CartViewState : ViewState
         productsCart.ForEach(x =>
         {
             var product = x.Product;
-            var priceString = product.NumberAvailable > 0 ? $"[lime]{product.Price,-9:F2}[/] PLN" : "[red]Unavailable[/]";
-            var companyString = product.Company is null ? new string(' ', 32) : ((product.Company.Name.Length <= 29) ? $"{product.Company.Name,-29}" : $"{product.Company.Name[..30]}...");
-            var displayString = $"{product.Name.EscapeMarkup(),-32} | {priceString + new string(' ', 13 - priceString.RemoveMarkup().Length)} | {companyString}";
+
+            string amountString = "1x";//$"{x.Amount}x"; TEMP
+            string priceString = product.NumberAvailable > 0 ? $"[lime]{product.Price,-9:F2}[/] PLN" : "[red]Unavailable[/]";
+            string companyString = product.Company is null ? new string(' ', 32) : ((product.Company.Name.Length <= 29) ? $"{product.Company.Name,-29}" : $"{product.Company.Name[..30]}...");
+            string displayString = $"{amountString} {product.Name.EscapeMarkup(),-32} | {priceString + new string(' ', 13 - priceString.RemoveMarkup().Length)} | {companyString}";
+
             printer.AddRow(new InteractableConsoleRow(new Markup(displayString), (row, printer) => fsm.Checkout(new ProductViewState(fsm, product, this, "Back to cart"))), "products");
         });
     }

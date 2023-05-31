@@ -296,7 +296,7 @@
                 <mxCell id="tu-g_7TpIbmg7pbgviE7-57" value="Link to list" style="rounded=1;whiteSpace=wrap;html=1;strokeColor=#2D7600;fontFamily=Helvetica;fontSize=12;fontColor=#ffffff;fillColor=#60a917;" parent="1" vertex="1">
                     <mxGeometry x="980" y="1020" width="120" height="60" as="geometry"/>
                 </mxCell>
-                <mxCell id="tu-g_7TpIbmg7pbgviE7-58" value="Add product to cart" style="rounded=1;whiteSpace=wrap;html=1;strokeColor=#d6b656;fontFamily=Helvetica;fontSize=12;fontColor=#000000;fillColor=#fff2cc;" parent="1" vertex="1">
+                <mxCell id="tu-g_7TpIbmg7pbgviE7-58" value="Add product to cart" style="rounded=1;whiteSpace=wrap;html=1;strokeColor=#2D7600;fontFamily=Helvetica;fontSize=12;fontColor=#ffffff;fillColor=#60a917;" parent="1" vertex="1">
                     <mxGeometry x="1940" y="1020" width="120" height="60" as="geometry"/>
                 </mxCell>
                 <mxCell id="tu-g_7TpIbmg7pbgviE7-59" value="Delete product from cart" style="rounded=1;whiteSpace=wrap;html=1;strokeColor=#d6b656;fontFamily=Helvetica;fontSize=12;fontColor=#000000;fillColor=#fff2cc;" parent="1" vertex="1">
