@@ -42,6 +42,7 @@ internal class MainMenuViewState : ViewState
         {
             printer.AddRow(new InteractableConsoleRow(new Text("Account view"), (row, own) => fsm.Checkout(new UserDetailsViewState(fsm))), "options-account");
             printer.AddRow(new InteractableConsoleRow(new Text("Your lists"), (row, own) => fsm.Checkout("listBrowse")), "options-account");
+            printer.AddRow(new InteractableConsoleRow(new Text("Cart"), (row, own) => fsm.Checkout(new CartViewState(fsm))), "options-account");
         }
 
         printer.ResetCursor();
