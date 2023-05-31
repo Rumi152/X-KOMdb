@@ -27,6 +27,10 @@ internal class CartViewState : ViewState
         {
             fsm.Checkout("mainMenu");
         }));
+        printer.AddRow(new InteractableConsoleRow(new Text("Back to searching porducts"), (row, owner) =>
+        {
+            fsm.Checkout("productsSearch");
+        }));
 
 
         printer.AddRow(new InteractableConsoleRow(new Text("Go to ordering"), (row, own) => throw new NotImplementedException()));//TODO ordering viewstate
