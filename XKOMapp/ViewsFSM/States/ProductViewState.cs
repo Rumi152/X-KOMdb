@@ -16,12 +16,21 @@ public class ProductViewState : ViewState
     private readonly Product product;
     private bool isInPropertiesView = true;
 
+    private readonly ViewState? backButtonTarget;
+    private readonly string? backButtonMessage;
+
     private int reviewWriteStars = 0;
     private string reviewWriteDescription = "";
 
     public ProductViewState(ViewStateMachine stateMachine, Product product) : base(stateMachine)
     {
         this.product = product;
+    }
+    public ProductViewState(ViewStateMachine stateMachine, Product product, ViewState backButtonTarget, string backButtonMessage) : base(stateMachine)
+    {
+        this.product = product;
+        this.backButtonTarget = backButtonTarget;
+        this.backButtonMessage = backButtonMessage;
     }
 
     protected override void InitialPrinterBuild(ConsolePrinter printer)
@@ -32,7 +41,11 @@ public class ProductViewState : ViewState
         printer.AddRow(StandardRenderables.StandardHeader.ToBasicConsoleRow());
         printer.StartContent();
 
+        if(backButtonTarget is null)
         printer.AddRow(new InteractableConsoleRow(new Text("Back to searching"), (row, owner) => fsm.Checkout("productsSearch")));
+        else
+            printer.AddRow(new InteractableConsoleRow(new Markup(backButtonMessage ?? "Back"), (row, owner) => fsm.Checkout(backButtonTarget)));
+
         printer.StartGroup("favourite");
         printer.AddRow(new InteractableConsoleRow(new Text("Add to cart"), (row, owner) => throw new NotImplementedException()));//TODO implement adding to cart
         printer.AddRow(new InteractableConsoleRow(new Text("Add to list"), (row, owner) => fsm.Checkout(new ProductListViewState(fsm, product))));
