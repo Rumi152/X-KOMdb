@@ -47,7 +47,8 @@ CREATE TABLE [Cart_Product]
 (
 	[ID] INT PRIMARY KEY IDENTITY(1,1) NOT NULL,
 	[ProductID] INT NOT NULL,
-	[CartID] INT NOT NULL
+	[CartID] INT NOT NULL,
+	[Amount] INT NOT NULL
 );
 
 CREATE TABLE [PromoCode]
