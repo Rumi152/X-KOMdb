@@ -6,7 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace XKOMapp.GUI.ConsoleRows.List;
+namespace XKOMapp.GUI.ConsoleRows.ListAndCart;
 
 internal class ListNameInputConsoleRow : ICustomCursorConsoleRow, ICustomKeystrokeListenerConsoleRow, IHoverConsoleRow, IInteractableConsoleRow
 {

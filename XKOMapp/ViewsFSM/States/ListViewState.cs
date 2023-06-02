@@ -2,13 +2,16 @@
 using XKOMapp.GUI.ConsoleRows;
 using XKOMapp.GUI;
 using XKOMapp.Models;
-using XKOMapp.GUI.ConsoleRows.List;
 using System.Linq;
+using Microsoft.EntityFrameworkCore;
+using XKOMapp.GUI.ConsoleRows.ListAndCart;
+using XKOMapp.GUI.ConsoleRows.Cart;
 
 namespace XKOMapp.ViewsFSM.States;
 
 internal class ListViewState : ViewState
 {
+    private readonly List<Product> ghosts = new();
     private readonly List list;
     private ListNameInputConsoleRow nameRow = null!;
     public ListViewState(ViewStateMachine stateMachine, List list) : base(stateMachine)
@@ -29,6 +32,7 @@ internal class ListViewState : ViewState
         printer.EnableScrolling();
 
         printer.StartGroup("name");
+        printer.StartGroup("errors");
 
         printer.AddRow(new BasicConsoleRow(new Text($"Link: {list.Link}"))); //TODO long display support
 
@@ -83,30 +87,39 @@ internal class ListViewState : ViewState
 
             using var context = new XkomContext();
             context.Attach(dbUser);
+
+            string name = $"{list.Name}-copy";
             var clonedList = new List()
             {
-                Name = $"{list.Name}-copy",
-                Link = GetLink(),
+                Name = name[..Math.Min(name.Length, 32)],
+                Link = ListCreateViewState.GetLink(),
                 User = dbUser
             };
             context.Add(clonedList);
 
-            var listProducts = context.ListProducts.Where(x => x.List == list).ToList();
-            var productIds = listProducts.Select(x => x.ProductId).ToList();
-            var products = context.Products.Where(x => productIds.Contains(x.Id)).ToList();
-            if (products.Any())
-            {
-                products.ToList().ForEach(x =>
+            context.ListProducts
+            .Include(x => x.Product)
+                .Where(x => x.ListId == list.Id)
+                .Select(x => new
+                {
+                    x.Product,
+                    x.Number
+                })
+                .ToList()
+                .ForEach(x =>
                 {
                     var newProdList = new ListProduct()
                     {
-                        ProductId = x.Id,
-                        List = clonedList
+                        Product = x.Product,
+                        List = clonedList,
+                        Number = x.Number
                     };
                     context.Add(newProdList);
                 });
-            }
+
             context.SaveChanges();
+
+            fsm.Checkout(new ListViewState(fsm, clonedList));
         }));
         printer.AddRow(new InteractableConsoleRow(new Markup("[red]Delete list[/]"), (row, own) =>
         {
@@ -133,7 +146,6 @@ internal class ListViewState : ViewState
         }));
 
         printer.AddRow(new Rule("Products in this list").RuleStyle(Style.Parse(StandardRenderables.AquamarineColorHex)).HeavyBorder().ToBasicConsoleRow());
-        printer.StartGroup("errors");
         printer.StartGroup("lists");
     }
 
@@ -173,62 +185,122 @@ internal class ListViewState : ViewState
         printer.ResetCursor();
         RefreshProducts();
         RefreshName();
+        ghosts.Clear();
     }
-    private static string GetLink()
-    {
-        string link = @"https://www.x-kom.pl/list/";
-        var random = new Random();
-        List<int> notAvailalbe = new() { 58, 59, 60, 61, 62, 63, 64, 91, 92, 93, 94, 95, 96 };
 
-        while (link.Length < 128)
-        {
-            int randomNumber = random.Next(48, 122);
-            char a = Convert.ToChar(randomNumber);
-            if (!notAvailalbe.Contains(a))
-            {
-                link += a;
-            }
-        }
-        using (var context = new XkomContext())
-            if (context.Lists.Any(x => x.Link == link))
-                return GetLink();
-
-        return link;
-    }
     private void RefreshProducts()
     {
+        if (HasListExpired())
+            return;
+
+        RefreshGhosts();
+
         printer.ClearMemoryGroup("products");
 
         using var context = new XkomContext();
-        var listProducts = context.ListProducts.Where(x => x.List == list).ToList();
-        var productIds = listProducts.Select(x => x.ProductId).ToList();
-        var products = context.Products.Where(x => productIds.Contains(x.Id)).ToList();
-
-        if (!products.Any())
-            printer.AddRow(new Text("No products were found").ToBasicConsoleRow(), "products");
-        
-        products.ToList().ForEach(x =>
-        {
-            //TODO better display (productSearch-like)
-            printer.AddRow(new InteractableConsoleRow(new Markup(x.Name), (row, printer) =>
+        var productsProj = context.ListProducts
+            .Include(x => x.Product)
+            .Where(x => x.List == list)
+            .ToList()
+            .Select(x => new
             {
-                if (SessionData.HasSessionExpired(out User dbUser))
-                {
-                    fsm.Checkout(new FastLoginViewState(fsm,
-                        markupMessage: $"[red]Session expired[/] - [{StandardRenderables.GrassColorHex}]Log in to see product[/]",
-                        loginRollbackTarget: this,
-                        abortRollbackTarget: fsm.GetSavedState("mainMenu"),
-                        abortMarkupMessage: "Back to main menu"
-                    ));
-                    return;
-                }
+                x.Product,
+                x.Number
+            })
+            .Concat(ghosts.Select(x => new
+            {
+                Product = x,
+                Number = 0
+            }))
+            .ToList();
 
-                fsm.Checkout(new ProductViewState(fsm, x, this, "Back to list"));
-            }), "products");
-        });
+        if (!productsProj.Any())
+        {
+            printer.AddRow(new Text("No products were found").ToBasicConsoleRow(), "products");
+            return;
+        }
+
+        productsProj
+            .OrderBy(x => x.Product.Name)
+            .ToList()
+            .ForEach(proj =>
+            {
+                printer.AddRow(new ProductInListConsoleRow
+                    (
+                        product: proj.Product,
+                        productAmount: proj.Number,
+                        onProductAmountChange: amount =>
+                        {
+                            if (SessionData.HasSessionExpired(out User loggedUser))
+                            {
+                                fsm.Checkout(new FastLoginViewState(fsm,
+                                    markupMessage: $"[red]Session expired[/]",
+                                    loginRollbackTarget: this,
+                                    abortRollbackTarget: fsm.GetSavedState("mainMenu"),
+                                    abortMarkupMessage: "Back to main menu"
+                                ));
+                                return;
+                            }
+
+                            using XkomContext context = new();
+
+                            //REFACTOR forgive me
+                            try { context.Attach(loggedUser); }
+                            catch (InvalidOperationException) { }
+                            try { context.Attach(list); }
+                            catch (InvalidOperationException) { }
+                            try { context.Attach(proj.Product); }
+                            catch (InvalidOperationException) { }
+
+                            ListProduct? listProduct = context.ListProducts.SingleOrDefault(lp => lp.ListId == list.Id && lp.ProductId == proj.Product.Id);
+
+                            if (amount == 0)
+                            {
+                                if (listProduct is not null)
+                                    context.Remove(listProduct);
+
+                                context.SaveChanges();
+
+                                if (!ghosts.Contains(proj.Product))
+                                    ghosts.Add(proj.Product);
+                            }
+                            else
+                            {
+                                if (listProduct is not null)
+                                    listProduct.Number = amount;
+                                else
+                                {
+                                    listProduct = new ListProduct()
+                                    {
+                                        List = list,
+                                        Product = proj.Product,
+                                        Number = amount
+                                    };
+                                    context.Add(listProduct);
+                                }
+
+                                context.SaveChanges();
+                            }
+
+                            RefreshProducts();
+                        },
+                        onInteraction: () => fsm.Checkout(new ProductViewState(fsm, proj.Product, this, "Back to list"))
+                    ), "products");
+            });
     }
+
+    private void RefreshGhosts()
+    {
+        using XkomContext context = new();
+
+        ghosts.RemoveAll(product => context.ListProducts.Any(pair => pair.ProductId == product.Id && pair.ListId == list.Id));
+    }
+
     private void RefreshName()
     {
+        if (HasListExpired())
+            return;
+
         printer.ClearMemoryGroup("name");
         nameRow = new ListNameInputConsoleRow($"Name: {list.Name} | New name: ", 32, OnNameInputClick);
         printer.AddRow(nameRow, "name");
@@ -254,6 +326,7 @@ internal class ListViewState : ViewState
         }
         return true;
     }
+
 
     private bool HasListExpired()
     {

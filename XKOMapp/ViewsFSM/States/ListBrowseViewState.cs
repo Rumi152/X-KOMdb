@@ -42,8 +42,18 @@ internal class ListBrowseViewState : ViewState
                 return;
             }
 
-            fsm.Checkout(new ListCreateViewState(fsm));
+            using var context = new XkomContext();
+            context.Attach(dbUser);
+            var newList = new List()
+            {
+                Name = $"newList-{DateTime.Now:dd.MMM.yyyy-HH:mm}",
+                Link = ListCreateViewState.GetLink(),
+                User = dbUser
+            };
+            context.Add(newList);
+            context.SaveChanges();
 
+            RefreshLists();
         }));
 
         printer.AddRow(new Rule("Your lists").RuleStyle(Style.Parse(StandardRenderables.AquamarineColorHex)).HeavyBorder().ToBasicConsoleRow());
@@ -53,7 +63,13 @@ internal class ListBrowseViewState : ViewState
 
     public override void OnEnter()
     {
-        if (SessionData.HasSessionExpired(out User dbUser))
+        base.OnEnter();
+        RefreshLists();
+    }
+
+    private void RefreshLists()
+    {
+        if (SessionData.HasSessionExpired(out User loggedUser))
         {
             fsm.Checkout(new FastLoginViewState(fsm,
                 markupMessage: "[red]Session expired[/]",
@@ -64,13 +80,11 @@ internal class ListBrowseViewState : ViewState
             return;
         }
 
-        base.OnEnter();
-
         printer.ClearMemoryGroup("lists");
 
         using var context = new XkomContext();
-        context.Attach(dbUser);
-        var lists = context.Lists.Where(x => x.User == dbUser);
+        context.Attach(loggedUser);
+        var lists = context.Lists.Where(x => x.User == loggedUser);
         if (!lists.Any())
             printer.AddRow(new Text("No lists were found").ToBasicConsoleRow(), "lists");
 
