@@ -81,7 +81,7 @@ internal class ListCreateViewState : ViewState
         printer.ResetCursor();
     }
 
-    private static string GetLink()
+    public static string GetLink()
     {
         string link = "https://www.x-kom.pl/list/";
         var random = new Random();

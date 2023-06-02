@@ -4,6 +4,7 @@ using XKOMapp.GUI;
 using XKOMapp.Models;
 using XKOMapp.GUI.ConsoleRows.List;
 using System.Linq;
+using Microsoft.EntityFrameworkCore;
 
 namespace XKOMapp.ViewsFSM.States;
 
@@ -85,28 +86,35 @@ internal class ListViewState : ViewState
             context.Attach(dbUser);
             var clonedList = new List()
             {
-                Name = $"{list.Name}-copy",
-                Link = GetLink(),
+                Name = $"{list.Name}-copy"[..32],
+                Link = ListCreateViewState.GetLink(),
                 User = dbUser
             };
             context.Add(clonedList);
 
-            var listProducts = context.ListProducts.Where(x => x.List == list).ToList();
-            var productIds = listProducts.Select(x => x.ProductId).ToList();
-            var products = context.Products.Where(x => productIds.Contains(x.Id)).ToList();
-            if (products.Any())
-            {
-                products.ToList().ForEach(x =>
+            context.ListProducts
+            .Include(x => x.Product)
+                .Where(x => x.ListId == list.Id)
+                .Select(x => new
+                {
+                    x.Product,
+                    x.Number
+                })
+                .ToList()
+                .ForEach(x =>
                 {
                     var newProdList = new ListProduct()
                     {
-                        ProductId = x.Id,
-                        List = clonedList
+                        Product = x.Product,
+                        List = clonedList,
+                        Number = x.Number
                     };
                     context.Add(newProdList);
                 });
-            }
+
             context.SaveChanges();
+
+            fsm.Checkout(new ListViewState(fsm, clonedList));
         }));
         printer.AddRow(new InteractableConsoleRow(new Markup("[red]Delete list[/]"), (row, own) =>
         {
@@ -174,27 +182,7 @@ internal class ListViewState : ViewState
         RefreshProducts();
         RefreshName();
     }
-    private static string GetLink()
-    {
-        string link = @"https://www.x-kom.pl/list/";
-        var random = new Random();
-        List<int> notAvailalbe = new() { 58, 59, 60, 61, 62, 63, 64, 91, 92, 93, 94, 95, 96 };
 
-        while (link.Length < 128)
-        {
-            int randomNumber = random.Next(48, 122);
-            char a = Convert.ToChar(randomNumber);
-            if (!notAvailalbe.Contains(a))
-            {
-                link += a;
-            }
-        }
-        using (var context = new XkomContext())
-            if (context.Lists.Any(x => x.Link == link))
-                return GetLink();
-
-        return link;
-    }
     private void RefreshProducts()
     {
         printer.ClearMemoryGroup("products");
@@ -206,7 +194,7 @@ internal class ListViewState : ViewState
 
         if (!products.Any())
             printer.AddRow(new Text("No products were found").ToBasicConsoleRow(), "products");
-        
+
         products.ToList().ForEach(x =>
         {
             //TODO better display (productSearch-like)
