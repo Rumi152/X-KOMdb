@@ -11,7 +11,7 @@ using XKOMapp.ViewsFSM.States;
 
 namespace XKOMapp.GUI.ConsoleRows.Cart;
 
-internal class ProductInCartConsoleRow : IInteractableConsoleRow, ICustomCursorConsoleRow, ICustomKeystrokeListenerConsoleRow, IHoverConsoleRow
+internal class ProductInListConsoleRow : IInteractableConsoleRow, ICustomCursorConsoleRow, ICustomKeystrokeListenerConsoleRow, IHoverConsoleRow
 {
     private readonly Product product;
     private readonly Action<int> onProductAmountChange;
@@ -22,7 +22,7 @@ internal class ProductInCartConsoleRow : IInteractableConsoleRow, ICustomCursorC
 
     private ConsolePrinter owner = null!;
 
-    public ProductInCartConsoleRow(Product product, int productAmount, Action<int> onProductAmountChange, Action onInteraction)
+    public ProductInListConsoleRow(Product product, int productAmount, Action<int> onProductAmountChange, Action onInteraction)
     {
         this.product = product;
         this.productAmount = productAmount;

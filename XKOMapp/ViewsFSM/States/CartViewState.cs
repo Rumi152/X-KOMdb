@@ -195,7 +195,7 @@ internal class CartViewState : ViewState
             .ToList()
             .ForEach(projected =>
             {
-                printer.AddRow(new ProductInCartConsoleRow
+                printer.AddRow(new ProductInListConsoleRow
                     (
                         product: projected.Product,
                         productAmount: projected.Amount,
@@ -216,6 +216,8 @@ internal class CartViewState : ViewState
 
                             //REFACTOR forgive me
                             try { context.Attach(loggedUser); }
+                            catch (InvalidOperationException) { }
+                            try { context.Attach(projected.Product); }
                             catch (InvalidOperationException) { }
 
                             //add new active cart if doesnt exist

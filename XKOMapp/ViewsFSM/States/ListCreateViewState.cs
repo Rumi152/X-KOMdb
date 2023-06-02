@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 using XKOMapp.GUI.ConsoleRows;
 using XKOMapp.GUI;
 using XKOMapp.Models;
-using XKOMapp.GUI.ConsoleRows.List;
+using XKOMapp.GUI.ConsoleRows.ListAndCart;
 
 namespace XKOMapp.ViewsFSM.States;
 

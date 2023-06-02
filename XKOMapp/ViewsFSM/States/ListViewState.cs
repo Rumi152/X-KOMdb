@@ -2,14 +2,16 @@
 using XKOMapp.GUI.ConsoleRows;
 using XKOMapp.GUI;
 using XKOMapp.Models;
-using XKOMapp.GUI.ConsoleRows.List;
 using System.Linq;
 using Microsoft.EntityFrameworkCore;
+using XKOMapp.GUI.ConsoleRows.ListAndCart;
+using XKOMapp.GUI.ConsoleRows.Cart;
 
 namespace XKOMapp.ViewsFSM.States;
 
 internal class ListViewState : ViewState
 {
+    private readonly List<Product> ghosts = new();
     private readonly List list;
     private ListNameInputConsoleRow nameRow = null!;
     public ListViewState(ViewStateMachine stateMachine, List list) : base(stateMachine)
@@ -183,6 +185,7 @@ internal class ListViewState : ViewState
         printer.ResetCursor();
         RefreshProducts();
         RefreshName();
+        ghosts.Clear();
     }
 
     private void RefreshProducts()
@@ -190,37 +193,108 @@ internal class ListViewState : ViewState
         if (HasListExpired())
             return;
 
+        RefreshGhosts();
+
         printer.ClearMemoryGroup("products");
 
         using var context = new XkomContext();
-        var listProducts = context.ListProducts.Where(x => x.List == list).ToList();
-        var productIds = listProducts.Select(x => x.ProductId).ToList();
-        var products = context.Products.Where(x => productIds.Contains(x.Id)).ToList();
-
-        if (!products.Any())
-            printer.AddRow(new Text("No products were found").ToBasicConsoleRow(), "products");
-
-        products.ToList().ForEach(x =>
-        {
-            //TODO better display (productSearch-like)
-            printer.AddRow(new InteractableConsoleRow(new Markup(x.Name), (row, printer) =>
+        var productsProj = context.ListProducts
+            .Include(x => x.Product)
+            .Where(x => x.List == list)
+            .ToList()
+            .Select(x => new
             {
-                if (SessionData.HasSessionExpired(out User dbUser))
-                {
-                    fsm.Checkout(new FastLoginViewState(fsm,
-                        markupMessage: $"[red]Session expired[/] - [{StandardRenderables.GrassColorHex}]Log in to see product[/]",
-                        loginRollbackTarget: this,
-                        abortRollbackTarget: fsm.GetSavedState("mainMenu"),
-                        abortMarkupMessage: "Back to main menu"
-                    ));
-                    return;
-                }
+                x.Product,
+                x.Number
+            })
+            .Concat(ghosts.Select(x => new
+            {
+                Product = x,
+                Number = 0
+            }))
+            .ToList();
 
-                fsm.Checkout(new ProductViewState(fsm, x, this, "Back to list"));
-            }), "products");
-        });
+        if (!productsProj.Any())
+        {
+            printer.AddRow(new Text("No products were found").ToBasicConsoleRow(), "products");
+            return;
+        }
+
+        productsProj
+            .OrderBy(x => x.Product.Name)
+            .ToList()
+            .ForEach(proj =>
+            {
+                printer.AddRow(new ProductInListConsoleRow
+                    (
+                        product: proj.Product,
+                        productAmount: proj.Number,
+                        onProductAmountChange: amount =>
+                        {
+                            if (SessionData.HasSessionExpired(out User loggedUser))
+                            {
+                                fsm.Checkout(new FastLoginViewState(fsm,
+                                    markupMessage: $"[red]Session expired[/]",
+                                    loginRollbackTarget: this,
+                                    abortRollbackTarget: fsm.GetSavedState("mainMenu"),
+                                    abortMarkupMessage: "Back to main menu"
+                                ));
+                                return;
+                            }
+
+                            using XkomContext context = new();
+
+                            //REFACTOR forgive me
+                            try { context.Attach(loggedUser); }
+                            catch (InvalidOperationException) { }
+                            try { context.Attach(list); }
+                            catch (InvalidOperationException) { }
+                            try { context.Attach(proj.Product); }
+                            catch (InvalidOperationException) { }
+
+                            ListProduct? listProduct = context.ListProducts.SingleOrDefault(lp => lp.ListId == list.Id && lp.ProductId == proj.Product.Id);
+
+                            if (amount == 0)
+                            {
+                                if (listProduct is not null)
+                                    context.Remove(listProduct);
+
+                                context.SaveChanges();
+
+                                if (!ghosts.Contains(proj.Product))
+                                    ghosts.Add(proj.Product);
+                            }
+                            else
+                            {
+                                if (listProduct is not null)
+                                    listProduct.Number = amount;
+                                else
+                                {
+                                    listProduct = new ListProduct()
+                                    {
+                                        List = list,
+                                        Product = proj.Product,
+                                        Number = amount
+                                    };
+                                    context.Add(listProduct);
+                                }
+
+                                context.SaveChanges();
+                            }
+
+                            RefreshProducts();
+                        },
+                        onInteraction: () => fsm.Checkout(new ProductViewState(fsm, proj.Product, this, "Back to list"))
+                    ), "products");
+            });
     }
 
+    private void RefreshGhosts()
+    {
+        using XkomContext context = new();
+
+        ghosts.RemoveAll(product => context.ListProducts.Any(pair => pair.ProductId == product.Id && pair.ListId == list.Id));
+    }
 
     private void RefreshName()
     {
