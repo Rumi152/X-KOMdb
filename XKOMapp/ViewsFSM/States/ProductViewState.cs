@@ -95,15 +95,14 @@ public class ProductViewState : ViewState
 
             Cart activeCart = context.Carts.Single(x => x.Id == loggedUser.ActiveCartId);
 
-            //TEMP add amount handling
-            var cartProduct = context.CartProducts.SingleOrDefault(x => x.Id == activeCart.Id && x.ProductId == product.Id);
+            var cartProduct = context.CartProducts.SingleOrDefault(x => x.CartId == activeCart.Id && x.ProductId == product.Id);
             if (cartProduct is null)
             {
                 var newRecord = new CartProduct()
                 {
                     Product = product,
-                    Cart = activeCart/*,
-                    Amount = 1*/ //TEMP
+                    Cart = activeCart,
+                    Amount = 1
                 };
 
                 context.CartProducts.Add(newRecord);
@@ -111,7 +110,7 @@ public class ProductViewState : ViewState
             }
             else
             {
-                //cartProduct.Amount++; TEMP
+                cartProduct.Amount++;
             }
 
             context.SaveChanges();
