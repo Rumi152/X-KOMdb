@@ -30,6 +30,7 @@ internal class ListViewState : ViewState
         printer.EnableScrolling();
 
         printer.StartGroup("name");
+        printer.StartGroup("errors");
 
         printer.AddRow(new BasicConsoleRow(new Text($"Link: {list.Link}"))); //TODO long display support
 
@@ -84,9 +85,11 @@ internal class ListViewState : ViewState
 
             using var context = new XkomContext();
             context.Attach(dbUser);
+
+            string name = $"{list.Name}-copy";
             var clonedList = new List()
             {
-                Name = $"{list.Name}-copy"[..32],
+                Name = name[..Math.Min(name.Length, 32)],
                 Link = ListCreateViewState.GetLink(),
                 User = dbUser
             };
@@ -141,7 +144,6 @@ internal class ListViewState : ViewState
         }));
 
         printer.AddRow(new Rule("Products in this list").RuleStyle(Style.Parse(StandardRenderables.AquamarineColorHex)).HeavyBorder().ToBasicConsoleRow());
-        printer.StartGroup("errors");
         printer.StartGroup("lists");
     }
 
