@@ -187,6 +187,9 @@ internal class ListViewState : ViewState
 
     private void RefreshProducts()
     {
+        if (HasListExpired())
+            return;
+
         printer.ClearMemoryGroup("products");
 
         using var context = new XkomContext();
@@ -217,8 +220,13 @@ internal class ListViewState : ViewState
             }), "products");
         });
     }
+
+
     private void RefreshName()
     {
+        if (HasListExpired())
+            return;
+
         printer.ClearMemoryGroup("name");
         nameRow = new ListNameInputConsoleRow($"Name: {list.Name} | New name: ", 32, OnNameInputClick);
         printer.AddRow(nameRow, "name");
@@ -244,6 +252,7 @@ internal class ListViewState : ViewState
         }
         return true;
     }
+
 
     private bool HasListExpired()
     {
