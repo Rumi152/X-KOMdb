@@ -147,75 +147,73 @@ internal class CartViewState : ViewState
                     (
                         product: projected.Product,
                         productAmount: projected.Amount,
-                        onProductAmountChange: OnProductAmountChange,
+                        onProductAmountChange: amount =>
+                        {
+                            if (SessionData.HasSessionExpired(out User loggedUser))
+                            {
+                                fsm.Checkout(new FastLoginViewState(fsm,
+                                    markupMessage: $"[red]Session expired[/]",
+                                    loginRollbackTarget: this,
+                                    abortRollbackTarget: fsm.GetSavedState("mainMenu"),
+                                    abortMarkupMessage: "Back to main menu"
+                                ));
+                                return;
+                            }
+
+                            using XkomContext context = new();
+
+                            //REFACTOR forgive me
+                            try { context.Attach(loggedUser); }
+                            catch (InvalidOperationException) { }
+
+                            //add new active cart if doesnt exist
+                            if (!context.Carts.Any(x => x.Id == loggedUser.ActiveCartId))
+                            {
+                                var newCart = new Cart()
+                                {
+                                    User = loggedUser
+                                };
+
+                                context.Carts.Add(newCart);
+                                loggedUser.ActiveCart = newCart;
+                            }
+                            context.SaveChanges();
+                            Cart activeCart = context.Carts.Single(x => x.Id == loggedUser.ActiveCartId);
+                            CartProduct? cartProduct = context.CartProducts.SingleOrDefault(cp => cp.CartId == activeCart.Id && cp.ProductId == projected.Product.Id);
+
+                            if (amount == 0)
+                            {
+                                if (cartProduct is not null)
+                                    context.Remove(cartProduct);
+
+                                context.SaveChanges();
+
+                                if (!ghosts.Contains(projected.Product))
+                                    ghosts.Add(projected.Product);
+                            }
+                            else
+                            {
+                                if (cartProduct is not null)
+                                    cartProduct.Amount = amount;
+                                else
+                                {
+                                    cartProduct = new CartProduct()
+                                    {
+                                        Cart = activeCart,
+                                        Product = projected.Product,
+                                        Amount = amount
+                                    };
+                                    context.Add(cartProduct);
+                                }
+
+                                context.SaveChanges();
+                            }
+
+                            RefreshProducts();
+                        },
                         onInteraction: () => fsm.Checkout(new ProductViewState(fsm, projected.Product, this, "Back to cart"))
                     ), "products");
             });
-
-        void OnProductAmountChange(int amount)
-        {
-            if (SessionData.HasSessionExpired(out User loggedUser))
-            {
-                fsm.Checkout(new FastLoginViewState(fsm,
-                    markupMessage: $"[red]Session expired[/]",
-                    loginRollbackTarget: this,
-                    abortRollbackTarget: fsm.GetSavedState("mainMenu"),
-                    abortMarkupMessage: "Back to main menu"
-                ));
-                return;
-            }
-
-            using XkomContext context = new();
-
-            //REFACTOR forgive me
-            try { context.Attach(loggedUser); }
-            catch (InvalidOperationException) { }
-
-            //add new active cart if doesnt exist
-            if (!context.Carts.Any(x => x.Id == loggedUser.ActiveCartId))
-            {
-                var newCart = new Cart()
-                {
-                    User = loggedUser
-                };
-
-                context.Carts.Add(newCart);
-                loggedUser.ActiveCart = newCart;
-            }
-            context.SaveChanges();
-            Cart activeCart = context.Carts.Single(x => x.Id == loggedUser.ActiveCartId);
-            CartProduct? cartProduct = context.CartProducts.SingleOrDefault(cp => cp.CartId == activeCart.Id && cp.ProductId == projected.Product.Id);
-
-            if (amount == 0)
-            {
-                if (cartProduct is not null)
-                    context.Remove(cartProduct);
-
-                context.SaveChanges();
-
-                if (!ghosts.Contains(projected.Product))
-                    ghosts.Add(projected.Product);
-            }
-            else
-            {
-                if (cartProduct is not null)
-                    cartProduct.Amount = amount;
-                else
-                {
-                    cartProduct = new CartProduct()
-                    {
-                        Cart = activeCart,
-                        Product = projected.Product,
-                        Amount = amount
-                    };
-                    context.Add(cartProduct);
-                }
-
-                context.SaveChanges();
-            }
-
-            RefreshProducts();
-        }
     }
 
     private void RefreshGhosts()
