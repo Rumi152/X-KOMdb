@@ -39,7 +39,7 @@ internal class ProductInCartConsoleRow : IInteractableConsoleRow, ICustomCursorC
         string dimStart = productAmount == 0 ? "[dim]" : "";
         string dimEnd = productAmount == 0 ? "[/]" : "";
 
-        string displayString = $"{dimStart}{amountString, -6} {product.Name.EscapeMarkup(),-40}  {priceString + new string(' ', 13 - priceString.RemoveMarkup().Length)}  {companyString}{dimEnd}";
+        string displayString = $"{dimStart}{amountString, -6} {product.Name.EscapeMarkup(),-40}  {priceString + new string(' ', Math.Max(0, 13 - priceString.RemoveMarkup().Length))}  {companyString}{dimEnd}";
 
         return new Markup(displayString);
     }
