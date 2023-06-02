@@ -51,7 +51,7 @@ internal class CartViewState : ViewState
 
             var snapshotList = new List()
             {
-                Name = $"cart-snapshot-{DateTime.Now:dd.MMM.yyyy}",
+                Name = $"cart-snapshot-{DateTime.Now:dd.MMM.yyyy-HH:mm}",
                 Link = ListCreateViewState.GetLink(),
                 User = loggedUser
             };
