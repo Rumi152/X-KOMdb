@@ -31,6 +31,57 @@ internal class CartViewState : ViewState
         printer.AddRow(new InteractableConsoleRow(new Text("Back to menu"), (row, owner) => fsm.Checkout("mainMenu")));
         printer.AddRow(new InteractableConsoleRow(new Text("Go to ordering"), (row, own) => throw new NotImplementedException()));//TODO ordering viewstate
 
+        printer.AddRow(StandardRenderables.StandardSeparator.ToBasicConsoleRow());
+
+        printer.AddRow(new InteractableConsoleRow(new Text("Snapshot to list"), (row, onwer) =>
+        {
+            if (SessionData.HasSessionExpired(out User loggedUser))
+            {
+                fsm.Checkout(new FastLoginViewState(fsm,
+                    markupMessage: $"[red]Session expired[/]",
+                    loginRollbackTarget: this,
+                    abortRollbackTarget: fsm.GetSavedState("mainMenu"),
+                    abortMarkupMessage: "Back to main menu"
+                ));
+                return;
+            }
+
+            using var context = new XkomContext();
+            context.Attach(loggedUser);
+
+            var snapshotList = new List()
+            {
+                Name = $"cart-snapshot-{DateTime.Now:dd.MMM.yyyy}",
+                Link = ListCreateViewState.GetLink(),
+                User = loggedUser
+            };
+            context.Add(snapshotList);
+
+            context.CartProducts
+            .Include(x => x.Product)
+                .Where(x => x.CartId == loggedUser.ActiveCartId)
+                .Select(x => new
+                {
+                    x.Product,
+                    x.Amount
+                })
+                .ToList()
+                .ForEach(x =>
+                {
+                    var newProdList = new ListProduct()
+                    {
+                        Product = x.Product,
+                        List = snapshotList,
+                        Number = x.Amount
+                    };
+                    context.Add(newProdList);
+                });
+
+            context.SaveChanges();
+
+            fsm.Checkout(new ListViewState(fsm, snapshotList));
+        }));
+
         printer.AddRow(new InteractableConsoleRow(new Text("Empty this cart"), (row, own) =>
         {
             if (SessionData.HasSessionExpired(out User loggedUser))
@@ -53,6 +104,7 @@ internal class CartViewState : ViewState
             context.SaveChanges();
             RefreshProducts();
         }));
+
         printer.AddRow(new InteractableConsoleRow(new Text("Delete unavailable"), (row, own) =>
         {
             if (SessionData.HasSessionExpired(out User loggedUser))
