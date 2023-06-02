@@ -287,7 +287,7 @@
                 <mxCell id="tu-g_7TpIbmg7pbgviE7-54" value="Change number of products" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontColor=#000000;" parent="1" vertex="1">
                     <mxGeometry x="1140" y="1120" width="120" height="60" as="geometry"/>
                 </mxCell>
-                <mxCell id="tu-g_7TpIbmg7pbgviE7-55" value="Change number of products" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontColor=#000000;" parent="1" vertex="1">
+                <mxCell id="tu-g_7TpIbmg7pbgviE7-55" value="Change number of products" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#60a917;strokeColor=#2D7600;fontColor=#ffffff;" parent="1" vertex="1">
                     <mxGeometry x="2100" y="1120" width="120" height="60" as="geometry"/>
                 </mxCell>
                 <mxCell id="tu-g_7TpIbmg7pbgviE7-56" value="Change lists name" style="rounded=1;whiteSpace=wrap;html=1;strokeColor=#2D7600;fontFamily=Helvetica;fontSize=12;fontColor=#ffffff;fillColor=#60a917;" parent="1" vertex="1">
@@ -296,10 +296,10 @@
                 <mxCell id="tu-g_7TpIbmg7pbgviE7-57" value="Link to list" style="rounded=1;whiteSpace=wrap;html=1;strokeColor=#2D7600;fontFamily=Helvetica;fontSize=12;fontColor=#ffffff;fillColor=#60a917;" parent="1" vertex="1">
                     <mxGeometry x="980" y="1020" width="120" height="60" as="geometry"/>
                 </mxCell>
-                <mxCell id="tu-g_7TpIbmg7pbgviE7-58" value="Add product to cart" style="rounded=1;whiteSpace=wrap;html=1;strokeColor=#d6b656;fontFamily=Helvetica;fontSize=12;fontColor=#000000;fillColor=#fff2cc;" parent="1" vertex="1">
+                <mxCell id="tu-g_7TpIbmg7pbgviE7-58" value="Add product to cart" style="rounded=1;whiteSpace=wrap;html=1;strokeColor=#2D7600;fontFamily=Helvetica;fontSize=12;fontColor=#ffffff;fillColor=#60a917;" parent="1" vertex="1">
                     <mxGeometry x="1940" y="1020" width="120" height="60" as="geometry"/>
                 </mxCell>
-                <mxCell id="tu-g_7TpIbmg7pbgviE7-59" value="Delete product from cart" style="rounded=1;whiteSpace=wrap;html=1;strokeColor=#d6b656;fontFamily=Helvetica;fontSize=12;fontColor=#000000;fillColor=#fff2cc;" parent="1" vertex="1">
+                <mxCell id="tu-g_7TpIbmg7pbgviE7-59" value="Delete product from cart" style="rounded=1;whiteSpace=wrap;html=1;strokeColor=#2D7600;fontFamily=Helvetica;fontSize=12;fontColor=#ffffff;fillColor=#60a917;" parent="1" vertex="1">
                     <mxGeometry x="2100" y="1020" width="120" height="60" as="geometry"/>
                 </mxCell>
                 <mxCell id="tu-g_7TpIbmg7pbgviE7-60" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0;entryY=0.75;entryDx=0;entryDy=0;entryPerimeter=0;fontFamily=Helvetica;fontSize=12;fontColor=#000000;" parent="1" source="tu-g_7TpIbmg7pbgviE7-61" target="tu-g_7TpIbmg7pbgviE7-74" edge="1">
@@ -473,10 +473,10 @@
                 <mxCell id="btTpmAtazuo6H9hWQEnr-9" value="Delete unavailable" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#60a917;strokeColor=#2D7600;fontColor=#ffffff;" parent="1" vertex="1">
                     <mxGeometry x="1460" y="1120" width="120" height="60" as="geometry"/>
                 </mxCell>
-                <mxCell id="btTpmAtazuo6H9hWQEnr-11" value="Empty cart" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontColor=#000000;" parent="1" vertex="1">
+                <mxCell id="btTpmAtazuo6H9hWQEnr-11" value="Empty cart" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#60a917;strokeColor=#2D7600;fontColor=#ffffff;" parent="1" vertex="1">
                     <mxGeometry x="1940" y="1120" width="120" height="60" as="geometry"/>
                 </mxCell>
-                <mxCell id="btTpmAtazuo6H9hWQEnr-13" value="Delete unavailable" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontColor=#000000;" parent="1" vertex="1">
+                <mxCell id="btTpmAtazuo6H9hWQEnr-13" value="Delete unavailable" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#60a917;strokeColor=#2D7600;fontColor=#ffffff;" parent="1" vertex="1">
                     <mxGeometry x="1940" y="1220" width="120" height="60" as="geometry"/>
                 </mxCell>
                 <mxCell id="jZJ21DdkEaakPETDEJtm-2" value="Clone list" style="rounded=1;whiteSpace=wrap;html=1;strokeColor=#d6b656;fontFamily=Helvetica;fontSize=12;fontColor=#000000;fillColor=#fff2cc;" parent="1" vertex="1">

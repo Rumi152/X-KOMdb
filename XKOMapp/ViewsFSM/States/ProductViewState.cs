@@ -16,12 +16,21 @@ public class ProductViewState : ViewState
     private readonly Product product;
     private bool isInPropertiesView = true;
 
+    private readonly ViewState? backButtonTarget;
+    private readonly string? backButtonMessage;
+
     private int reviewWriteStars = 0;
     private string reviewWriteDescription = "";
 
     public ProductViewState(ViewStateMachine stateMachine, Product product) : base(stateMachine)
     {
         this.product = product;
+    }
+    public ProductViewState(ViewStateMachine stateMachine, Product product, ViewState backButtonTarget, string backButtonMessage) : base(stateMachine)
+    {
+        this.product = product;
+        this.backButtonTarget = backButtonTarget;
+        this.backButtonMessage = backButtonMessage;
     }
 
     protected override void InitialPrinterBuild(ConsolePrinter printer)
@@ -32,9 +41,82 @@ public class ProductViewState : ViewState
         printer.AddRow(StandardRenderables.StandardHeader.ToBasicConsoleRow());
         printer.StartContent();
 
+        if(backButtonTarget is null)
         printer.AddRow(new InteractableConsoleRow(new Text("Back to searching"), (row, owner) => fsm.Checkout("productsSearch")));
+        else
+            printer.AddRow(new InteractableConsoleRow(new Markup(backButtonMessage ?? "Back"), (row, owner) => fsm.Checkout(backButtonTarget)));
+
         printer.StartGroup("favourite");
-        printer.AddRow(new InteractableConsoleRow(new Text("Add to cart"), (row, owner) => throw new NotImplementedException()));//TODO implement adding to cart
+        printer.AddRow(new InteractableConsoleRow(new Text("Add to cart"), (row, owner) =>
+        {
+            if (!SessionData.IsLoggedIn())
+            {
+                fsm.Checkout(new FastLoginViewState(fsm,
+                    markupMessage: $"[{StandardRenderables.GrassColorHex}]Log in to use cart[/]",
+                    loginRollbackTarget: this,
+                    abortRollbackTarget: this,
+                    abortMarkupMessage: "Click to abort"
+                ));
+                return;
+            }
+
+            if (SessionData.HasSessionExpired(out User loggedUser))
+            {
+                fsm.Checkout(new FastLoginViewState(fsm,
+                    markupMessage: $"[red]Session expired[/] - [{StandardRenderables.GrassColorHex}]Log in to use cart[/]",
+                    loginRollbackTarget: this,
+                    abortRollbackTarget: this,
+                    abortMarkupMessage: "Click to abort"
+                ));
+                return;
+            }
+
+            using XkomContext context = new();
+
+            //REFACTOR forgive me
+            try { context.Attach(product); }
+            catch (InvalidOperationException) { }
+            try { context.Attach(loggedUser); }
+            catch (InvalidOperationException) { }
+
+            //add new active cart if doesnt exist
+            if (!context.Carts.Any(x => x.Id == loggedUser.ActiveCartId))
+            {
+                var newCart = new Cart()
+                {
+                    User = loggedUser
+                };
+
+                context.Carts.Add(newCart);
+                loggedUser.ActiveCart = newCart;
+            }
+
+            context.SaveChanges();
+
+            Cart activeCart = context.Carts.Single(x => x.Id == loggedUser.ActiveCartId);
+
+            var cartProduct = context.CartProducts.SingleOrDefault(x => x.CartId == activeCart.Id && x.ProductId == product.Id);
+            if (cartProduct is null)
+            {
+                var newRecord = new CartProduct()
+                {
+                    Product = product,
+                    Cart = activeCart,
+                    Amount = 1
+                };
+
+                context.CartProducts.Add(newRecord);
+                cartProduct = newRecord;
+            }
+            else
+            {
+                cartProduct.Amount++;
+            }
+
+            context.SaveChanges();
+
+            fsm.Checkout(new CartViewState(fsm));
+        }));
         printer.AddRow(new InteractableConsoleRow(new Text("Add to list"), (row, owner) => fsm.Checkout(new ProductListViewState(fsm, product))));
 
         printer.AddRow(new Rule($"{product.Category?.Name} category").HeavyBorder().LeftJustified().RuleStyle(Style.Parse("#0e8f75")).ToBasicConsoleRow());
@@ -240,12 +322,9 @@ public class ProductViewState : ViewState
             {
                 context.Attach(product);
             }
-            catch
+            catch(InvalidOperationException)
             {
-                //TODO more specific catch
-
-                //I dont give a shit
-                //please forgive me
+                //REFACTOR please forgive me
             }
 
             printer.ClearMemoryGroup("reviews-postInput-errors");
