@@ -131,6 +131,12 @@ VALUES
 ),
 ('Tymek Rogowski',0,20,28,1,'2007-05-11',
 '{"Color":"#000000","Speed":"0.(9)c","Specialization":"Basketball"}'
+),
+('Playstation 5',2699,11,9,0,'2020-11-12',
+'{"Color":"Black&White","Processor":"AMD Ryzen Zen 2","Graphic card":"AMD RDNA 2.0","RAM":"16GB","Storage":"825 GB SSD"}'
+),
+('7000D Airflow',1449,14,12,0,'2019-07-04',
+'{"Color":"Black","Type":"Full Tower","Side panel":"Tempered glass","RAM":"16GB","Mother board standard":"ATX","Number of fans":"3"}'
 )
 
 

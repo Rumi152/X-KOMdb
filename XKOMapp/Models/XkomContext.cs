@@ -54,7 +54,7 @@ public partial class XkomContext : DbContext
     {
         modelBuilder.Entity<Cart>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__Cart__3214EC272245B976");
+            entity.HasKey(e => e.Id).HasName("PK__Cart__3214EC27D1EF9C7D");
 
             entity.ToTable("Cart");
 
@@ -70,7 +70,7 @@ public partial class XkomContext : DbContext
 
         modelBuilder.Entity<CartProduct>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__Cart_Pro__3214EC27D159941A");
+            entity.HasKey(e => e.Id).HasName("PK__Cart_Pro__3214EC27E30D65E9");
 
             entity.ToTable("Cart_Product");
 
@@ -89,11 +89,11 @@ public partial class XkomContext : DbContext
 
         modelBuilder.Entity<City>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__City__3214EC2727B049C7");
+            entity.HasKey(e => e.Id).HasName("PK__City__3214EC27FE7182B3");
 
             entity.ToTable("City");
 
-            entity.HasIndex(e => e.Name, "UQ__City__737584F68E339791").IsUnique();
+            entity.HasIndex(e => e.Name, "UQ__City__737584F625DDF253").IsUnique();
 
             entity.Property(e => e.Id).HasColumnName("ID");
             entity.Property(e => e.Name)
@@ -103,7 +103,7 @@ public partial class XkomContext : DbContext
 
         modelBuilder.Entity<FavouriteProduct>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__Favourit__3214EC276750A61A");
+            entity.HasKey(e => e.Id).HasName("PK__Favourit__3214EC2775359D9F");
 
             entity.ToTable("FavouriteProduct");
 
@@ -122,7 +122,7 @@ public partial class XkomContext : DbContext
 
         modelBuilder.Entity<List>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__List__3214EC270D1ADB67");
+            entity.HasKey(e => e.Id).HasName("PK__List__3214EC270E31C79C");
 
             entity.ToTable("List");
 
@@ -147,7 +147,7 @@ public partial class XkomContext : DbContext
 
         modelBuilder.Entity<ListProduct>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__List_Pro__3214EC2756BF25EF");
+            entity.HasKey(e => e.Id).HasName("PK__List_Pro__3214EC277BE75C7E");
 
             entity.ToTable("List_Product");
 
@@ -168,13 +168,13 @@ public partial class XkomContext : DbContext
 
         modelBuilder.Entity<Order>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__Order__3214EC271DFD579D");
+            entity.HasKey(e => e.Id).HasName("PK__Order__3214EC27D260BEBA");
 
             entity.ToTable("Order");
 
-            entity.HasIndex(e => e.ShipmentInfoId, "UQ__Order__23189E8A0E0025B8").IsUnique();
+            entity.HasIndex(e => e.ShipmentInfoId, "UQ__Order__23189E8ACD4FD508").IsUnique();
 
-            entity.HasIndex(e => e.CartId, "UQ__Order__51BCD7961B39BDB7").IsUnique();
+            entity.HasIndex(e => e.CartId, "UQ__Order__51BCD796575D59B1").IsUnique();
 
             entity.Property(e => e.Id).HasColumnName("ID");
             entity.Property(e => e.CartId).HasColumnName("CartID");
@@ -206,11 +206,11 @@ public partial class XkomContext : DbContext
 
         modelBuilder.Entity<OrderStatus>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__OrderSta__3214EC2793151474");
+            entity.HasKey(e => e.Id).HasName("PK__OrderSta__3214EC275F22469D");
 
             entity.ToTable("OrderStatus");
 
-            entity.HasIndex(e => e.Name, "UQ__OrderSta__737584F6A501CB4B").IsUnique();
+            entity.HasIndex(e => e.Name, "UQ__OrderSta__737584F623D52B3F").IsUnique();
 
             entity.Property(e => e.Id).HasColumnName("ID");
             entity.Property(e => e.Name)
@@ -220,11 +220,11 @@ public partial class XkomContext : DbContext
 
         modelBuilder.Entity<PaymentMethod>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__PaymentM__3214EC2787E92D3F");
+            entity.HasKey(e => e.Id).HasName("PK__PaymentM__3214EC27E2948C67");
 
             entity.ToTable("PaymentMethod");
 
-            entity.HasIndex(e => e.Name, "UQ__PaymentM__737584F6950E7F00").IsUnique();
+            entity.HasIndex(e => e.Name, "UQ__PaymentM__737584F668B90D50").IsUnique();
 
             entity.Property(e => e.Id).HasColumnName("ID");
             entity.Property(e => e.Name)
@@ -234,7 +234,7 @@ public partial class XkomContext : DbContext
 
         modelBuilder.Entity<Product>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__Product__3214EC271D2C5D4B");
+            entity.HasKey(e => e.Id).HasName("PK__Product__3214EC27B323295F");
 
             entity.ToTable("Product");
 
@@ -261,11 +261,11 @@ public partial class XkomContext : DbContext
 
         modelBuilder.Entity<ProductCategory>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__ProductC__3214EC2786F72740");
+            entity.HasKey(e => e.Id).HasName("PK__ProductC__3214EC27027FEBD6");
 
             entity.ToTable("ProductCategory");
 
-            entity.HasIndex(e => e.Name, "UQ__ProductC__737584F65F3A6C75").IsUnique();
+            entity.HasIndex(e => e.Name, "UQ__ProductC__737584F6063E4A9C").IsUnique();
 
             entity.Property(e => e.Id).HasColumnName("ID");
             entity.Property(e => e.Name)
@@ -275,11 +275,11 @@ public partial class XkomContext : DbContext
 
         modelBuilder.Entity<ProductCompany>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__ProductC__3214EC278547178A");
+            entity.HasKey(e => e.Id).HasName("PK__ProductC__3214EC27CF209EE0");
 
             entity.ToTable("ProductCompany");
 
-            entity.HasIndex(e => e.Name, "UQ__ProductC__737584F673D4C878").IsUnique();
+            entity.HasIndex(e => e.Name, "UQ__ProductC__737584F6C7B2D4AA").IsUnique();
 
             entity.Property(e => e.Id).HasColumnName("ID");
             entity.Property(e => e.Name)
@@ -289,7 +289,7 @@ public partial class XkomContext : DbContext
 
         modelBuilder.Entity<PromoCode>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__PromoCod__3214EC2761AFF20C");
+            entity.HasKey(e => e.Id).HasName("PK__PromoCod__3214EC27228FA457");
 
             entity.ToTable("PromoCode");
 
@@ -305,7 +305,7 @@ public partial class XkomContext : DbContext
 
         modelBuilder.Entity<Review>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__Review__3214EC271C55084F");
+            entity.HasKey(e => e.Id).HasName("PK__Review__3214EC27F05EC6EB");
 
             entity.ToTable("Review");
 
@@ -326,7 +326,7 @@ public partial class XkomContext : DbContext
 
         modelBuilder.Entity<ShipmentInfo>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__Shipment__3214EC275F682B7D");
+            entity.HasKey(e => e.Id).HasName("PK__Shipment__3214EC2725CFB353");
 
             entity.ToTable("ShipmentInfo");
 
@@ -344,11 +344,11 @@ public partial class XkomContext : DbContext
 
         modelBuilder.Entity<User>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__User__3214EC27E9FC5C8E");
+            entity.HasKey(e => e.Id).HasName("PK__User__3214EC2712E092CE");
 
             entity.ToTable("User", tb => tb.HasTrigger("deleteActiveCart"));
 
-            entity.HasIndex(e => e.Email, "UQ__User__A9D1053463778251").IsUnique();
+            entity.HasIndex(e => e.Email, "UQ__User__A9D10534B973CACB").IsUnique();
 
             entity.HasIndex(e => e.ActiveCartId, "idx_User_NullableUnique")
                 .IsUnique()
