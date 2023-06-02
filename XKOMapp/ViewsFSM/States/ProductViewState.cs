@@ -322,12 +322,9 @@ public class ProductViewState : ViewState
             {
                 context.Attach(product);
             }
-            catch
+            catch(InvalidOperationException)
             {
-                //TODO more specific catch
-
-                //I dont give a shit
-                //please forgive me
+                //REFACTOR please forgive me
             }
 
             printer.ClearMemoryGroup("reviews-postInput-errors");
