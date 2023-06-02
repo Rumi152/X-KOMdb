@@ -9,11 +9,15 @@ using XKOMapp.GUI;
 using XKOMapp.Models;
 using System.Net.Sockets;
 using Microsoft.EntityFrameworkCore;
+using XKOMapp.GUI.ConsoleRows.Cart;
 
 namespace XKOMapp.ViewsFSM.States;
 
 internal class CartViewState : ViewState
 {
+    private readonly List<Product> ghosts = new();
+
+
     public CartViewState(ViewStateMachine stateMachine) : base(stateMachine)
     {
     }
@@ -23,17 +27,10 @@ internal class CartViewState : ViewState
         printer.AddRow(StandardRenderables.StandardHeader.ToBasicConsoleRow());
         printer.StartContent();
 
-        printer.AddRow(new InteractableConsoleRow(new Text("Back to menu"), (row, owner) =>
-        {
-            fsm.Checkout("mainMenu");
-        }));
-        printer.AddRow(new InteractableConsoleRow(new Text("Back to searching porducts"), (row, owner) =>
-        {
-            fsm.Checkout("productsSearch");
-        }));
-
-
+        printer.AddRow(new InteractableConsoleRow(new Text("Back to searching porducts"), (row, owner) => fsm.Checkout("productsSearch")));
+        printer.AddRow(new InteractableConsoleRow(new Text("Back to menu"), (row, owner) => fsm.Checkout("mainMenu")));
         printer.AddRow(new InteractableConsoleRow(new Text("Go to ordering"), (row, own) => throw new NotImplementedException()));//TODO ordering viewstate
+
         printer.AddRow(new InteractableConsoleRow(new Text("Empty this cart"), (row, own) =>
         {
             if (SessionData.HasSessionExpired(out User loggedUser))
@@ -48,6 +45,8 @@ internal class CartViewState : ViewState
             }
 
             using XkomContext context = new();
+
+            ghosts.Clear();
 
             var cartProducts = context.CartProducts.Where(x => x.CartId == loggedUser.ActiveCartId);
             context.RemoveRange(cartProducts);
@@ -87,9 +86,16 @@ internal class CartViewState : ViewState
         RefreshProducts();
     }
 
+    public override void OnExit()
+    {
+        base.OnExit();
+        ghosts.Clear();
+    }
+
 
     private void RefreshProducts()
     {
+        printer.SetBufferDirty();
         printer.ClearMemoryGroup("products");
 
         if (SessionData.HasSessionExpired(out User loggedUser))
@@ -103,32 +109,120 @@ internal class CartViewState : ViewState
             return;
         }
 
+        RefreshGhosts();
+
         using XkomContext context = new();
 
-        List<CartProduct> productsCart = context.CartProducts
+        var productsProj = context.CartProducts
             .Include(x => x.Product)
             .Include(x => x.Product.Company)
             .Include(x => x.Product.Category)
+            .AsNoTracking()
             .Where(x => x.CartId == loggedUser.ActiveCartId)
+            .ToList()
+            .Select(x => new
+            {
+                Product = x.Product,
+                Amount = x.Amount
+            })
+            .Concat(ghosts.Select(x => new
+            {
+                Product = x,
+                Amount = 0
+            }))
             .ToList();
 
-        if (!productsCart.Any())
+        if (!productsProj.Any())
         {
             printer.AddRow(new BasicConsoleRow(new Markup("You have no products in cart")), "products");
             return;
         }
 
-        productsCart.ForEach(x =>
+        productsProj
+            .OrderBy(x => x.Product.Name)
+            .ToList()
+            .ForEach(projected =>
+            {
+                printer.AddRow(new ProductInCartConsoleRow
+                    (
+                        product: projected.Product,
+                        productAmount: projected.Amount,
+                        onProductAmountChange: OnProductAmountChange,
+                        onInteraction: () => fsm.Checkout(new ProductViewState(fsm, projected.Product, this, "Back to cart"))
+                    ), "products");
+            });
+
+        void OnProductAmountChange(int amount)
         {
-            var product = x.Product;
+            if (SessionData.HasSessionExpired(out User loggedUser))
+            {
+                fsm.Checkout(new FastLoginViewState(fsm,
+                    markupMessage: $"[red]Session expired[/]",
+                    loginRollbackTarget: this,
+                    abortRollbackTarget: fsm.GetSavedState("mainMenu"),
+                    abortMarkupMessage: "Back to main menu"
+                ));
+                return;
+            }
 
-            string amountString = "1x";//$"{x.Amount}x"; TEMP
-            string priceString = product.NumberAvailable > 0 ? $"[lime]{product.Price,-9:F2}[/] PLN" : "[red]Unavailable[/]";
-            string companyString = product.Company is null ? new string(' ', 32) : ((product.Company.Name.Length <= 29) ? $"{product.Company.Name,-29}" : $"{product.Company.Name[..30]}...");
-            string displayString = $"{amountString} {product.Name.EscapeMarkup(),-32} | {priceString + new string(' ', 13 - priceString.RemoveMarkup().Length)} | {companyString}";
+            using XkomContext context = new();
 
-            printer.AddRow(new InteractableConsoleRow(new Markup(displayString), (row, printer) => fsm.Checkout(new ProductViewState(fsm, product, this, "Back to cart"))), "products");
-        });
+            //REFACTOR forgive me
+            try { context.Attach(loggedUser); }
+            catch (InvalidOperationException) { }
+
+            //add new active cart if doesnt exist
+            if (!context.Carts.Any(x => x.Id == loggedUser.ActiveCartId))
+            {
+                var newCart = new Cart()
+                {
+                    User = loggedUser
+                };
+
+                context.Carts.Add(newCart);
+                loggedUser.ActiveCart = newCart;
+            }
+            context.SaveChanges();
+            Cart activeCart = context.Carts.Single(x => x.Id == loggedUser.ActiveCartId);
+            CartProduct? cartProduct = context.CartProducts.SingleOrDefault(cp => cp.CartId == activeCart.Id && cp.ProductId == projected.Product.Id);
+
+            if (amount == 0)
+            {
+                if (cartProduct is not null)
+                    context.Remove(cartProduct);
+
+                context.SaveChanges();
+
+                if (!ghosts.Contains(projected.Product))
+                    ghosts.Add(projected.Product);
+            }
+            else
+            {
+                if (cartProduct is not null)
+                    cartProduct.Amount = amount;
+                else
+                {
+                    cartProduct = new CartProduct()
+                    {
+                        Cart = activeCart,
+                        Product = projected.Product,
+                        Amount = amount
+                    };
+                    context.Add(cartProduct);
+                }
+
+                context.SaveChanges();
+            }
+
+            RefreshProducts();
+        }
+    }
+
+    private void RefreshGhosts()
+    {
+        using XkomContext context = new();
+
+        ghosts.RemoveAll(product => context.CartProducts.Any(pair => pair.ProductId == product.Id && pair.CartId == SessionData.GetUserOffline()!.ActiveCartId));
     }
 }
 
