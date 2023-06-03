@@ -56,16 +56,18 @@ internal class ListViewState : ViewState
 
             using var context = new XkomContext();
 
-            var listProducts = context.ListProducts.Where(x => x.List == list).ToList();
-            var productIds = listProducts.Select(x => x.ProductId).ToList();
-            var unavailableProducts = context.Products.Where(x => productIds.Contains(x.Id) && x.NumberAvailable <= 0).ToList();
-            var productRelationToDelete = listProducts.Where(x => unavailableProducts.Contains(x.Product)).ToList();
+            var unavailableProductsList = context.ListProducts
+                .Include(x => x.Product)
+                .Where(x => x.ListId == list.Id)
+                .Where(x => x.Product.NumberAvailable <= 0);
 
-            if (productRelationToDelete is not null)
-            {
-                context.RemoveRange(productRelationToDelete);
-                context.SaveChanges();
-            }
+            unavailableProductsList
+                .Where(x => !ghosts.Contains(x.Product))
+                .ToList()
+                .ForEach(x => ghosts.Add(x.Product));
+
+            context.RemoveRange(unavailableProductsList);
+            context.SaveChanges();
             RefreshProducts();
         }));
 

@@ -97,11 +97,18 @@ internal class CartViewState : ViewState
 
             using XkomContext context = new();
 
-            ghosts.Clear();
+            var cartProducts = context.CartProducts
+                .Include(x => x.Product)
+                .Where(x => x.CartId == loggedUser.ActiveCartId);
 
-            var cartProducts = context.CartProducts.Where(x => x.CartId == loggedUser.ActiveCartId);
+            cartProducts
+                .Where(x => !ghosts.Contains(x.Product))
+                .ToList()
+                .ForEach(x => ghosts.Add(x.Product));
+
             context.RemoveRange(cartProducts);
             context.SaveChanges();
+
             RefreshProducts();
         }));
 
@@ -120,9 +127,18 @@ internal class CartViewState : ViewState
 
             using XkomContext context = new();
 
-            var cartProducts = context.CartProducts.Where(x => x.CartId == loggedUser.ActiveCartId && x.Product.NumberAvailable <= 0);
+            var cartProducts = context.CartProducts
+                .Include(x => x.Product)
+                .Where(x => x.CartId == loggedUser.ActiveCartId && x.Product.NumberAvailable <= 0);
+
+            cartProducts
+                .Where(x => !ghosts.Contains(x.Product))
+                .ToList()
+                .ForEach(x => ghosts.Add(x.Product));
+
             context.RemoveRange(cartProducts);
             context.SaveChanges();
+
             RefreshProducts();
         }));
 
