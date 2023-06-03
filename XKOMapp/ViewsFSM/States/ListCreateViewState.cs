@@ -87,7 +87,7 @@ internal class ListCreateViewState : ViewState
         var random = new Random();
         List<int> notAvailalbe = new() { 58, 59, 60, 61, 62, 63, 64, 91, 92, 93, 94, 95, 96 };
 
-        while (link.Length<128)
+        while (link.Length<64)
         {
             int randomNumber = random.Next(48, 122);
             char a = Convert.ToChar(randomNumber);
