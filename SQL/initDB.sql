@@ -54,7 +54,7 @@ CREATE TABLE [Cart_Product]
 CREATE TABLE [PromoCode]
 (
 	[ID] INT PRIMARY KEY IDENTITY(1,1) NOT NULL,
-	[Code] CHAR(16) NOT NULL,
+	[Code] VARCHAR(16) NOT NULL,
 	[StartDate] DATETIME NOT NULL,
 	[EndDate] DATETIME NOT NULL,
 	[Percentage] INT NOT NULL, CHECK([Percentage] <= 100 AND [Percentage] >= 0),

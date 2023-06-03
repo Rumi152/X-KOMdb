@@ -36,7 +36,8 @@ INSERT INTO OrderStatus(Name)
 VALUES
 ('Viewed'),
 ('In progress'),
-('Completed');
+('Completed'),
+('Order has been stolen');
 
 INSERT INTO ProductCategory(Name)
 VALUES
@@ -91,6 +92,14 @@ VALUES
 ('Jabra'),
 ('ENDORFY'),
 ('Africa');
+
+INSERT INTO PromoCode(Code, StartDate, EndDate, Percentage, MaximumMoney)
+VALUES 
+('zakopane','2023-06-01','2023-06-03',100,999999.99),
+('backuprider','2022-11-23','2023-11-23',25,1000),
+('sql','2022-11-23','2023-11-23',35,550),
+('cityfuse','2023-04-12','2023-07-03',0,10),
+('rel','2022-10-23','2023-12-09',10,999.99);
 
 GO
 
