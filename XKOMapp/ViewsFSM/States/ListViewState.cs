@@ -38,6 +38,68 @@ internal class ListViewState : ViewState
 
         printer.AddRow(StandardRenderables.StandardSeparator.ToBasicConsoleRow());
 
+        printer.AddRow(new InteractableConsoleRow(new Text("Add to cart"), (row, onwer) =>
+        {
+            if (SessionData.HasSessionExpired(out User loggedUser))
+            {
+                fsm.Checkout(new FastLoginViewState(fsm,
+                    markupMessage: $"[red]Session expired[/]",
+                    loginRollbackTarget: this,
+                    abortRollbackTarget: fsm.GetSavedState("mainMenu"),
+                    abortMarkupMessage: "Back to main menu"
+                ));
+                return;
+            }
+
+            using XkomContext context = new();
+            try { context.Attach(loggedUser); }
+            catch (InvalidOperationException) { }
+
+            //add new active cart if doesnt exist
+            if (!context.Carts.Any(x => x.Id == loggedUser.ActiveCartId))
+            {
+                var newCart = new Cart()
+                {
+                    User = loggedUser
+                };
+
+                context.Carts.Add(newCart);
+                loggedUser.ActiveCart = newCart;
+            }
+
+            context.SaveChanges();
+
+            Cart activeCart = context.Carts.Single(x => x.Id == loggedUser.ActiveCartId);
+
+            context.ListProducts
+                .Include(x => x.Product)
+                .Where(x => x.ListId == list.Id)
+                .ToList()
+                .ForEach(listProd =>
+                {
+                    var cartProduct = context.CartProducts.SingleOrDefault(x => x.CartId == activeCart.Id && x.ProductId == listProd.ProductId);
+                    if (cartProduct is null)
+                    {
+                        context.CartProducts.Add(new CartProduct()
+                        {
+                            Product = listProd.Product,
+                            Cart = activeCart,
+                            Amount = Math.Min(99999, listProd.Number)
+                        });
+                    }
+                    else
+                    {
+                        cartProduct.Amount += listProd.Number;
+                        if (cartProduct.Amount > 99999)
+                            cartProduct.Amount = 99999;
+                    }
+
+                });
+
+            context.SaveChanges();
+            fsm.Checkout(new CartViewState(fsm));
+        }));
+
         printer.AddRow(new InteractableConsoleRow(new Text("Delete unavailable"), (row, own) =>
         {
             if (SessionData.HasSessionExpired(out User dbUser))
@@ -123,6 +185,7 @@ internal class ListViewState : ViewState
 
             fsm.Checkout(new ListViewState(fsm, clonedList));
         }));
+
         printer.AddRow(new InteractableConsoleRow(new Markup("[red]Delete list[/]"), (row, own) =>
         {
             if (SessionData.HasSessionExpired(out User dbUser))
