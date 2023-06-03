@@ -1,6 +1,6 @@
 <mxfile host="65bd71144e">
     <diagram name="Strona-1" id="DpiKnfvnMf119dL31PfI">
-        <mxGraphModel dx="-125" dy="424" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
+        <mxGraphModel dx="131" dy="568" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
             <root>
                 <mxCell id="0"/>
                 <mxCell id="1" parent="0"/>
@@ -186,7 +186,7 @@
                         </Array>
                     </mxGeometry>
                 </mxCell>
-                <mxCell id="tu-g_7TpIbmg7pbgviE7-32" value="Lists" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontColor=#000000;" parent="1" vertex="1">
+                <mxCell id="tu-g_7TpIbmg7pbgviE7-32" value="Lists" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#1ba1e2;strokeColor=#006EAF;fontColor=#ffffff;" parent="1" vertex="1">
                     <mxGeometry x="1460" y="920" width="120" height="60" as="geometry"/>
                 </mxCell>
                 <mxCell id="tu-g_7TpIbmg7pbgviE7-34" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;fontFamily=Helvetica;fontSize=12;fontColor=#000000;" parent="1" source="tu-g_7TpIbmg7pbgviE7-39" target="tu-g_7TpIbmg7pbgviE7-86" edge="1">
@@ -258,7 +258,7 @@
                 <mxCell id="tu-g_7TpIbmg7pbgviE7-46" value="Convert cart to list" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#60a917;strokeColor=#2D7600;fontColor=#ffffff;" parent="1" vertex="1">
                     <mxGeometry x="1700" y="880" width="120" height="60" as="geometry"/>
                 </mxCell>
-                <mxCell id="tu-g_7TpIbmg7pbgviE7-47" value="Delete product from list" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontColor=#000000;" parent="1" vertex="1">
+                <mxCell id="tu-g_7TpIbmg7pbgviE7-47" value="Delete product from list" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#60a917;strokeColor=#2D7600;fontColor=#ffffff;" parent="1" vertex="1">
                     <mxGeometry x="1300" y="1020" width="120" height="60" as="geometry"/>
                 </mxCell>
                 <mxCell id="tu-g_7TpIbmg7pbgviE7-48" value="Add product to list" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#60a917;strokeColor=#2D7600;fontColor=#ffffff;" parent="1" vertex="1">
@@ -281,10 +281,10 @@
                 <mxCell id="tu-g_7TpIbmg7pbgviE7-52" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.75;entryDx=0;entryDy=0;fontColor=#000000;" parent="1" source="tu-g_7TpIbmg7pbgviE7-53" target="tu-g_7TpIbmg7pbgviE7-24" edge="1">
                     <mxGeometry relative="1" as="geometry"/>
                 </mxCell>
-                <mxCell id="tu-g_7TpIbmg7pbgviE7-53" value="Add available content to cart" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontColor=#000000;" parent="1" vertex="1">
+                <mxCell id="tu-g_7TpIbmg7pbgviE7-53" value="Add available content to cart" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#60a917;strokeColor=#2D7600;fontColor=#ffffff;" parent="1" vertex="1">
                     <mxGeometry x="1700" y="960" width="120" height="60" as="geometry"/>
                 </mxCell>
-                <mxCell id="tu-g_7TpIbmg7pbgviE7-54" value="Change number of products" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontColor=#000000;" parent="1" vertex="1">
+                <mxCell id="tu-g_7TpIbmg7pbgviE7-54" value="Change number of products" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#60a917;strokeColor=#2D7600;fontColor=#ffffff;" parent="1" vertex="1">
                     <mxGeometry x="1140" y="1120" width="120" height="60" as="geometry"/>
                 </mxCell>
                 <mxCell id="tu-g_7TpIbmg7pbgviE7-55" value="Change number of products" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#60a917;strokeColor=#2D7600;fontColor=#ffffff;" parent="1" vertex="1">
@@ -414,7 +414,7 @@
                 <mxCell id="tu-g_7TpIbmg7pbgviE7-86" value="Add to list" style="rounded=1;whiteSpace=wrap;html=1;strokeColor=#2D7600;fontFamily=Helvetica;fontSize=12;fontColor=#ffffff;fillColor=#60a917;" parent="1" vertex="1">
                     <mxGeometry x="2340" y="620" width="120" height="60" as="geometry"/>
                 </mxCell>
-                <mxCell id="tu-g_7TpIbmg7pbgviE7-87" value="Add to cart" style="rounded=1;whiteSpace=wrap;html=1;strokeColor=#d6b656;fontFamily=Helvetica;fontSize=12;fontColor=#000000;fillColor=#fff2cc;" parent="1" vertex="1">
+                <mxCell id="tu-g_7TpIbmg7pbgviE7-87" value="Add to cart" style="rounded=1;whiteSpace=wrap;html=1;strokeColor=#2D7600;fontFamily=Helvetica;fontSize=12;fontColor=#ffffff;fillColor=#60a917;" parent="1" vertex="1">
                     <mxGeometry x="2580" y="820" width="120" height="60" as="geometry"/>
                 </mxCell>
                 <mxCell id="tu-g_7TpIbmg7pbgviE7-89" value="Give feedback about product" style="rounded=1;whiteSpace=wrap;html=1;strokeColor=#2D7600;fontFamily=Helvetica;fontSize=12;fontColor=#ffffff;fillColor=#60a917;" parent="1" vertex="1">
@@ -479,7 +479,7 @@
                 <mxCell id="btTpmAtazuo6H9hWQEnr-13" value="Delete unavailable" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#60a917;strokeColor=#2D7600;fontColor=#ffffff;" parent="1" vertex="1">
                     <mxGeometry x="1940" y="1220" width="120" height="60" as="geometry"/>
                 </mxCell>
-                <mxCell id="jZJ21DdkEaakPETDEJtm-2" value="Clone list" style="rounded=1;whiteSpace=wrap;html=1;strokeColor=#d6b656;fontFamily=Helvetica;fontSize=12;fontColor=#000000;fillColor=#fff2cc;" parent="1" vertex="1">
+                <mxCell id="jZJ21DdkEaakPETDEJtm-2" value="Clone list" style="rounded=1;whiteSpace=wrap;html=1;strokeColor=#2D7600;fontFamily=Helvetica;fontSize=12;fontColor=#ffffff;fillColor=#60a917;" parent="1" vertex="1">
                     <mxGeometry x="980" y="1120" width="120" height="60" as="geometry"/>
                 </mxCell>
                 <mxCell id="jZJ21DdkEaakPETDEJtm-6" value="Convert currency" style="rounded=1;whiteSpace=wrap;html=1;strokeColor=#d6b656;fontFamily=Helvetica;fontSize=12;fontColor=#000000;fillColor=#fff2cc;" parent="1" vertex="1">

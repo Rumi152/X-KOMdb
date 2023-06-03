@@ -110,7 +110,8 @@ public class ProductViewState : ViewState
             }
             else
             {
-                cartProduct.Amount++;
+                if (cartProduct.Amount < 99999)
+                    cartProduct.Amount++;
             }
 
             context.SaveChanges();
