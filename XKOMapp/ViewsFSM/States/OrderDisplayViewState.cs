@@ -34,7 +34,11 @@ internal class OrderDisplayViewState : ViewState
         printer.AddRow(StandardRenderables.StandardSeparator.ToBasicConsoleRow());
         printer.EnableScrolling();
 
-        printer.StartGroup("data");
+        printer.StartGroup("data-general");
+        printer.AddRow(StandardRenderables.StandardSeparator.ToBasicConsoleRow());
+        printer.StartGroup("data-place");
+        printer.AddRow(StandardRenderables.StandardSeparator.ToBasicConsoleRow());
+        printer.StartGroup("data-price");
 
         printer.AddRow(StandardRenderables.StandardSeparator.ToBasicConsoleRow());
 
@@ -65,20 +69,20 @@ internal class OrderDisplayViewState : ViewState
         printer.ClearMemoryGroup("data");
 
         const int padding = 23;
-        printer.AddRow(new Text($"{"ID",-padding}: {order.Id}").ToBasicConsoleRow(), "data");
-        printer.AddRow(new Text($"{"Status",-padding}: {order.Status.Name}").ToBasicConsoleRow(), "data");
-        printer.AddRow(new Text($"{"Ordered",-padding}: {order.OrderDate:dd.MMM.yyyy mm:HH}").ToBasicConsoleRow(), "data");
-        printer.AddRow(new Text($"{"Payment method",-padding}: {order.PaymentMethod?.Name ?? "Other"}").ToBasicConsoleRow(), "data");
-        printer.AddRow(new Text($"{"Installation assistance",-padding}: {(order.NeedInstallationAssistance ? "Yes" : "No")}").ToBasicConsoleRow(), "data");
+        printer.AddRow(new Text($"{"ID",-padding} : {order.Id}").ToBasicConsoleRow(), "data-general");
+        printer.AddRow(new Text($"{"Status",-padding} : {order.Status.Name}").ToBasicConsoleRow(), "data-general");
+        printer.AddRow(new Text($"{"Ordered",-padding} : {order.OrderDate:dd.MMM.yyyy mm:HH}").ToBasicConsoleRow(), "data-general");
+        printer.AddRow(new Text($"{"Payment method",-padding} : {order.PaymentMethod?.Name ?? "Other"}").ToBasicConsoleRow(), "data-general");
+        printer.AddRow(new Text($"{"Installation assistance",-padding} : {(order.NeedInstallationAssistance ? "Yes" : "No")}").ToBasicConsoleRow(), "data-general");
 
-        printer.AddRow(new Text($"{"Products price",-padding}: [lime]{order.Price + order.Cart.Discount,-9:F2}[/] PLN").ToBasicConsoleRow(), "data");
-        printer.AddRow(new Text($"{"Discount",-padding}: -[red]{order.Cart.Discount,-9:F2}[/] PLN").ToBasicConsoleRow(), "data");
-        printer.AddRow(new Text($"{"Final price",-padding}: [lime]{order.Price,-9:F2}[/] PLN").ToBasicConsoleRow(), "data");
+        printer.AddRow(new Markup($"{"Normal price",-padding} : [lime]{order.Price + (order.Cart.Discount ?? 0),-9:F2}[/] PLN").ToBasicConsoleRow(), "data-price");
+        printer.AddRow(new Markup($"{"Discount",-padding} : [red]{order.Cart.Discount ?? 0,-9:F2}[/] PLN").ToBasicConsoleRow(), "data-price");
+        printer.AddRow(new Markup($"{"Final price",-padding} : [lime]{order.Price,-9:F2}[/] PLN").ToBasicConsoleRow(), "data-price");
 
-        printer.AddRow(new Text($"{"City",-padding}: {order.ShipmentInfo.City.Name}").ToBasicConsoleRow(), "data");
-        printer.AddRow(new Text($"{"Street",-padding}: {order.ShipmentInfo.StreetName}").ToBasicConsoleRow(), "data");
-        printer.AddRow(new Text($"{"Building number",-padding}: {order.ShipmentInfo.BuildingNumber}").ToBasicConsoleRow(), "data");
-        printer.AddRow(new Text($"{"Apartment number",-padding}: {order.ShipmentInfo.ApartmentNumber}").ToBasicConsoleRow(), "data");
+        printer.AddRow(new Text($"{"City",-padding} : {order.ShipmentInfo.City.Name}").ToBasicConsoleRow(), "data-place");
+        printer.AddRow(new Text($"{"Street",-padding} : {order.ShipmentInfo.StreetName}").ToBasicConsoleRow(), "data-place");
+        printer.AddRow(new Text($"{"Building number",-padding} : {order.ShipmentInfo.BuildingNumber}").ToBasicConsoleRow(), "data-place");
+        printer.AddRow(new Text($"{"Apartment number",-padding} : {order.ShipmentInfo.ApartmentNumber}").ToBasicConsoleRow(), "data-place");
     }
 
     private void RefreshProducts()
@@ -108,6 +112,6 @@ internal class OrderDisplayViewState : ViewState
         var companyString = product.Company is null ? new string(' ', 32) : (product.Company.Name.Length <= 29 ? $"{product.Company.Name,-29}" : $"{product.Company.Name[..30]}...");
 
         var displayString = $"{cp.Amount,-5}x {product.Name.EscapeMarkup(),-32} | {priceString + new string(' ', 13 - priceString.RemoveMarkup().Length)} | {companyString}";
-        printer.AddRow(new InteractableConsoleRow(new Markup(displayString), (row, printer) => fsm.Checkout(new ProductViewState(fsm, product, this, "Back to user"))), "products");
+        printer.AddRow(new InteractableConsoleRow(new Markup(displayString), (row, printer) => fsm.Checkout(new ProductViewState(fsm, product, this, "Back to order"))), "products");
     }
 }

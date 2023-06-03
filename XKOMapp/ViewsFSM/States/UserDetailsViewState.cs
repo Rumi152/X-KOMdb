@@ -105,14 +105,14 @@ internal class UserDetailsViewState : ViewState
             })
             .ToList();
 
-        const string orderPad = " ";
+        const string orderPad = "  ";
 
         statusGrouping.ForEach(g =>
         {
-            printer.AddRow(new Text($"{g.Status.Name}:").ToBasicConsoleRow(), "orders");
+            printer.AddRow(new Text($"{g.Status.Name}").ToBasicConsoleRow(), "orders");
             g.Orders.ForEach(order =>
             {
-                printer.AddRow(new InteractableConsoleRow(new Text($"{orderPad}ID: {order.Id, -5}"), (row, owner) => fsm.Checkout(new OrderDisplayViewState(fsm, order, this, "Back to user"))), "orders");
+                printer.AddRow(new InteractableConsoleRow(new Text($"{orderPad}Order {order.Id}: {order.OrderDate:dd.MMM.yyyy mm:HH}"), (row, owner) => fsm.Checkout(new OrderDisplayViewState(fsm, order, this, "Back to user"))), "orders");
             });
         });
     }
