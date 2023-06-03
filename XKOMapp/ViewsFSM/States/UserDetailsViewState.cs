@@ -85,10 +85,16 @@ internal class UserDetailsViewState : ViewState
         context.Attach(loggedUser);
         var orders = context
             .Orders
+            .AsNoTracking()
             .Include(x => x.Status)
             .Include(x => x.Cart)
-            .ThenInclude(x => x.User)
+                .ThenInclude(x => x.User)
             .Where(x => x.Cart.User == loggedUser)
+            .Include(x => x.Cart.CartProducts)
+                .ThenInclude(x => x.Product)
+            .Include(x => x.PaymentMethod)
+            .Include(x => x.ShipmentInfo)
+                .ThenInclude(x => x.City)
             .ToList();
 
         var statusGrouping = orders
@@ -99,15 +105,18 @@ internal class UserDetailsViewState : ViewState
             })
             .ToList();
 
+        const string orderPad = "  ";
+
         statusGrouping.ForEach(g =>
         {
-            printer.AddRow(new Text($"{g.Status.Name}:").ToBasicConsoleRow(), "orders");
+            printer.AddRow(new Text($"{g.Status.Name}").ToBasicConsoleRow(), "orders");
             g.Orders.ForEach(order =>
             {
-                printer.AddRow(new Text($"  {order.Id}").ToBasicConsoleRow(), "orders");
+                printer.AddRow(new InteractableConsoleRow(new Text($"{orderPad}Order {order.Id}: {order.OrderDate:dd.MMM.yyyy mm:HH}"), (row, owner) => fsm.Checkout(new OrderDisplayViewState(fsm, order, this, "Back to user"))), "orders");
             });
         });
     }
+
 
     private void RefreshCredentials(User user)
     {
