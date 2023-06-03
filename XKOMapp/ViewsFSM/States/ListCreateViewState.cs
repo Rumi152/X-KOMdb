@@ -85,13 +85,12 @@ internal class ListCreateViewState : ViewState
     {
         string link = "https://www.x-kom.pl/list/";
         var random = new Random();
-        List<int> notAvailalbe = new() { 58, 59, 60, 61, 62, 63, 64, 91, 92, 93, 94, 95, 96 };
 
         while (link.Length<64)
         {
             int randomNumber = random.Next(48, 122);
             char a = Convert.ToChar(randomNumber);
-            if (!notAvailalbe.Contains(a))
+            if (char.IsLetterOrDigit(a))
             {
                 link += a;
             }

@@ -9,12 +9,15 @@ using XKOMapp.GUI;
 using Microsoft.EntityFrameworkCore.Update.Internal;
 using XKOMapp.Models;
 using Microsoft.EntityFrameworkCore;
+using XKOMapp.GUI.ConsoleRows.ListAndCart;
 
 namespace XKOMapp.ViewsFSM.States;
 internal class ListBrowseViewState : ViewState
 {
+    private readonly ListLinkInputConsoleRow linkInput;
     public ListBrowseViewState(ViewStateMachine stateMachine) : base(stateMachine)
     {
+        linkInput = new("Clone from link: ", 64, CloneFromLink);
     }
 
     protected override void InitialPrinterBuild(ConsolePrinter printer)
@@ -28,6 +31,9 @@ internal class ListBrowseViewState : ViewState
         }));
         printer.AddRow(new Rule("Lists").RuleStyle(Style.Parse(StandardRenderables.AquamarineColorHex)).HeavyBorder().ToBasicConsoleRow());
         printer.EnableScrolling();
+
+        printer.AddRow(linkInput);
+        printer.StartGroup("link-error");
 
         printer.AddRow(new InteractableConsoleRow(new Text("Add new list"), (row, owner) =>
         {
@@ -65,6 +71,7 @@ internal class ListBrowseViewState : ViewState
     {
         base.OnEnter();
         RefreshLists();
+        printer.ClearMemoryGroup("link-error");
     }
 
     private void RefreshLists()
@@ -106,6 +113,69 @@ internal class ListBrowseViewState : ViewState
                 fsm.Checkout(new ListViewState(fsm, x));
             }), "lists");
         });
+    }
+
+
+    private void CloneFromLink(string link)
+    {
+        if (SessionData.HasSessionExpired(out User loggedUser))
+        {
+            fsm.Checkout(new FastLoginViewState(fsm,
+                markupMessage: $"[red]Session expired[/] - [{StandardRenderables.GrassColorHex}]Log in to add list[/]",
+                loginRollbackTarget: this,
+                abortRollbackTarget: fsm.GetSavedState("mainMenu"),
+                abortMarkupMessage: "Back to main menu"
+            ));
+            return;
+        }
+
+        printer.ClearMemoryGroup("link-error");
+
+        using XkomContext context = new();
+        context.Attach(loggedUser);
+
+        var list = context.Lists.SingleOrDefault(x => x.Link == link);
+
+        if (list is null)
+        {
+            printer.AddRow(new Markup("[red]List not found[/]").ToBasicConsoleRow(), "link-error");
+            return;
+        }
+
+        string name = $"{list.Name}-image";
+        var clonedList = new List()
+        {
+            Name = name[..Math.Min(name.Length, 32)],
+            Link = ListCreateViewState.GetLink(),
+            User = loggedUser
+        };
+        context.Add(clonedList);
+
+        context.ListProducts
+        .Include(x => x.Product)
+            .Where(x => x.ListId == list.Id)
+            .Select(x => new
+            {
+                x.Product,
+                x.Number
+            })
+            .ToList()
+            .ForEach(x =>
+            {
+                var newProdList = new ListProduct()
+                {
+                    Product = x.Product,
+                    List = clonedList,
+                    Number = x.Number
+                };
+                context.Add(newProdList);
+            });
+
+        context.SaveChanges();
+
+        fsm.Checkout(new ListViewState(fsm, clonedList));
+
+        linkInput.ResetInput();
     }
 }
 
