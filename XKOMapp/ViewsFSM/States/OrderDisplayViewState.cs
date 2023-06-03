@@ -64,21 +64,21 @@ internal class OrderDisplayViewState : ViewState
 
         printer.ClearMemoryGroup("data");
 
-        const int padding = 10;
-        printer.AddRow(new Text($"{"ID", -padding}: {order.Id}").ToBasicConsoleRow(), "data");
-        printer.AddRow(new Text($"{"Status", -padding}: {order.Status.Name}").ToBasicConsoleRow(), "data");
-        printer.AddRow(new Text($"{"Ordered", -padding}: {order.OrderDate:dd.MMM.yyyy mm:HH}").ToBasicConsoleRow(), "data");
-        printer.AddRow(new Text($"{"Payment method", -padding}: {order.PaymentMethod?.Name ?? "Other"}").ToBasicConsoleRow(), "data");
+        const int padding = 23;
+        printer.AddRow(new Text($"{"ID",-padding}: {order.Id}").ToBasicConsoleRow(), "data");
+        printer.AddRow(new Text($"{"Status",-padding}: {order.Status.Name}").ToBasicConsoleRow(), "data");
+        printer.AddRow(new Text($"{"Ordered",-padding}: {order.OrderDate:dd.MMM.yyyy mm:HH}").ToBasicConsoleRow(), "data");
+        printer.AddRow(new Text($"{"Payment method",-padding}: {order.PaymentMethod?.Name ?? "Other"}").ToBasicConsoleRow(), "data");
         printer.AddRow(new Text($"{"Installation assistance",-padding}: {(order.NeedInstallationAssistance ? "Yes" : "No")}").ToBasicConsoleRow(), "data");
 
-        printer.AddRow(new Text($"{"Products price", -padding}: [lime]{order.Price + order.Cart.Discount,-9:F2}[/] PLN").ToBasicConsoleRow(), "data");
-        printer.AddRow(new Text($"{"Discount", -padding}: -[red]{order.Cart.Discount,-9:F2}[/] PLN").ToBasicConsoleRow(), "data");
-        printer.AddRow(new Text($"{"Final price", -padding}: [lime]{order.Price,-9:F2}[/] PLN").ToBasicConsoleRow(), "data");
+        printer.AddRow(new Text($"{"Products price",-padding}: [lime]{order.Price + order.Cart.Discount,-9:F2}[/] PLN").ToBasicConsoleRow(), "data");
+        printer.AddRow(new Text($"{"Discount",-padding}: -[red]{order.Cart.Discount,-9:F2}[/] PLN").ToBasicConsoleRow(), "data");
+        printer.AddRow(new Text($"{"Final price",-padding}: [lime]{order.Price,-9:F2}[/] PLN").ToBasicConsoleRow(), "data");
 
-        printer.AddRow(new Text($"{"City", -padding}: {order.ShipmentInfo.City.Name}").ToBasicConsoleRow(), "data");
-        printer.AddRow(new Text($"{"Street", -padding}: {order.ShipmentInfo.StreetName}").ToBasicConsoleRow(), "data");
-        printer.AddRow(new Text($"{"Building number", -padding}: {order.ShipmentInfo.BuildingNumber}").ToBasicConsoleRow(), "data");
-        printer.AddRow(new Text($"{"Apartment number", -padding}: {order.ShipmentInfo.ApartmentNumber}").ToBasicConsoleRow(), "data");
+        printer.AddRow(new Text($"{"City",-padding}: {order.ShipmentInfo.City.Name}").ToBasicConsoleRow(), "data");
+        printer.AddRow(new Text($"{"Street",-padding}: {order.ShipmentInfo.StreetName}").ToBasicConsoleRow(), "data");
+        printer.AddRow(new Text($"{"Building number",-padding}: {order.ShipmentInfo.BuildingNumber}").ToBasicConsoleRow(), "data");
+        printer.AddRow(new Text($"{"Apartment number",-padding}: {order.ShipmentInfo.ApartmentNumber}").ToBasicConsoleRow(), "data");
     }
 
     private void RefreshProducts()
