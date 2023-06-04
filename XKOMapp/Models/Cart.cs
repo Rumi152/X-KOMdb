@@ -9,8 +9,6 @@ public partial class Cart
 
     public int? UserId { get; set; }
 
-    public decimal? Discount { get; set; }
-
     public virtual ICollection<CartProduct> CartProducts { get; } = new List<CartProduct>();
 
     public virtual Order? Order { get; set; }
