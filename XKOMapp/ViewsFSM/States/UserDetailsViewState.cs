@@ -94,7 +94,6 @@ internal class UserDetailsViewState : ViewState
                 .ThenInclude(x => x.Product)
             .Include(x => x.PaymentMethod)
             .Include(x => x.ShipmentInfo)
-                .ThenInclude(x => x.City)
             .ToList();
 
         var statusGrouping = orders
