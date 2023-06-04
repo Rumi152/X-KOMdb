@@ -6,24 +6,6 @@ VALUES
 ('Jakub','Cackowski','123','cyc'),
 ('Sasza','Ukraina','321','ukr');
 
-INSERT INTO City(Name)
-VALUES
-('Warszawa'),
-('Kraków'),
-('Łódź'),
-('Wrocław'),
-('Poznań'),
-('Gdańsk'),
-('Szczecin'),
-('Bydgoszcz'),
-('Lublin'),
-('Białystok'),
-('Katowice'),
-('Gdynia'),
-('Częstochowa'),
-('Radom'),
-('Rzeszów');
-
 INSERT INTO PaymentMethod(Name)
 VALUES
 ('Card'),
@@ -37,7 +19,7 @@ VALUES
 ('Viewed'),
 ('In progress'),
 ('Completed'),
-('Order has been stolen');
+('Order stolen');
 
 INSERT INTO ProductCategory(Name)
 VALUES
