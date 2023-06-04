@@ -7,15 +7,13 @@ public partial class ShipmentInfo
 {
     public int Id { get; set; }
 
-    public int CityId { get; set; }
+    public string CityName { get; set; } = null!;
 
     public string StreetName { get; set; } = null!;
 
     public int BuildingNumber { get; set; }
 
     public int ApartmentNumber { get; set; }
-
-    public virtual City City { get; set; } = null!;
 
     public virtual Order? Order { get; set; }
 }

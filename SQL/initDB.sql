@@ -39,8 +39,7 @@ CREATE TABLE [Review]
 CREATE TABLE [Cart]
 (
 	[ID] INT PRIMARY KEY IDENTITY(1,1) NOT NULL,
-	[UserID] INT NULL,
-	[Discount] DECIMAL(8,2) NULL
+	[UserID] INT NULL
 );
 
 CREATE TABLE [Cart_Product]
@@ -113,22 +112,17 @@ CREATE TABLE [Order]
 	[PaymentMethodID] INT NULL,
 	[Price] MONEY NOT NULL,
 	[ShipmentInfoID] INT NOT NULL UNIQUE,
-	[NeedInstallationAssistance] BIT NOT NULL DEFAULT(0)
+	[NeedInstallationAssistance] BIT NOT NULL DEFAULT(0),
+	[Discount] DECIMAL(8,2) NULL
 );
 
 CREATE TABLE [ShipmentInfo]
 (
 	[ID] INT PRIMARY KEY IDENTITY(1,1) NOT NULL,
-	[CityID] INT NOT NULL,
+	[CityName] VARCHAR(64) NOT NULL,
 	[StreetName] VARCHAR(64) NOT NULL,
 	[BuildingNumber] INT NOT NULL,
 	[ApartmentNumber] INT NOT NULL
-);
-
-CREATE TABLE [City]
-(
-	[ID] INT PRIMARY KEY IDENTITY(1,1) NOT NULL,
-	[Name] VARCHAR(64) NOT NULL UNIQUE
 );
 
 CREATE TABLE [OrderStatus]
@@ -203,10 +197,6 @@ ON DELETE CASCADE;
 
 ALTER TABLE [Order]
 ADD FOREIGN KEY (ShipmentInfoID) REFERENCES ShipmentInfo (ID)
-ON DELETE NO ACTION;
-
-ALTER TABLE ShipmentInfo
-ADD FOREIGN KEY (CityID) REFERENCES City (ID)
 ON DELETE NO ACTION;
 
 ALTER TABLE [User]

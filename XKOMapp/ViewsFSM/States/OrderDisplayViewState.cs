@@ -75,11 +75,11 @@ internal class OrderDisplayViewState : ViewState
         printer.AddRow(new Text($"{"Payment method",-padding} : {order.PaymentMethod?.Name ?? "Other"}").ToBasicConsoleRow(), "data-general");
         printer.AddRow(new Text($"{"Installation assistance",-padding} : {(order.NeedInstallationAssistance ? "Yes" : "No")}").ToBasicConsoleRow(), "data-general");
 
-        printer.AddRow(new Markup($"{"Normal price",-padding} : [lime]{order.Price + (order.Cart.Discount ?? 0),-9:F2}[/] PLN").ToBasicConsoleRow(), "data-price");
-        printer.AddRow(new Markup($"{"Discount",-padding} : [red]{order.Cart.Discount ?? 0,-9:F2}[/] PLN").ToBasicConsoleRow(), "data-price");
+        printer.AddRow(new Markup($"{"Normal price",-padding} : [lime]{order.Price + (order.Discount ?? 0),-9:F2}[/] PLN").ToBasicConsoleRow(), "data-price");
+        printer.AddRow(new Markup($"{"Discount",-padding} : [red]{order.Discount ?? 0,-9:F2}[/] PLN").ToBasicConsoleRow(), "data-price");
         printer.AddRow(new Markup($"{"Final price",-padding} : [lime]{order.Price,-9:F2}[/] PLN").ToBasicConsoleRow(), "data-price");
 
-        printer.AddRow(new Text($"{"City",-padding} : {order.ShipmentInfo.City.Name}").ToBasicConsoleRow(), "data-place");
+        printer.AddRow(new Text($"{"City",-padding} : {order.ShipmentInfo.CityName}").ToBasicConsoleRow(), "data-place");
         printer.AddRow(new Text($"{"Street",-padding} : {order.ShipmentInfo.StreetName}").ToBasicConsoleRow(), "data-place");
         printer.AddRow(new Text($"{"Building number",-padding} : {order.ShipmentInfo.BuildingNumber}").ToBasicConsoleRow(), "data-place");
         printer.AddRow(new Text($"{"Apartment number",-padding} : {order.ShipmentInfo.ApartmentNumber}").ToBasicConsoleRow(), "data-place");

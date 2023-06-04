@@ -21,6 +21,8 @@ public partial class Order
 
     public bool NeedInstallationAssistance { get; set; }
 
+    public decimal? Discount { get; set; }
+
     public virtual Cart Cart { get; set; } = null!;
 
     public virtual PaymentMethod? PaymentMethod { get; set; }
