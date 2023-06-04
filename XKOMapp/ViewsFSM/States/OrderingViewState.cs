@@ -216,9 +216,6 @@ internal class OrderingViewState : ViewState
             isValid = false;
         }
 
-        if (Discount.Length < 1)
-            isValid = false;
-
         return isValid;
     }
 }
