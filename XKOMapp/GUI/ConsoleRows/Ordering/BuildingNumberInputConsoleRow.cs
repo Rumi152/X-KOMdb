@@ -40,7 +40,7 @@ namespace XKOMapp.GUI.ConsoleRows.User
             if (CurrentInput.Length >= maxLength)
                 return;
 
-            if (!char.IsLetterOrDigit(letter))
+            if (char.IsLetterOrDigit(letter))
             {
                 CurrentInput += letter;
                 return;
