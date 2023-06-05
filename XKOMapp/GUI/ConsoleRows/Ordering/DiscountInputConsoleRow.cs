@@ -4,7 +4,7 @@ using Spectre.Console.Rendering;
 
 namespace XKOMapp.GUI.ConsoleRows.User
 {
-    internal class DiscountInputConsoleRow : ICustomCursorConsoleRow, ICustomKeystrokeListenerConsoleRow, IHoverConsoleRow, IInteractableConsoleRow, IFocusableConsoleRow
+    internal class DiscountInputConsoleRow : ICustomCursorConsoleRow, ICustomKeystrokeListenerConsoleRow, IHoverConsoleRow, IInteractableConsoleRow
     {
         private readonly string markupLabel;
         private readonly int maxLength;
