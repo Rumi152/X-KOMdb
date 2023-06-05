@@ -14,7 +14,7 @@ namespace XKOMapp.GUI.ConsoleRows.User
 
         private bool isHovered;
 
-        public OrderingNameInputConsoleRow(string markupLabel, int maxLength,)
+        public OrderingNameInputConsoleRow(string markupLabel, int maxLength)
         {
             this.markupLabel = markupLabel;
             this.maxLength = maxLength;
