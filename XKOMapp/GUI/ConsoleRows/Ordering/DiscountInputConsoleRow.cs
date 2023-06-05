@@ -57,6 +57,10 @@ namespace XKOMapp.GUI.ConsoleRows.User
         public void OnInteraction() => owner.CursorDown();
 
 
-        public void ResetInput() => CurrentInput = "";
+        public void ResetInput()
+        {
+            owner.SetBufferDirty();
+            CurrentInput = "";
+        }
     }
 }

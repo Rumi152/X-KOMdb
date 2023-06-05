@@ -14,15 +14,10 @@ namespace XKOMapp.GUI.ConsoleRows.User
 
         private bool isHovered;
 
-
-        private readonly bool isFocused;
-        bool ISwitchableConsoleRow.IsActive { get => isFocused; set => throw new InvalidOperationException(); }
-
-        public OrderingNameInputConsoleRow(string markupLabel, int maxLength, bool isFocused = false)
+        public OrderingNameInputConsoleRow(string markupLabel, int maxLength,)
         {
             this.markupLabel = markupLabel;
             this.maxLength = maxLength;
-            this.isFocused = isFocused;
         }
 
         public IRenderable GetRenderContent() => new Markup($"{markupLabel}{CurrentInput.EscapeMarkup()}{(isHovered ? "[blink]_[/]" : "")}");
@@ -70,16 +65,10 @@ namespace XKOMapp.GUI.ConsoleRows.User
         public void OnInteraction() => owner.CursorDown();
 
 
-        public void ResetInput() => CurrentInput = "";
-
-        void ISwitchableConsoleRow.OnTurningOff()
+        public void ResetInput()
         {
-            throw new InvalidOperationException();
-        }
-
-        void ISwitchableConsoleRow.OnTurningOn()
-        {
-            throw new InvalidOperationException();
+            owner.SetBufferDirty();
+            CurrentInput = "";
         }
     }
 }
