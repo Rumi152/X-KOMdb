@@ -83,8 +83,6 @@ internal class OrderingViewState : ViewState
             {
                 CityName = CityNameRow.CurrentInput,
                 StreetName = StreetNameRow.CurrentInput,
-                BuildingNumber = int.Parse(BuildingNumberRow.CurrentInput),//TEMP
-                ApartmentNumber = int.Parse(ApartmentNumberRow.CurrentInput)//TEMP
             };
             context.Add(shipmentInfo);
 

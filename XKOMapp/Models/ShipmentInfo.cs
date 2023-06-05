@@ -11,9 +11,9 @@ public partial class ShipmentInfo
 
     public string StreetName { get; set; } = null!;
 
-    public int BuildingNumber { get; set; }
+    public string BuildingNumber { get; set; } = null!;
 
-    public int ApartmentNumber { get; set; }
+    public string ApartmentNumber { get; set; } = null!;
 
     public virtual Order? Order { get; set; }
 }

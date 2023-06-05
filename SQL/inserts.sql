@@ -130,6 +130,5 @@ VALUES
 '{"Color":"Black","Type":"Full Tower","Side panel":"Tempered glass","RAM":"16GB","Mother board standard":"ATX","Number of fans":"3"}'
 )
 
-
 GO
 USE master
