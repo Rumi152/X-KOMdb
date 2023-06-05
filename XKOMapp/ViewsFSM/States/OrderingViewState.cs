@@ -18,9 +18,9 @@ internal class OrderingViewState : ViewState
     const int labelPad = 20;
     private readonly OrderingNameInputConsoleRow CityNameRow = new($"{"City",-labelPad} : ", 64);
     private readonly OrderingNameInputConsoleRow StreetNameRow = new($"{"Street",-labelPad} : ", 64);
-    private readonly OrderingNumberInputConsoleRow BuildingNumberRow = new($"{"Building",-labelPad} : ", 4);
-    private readonly OrderingNumberInputConsoleRow ApartmentNumberRow = new($"{"Apartment",-labelPad} : ", 3);
-    private readonly OrderingNumberInputConsoleRow AssistanceChoiceRow = new($"{"Need assistance? 0/1",-labelPad} : ", 2);
+    private readonly BuldingNumberInputConsoleRow BuildingNumberRow = new($"{"Building",-labelPad} : ", 4);
+    private readonly BuldingNumberInputConsoleRow ApartmentNumberRow = new($"{"Apartment",-labelPad} : ", 3);
+    private readonly BuldingNumberInputConsoleRow AssistanceChoiceRow = new($"{"Need assistance? 0/1",-labelPad} : ", 2);
     private readonly DiscountInputConsoleRow DiscountRow = new($"{"Insert coupon code",-labelPad} : ", 16);
     private Cart cart;
     private PaymentMethod chosenMethod = null!;

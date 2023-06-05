@@ -4,7 +4,7 @@ using Spectre.Console.Rendering;
 
 namespace XKOMapp.GUI.ConsoleRows.User
 {
-    internal class OrderingNumberInputConsoleRow : ICustomCursorConsoleRow, ICustomKeystrokeListenerConsoleRow, IHoverConsoleRow, IInteractableConsoleRow, IFocusableConsoleRow
+    internal class BuldingNumberInputConsoleRow : ICustomCursorConsoleRow, ICustomKeystrokeListenerConsoleRow, IHoverConsoleRow, IInteractableConsoleRow, IFocusableConsoleRow
     {
         private readonly string markupLabel;
         private readonly int maxLength;
@@ -14,15 +14,10 @@ namespace XKOMapp.GUI.ConsoleRows.User
 
         private bool isHovered;
 
-
-        private readonly bool isFocused;
-        bool ISwitchableConsoleRow.IsActive { get => isFocused; set => throw new InvalidOperationException(); }
-
-        public OrderingNumberInputConsoleRow(string markupLabel, int maxLength, bool isFocused = false)
+        public BuldingNumberInputConsoleRow(string markupLabel, int maxLength)
         {
             this.markupLabel = markupLabel;
             this.maxLength = maxLength;
-            this.isFocused = isFocused;
         }
 
         public IRenderable GetRenderContent() => new Markup($"{markupLabel}{CurrentInput.EscapeMarkup()}{(isHovered ? "[blink]_[/]" : "")}");
@@ -45,10 +40,12 @@ namespace XKOMapp.GUI.ConsoleRows.User
             if (CurrentInput.Length >= maxLength)
                 return;
 
-            if (!char.IsDigit(letter))
+            if (!char.IsLetterOrDigit(letter))
+            {
+                CurrentInput += letter;
                 return;
+            }
 
-            CurrentInput += letter;
         }
 
 
@@ -61,16 +58,10 @@ namespace XKOMapp.GUI.ConsoleRows.User
         public void OnInteraction() => owner.CursorDown();
 
 
-        public void ResetInput() => CurrentInput = "";
-
-        void ISwitchableConsoleRow.OnTurningOff()
+        public void ResetInput()
         {
-            throw new InvalidOperationException();
-        }
-
-        void ISwitchableConsoleRow.OnTurningOn()
-        {
-            throw new InvalidOperationException();
+            owner.SetBufferDirty();
+            CurrentInput = "";
         }
     }
 }
