@@ -29,7 +29,7 @@ internal class CartViewState : ViewState
 
         printer.AddRow(new InteractableConsoleRow(new Text("Back to searching porducts"), (row, owner) => fsm.Checkout("productsSearch")));
         printer.AddRow(new InteractableConsoleRow(new Text("Back to menu"), (row, owner) => fsm.Checkout("mainMenu")));
-        printer.AddRow(new InteractableConsoleRow(new Text("Go to ordering [red](COMING SOON)[/]"), (row, own) => 
+        printer.AddRow(new InteractableConsoleRow(new Markup("Go to ordering [red](COMING SOON)[/]"), (row, own) => 
         {
             if (SessionData.HasSessionExpired(out User loggedUser))
             {
