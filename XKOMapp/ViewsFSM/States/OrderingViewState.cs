@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 using Spectre.Console;
 using System;
 using System.Collections.Generic;
@@ -18,17 +19,15 @@ internal class OrderingViewState : ViewState
     const int labelPad = 20;
     private readonly OrderingNameInputConsoleRow CityNameRow = new($"{"City",-labelPad} : ", 64);
     private readonly OrderingNameInputConsoleRow StreetNameRow = new($"{"Street",-labelPad} : ", 64);
-    private readonly BuldingNumberInputConsoleRow BuildingNumberRow = new($"{"Building",-labelPad} : ", 4);
-    private readonly BuldingNumberInputConsoleRow ApartmentNumberRow = new($"{"Apartment",-labelPad} : ", 3);
-    private readonly BuldingNumberInputConsoleRow AssistanceChoiceRow = new($"{"Need assistance? 0/1",-labelPad} : ", 2);
-    private readonly DiscountInputConsoleRow DiscountRow = new($"{"Insert coupon code",-labelPad} : ", 16);
-    private Cart cart;
-    private PaymentMethod chosenMethod = null!;
-    private PromoCode discount = null!;
+    private readonly BuldingNumberInputConsoleRow BuildingNumberRow = new($"{"Building",-labelPad} : ", 8);
+    private readonly BuldingNumberInputConsoleRow ApartmentNumberRow = new($"{"Apartment",-labelPad} : ", 8);
+    private readonly BuldingNumberInputConsoleRow AssistanceChoiceRow = new($"{"Need assistance? 0/1",-labelPad} : ", 2);//TEMP
+    private readonly DiscountInputConsoleRow DiscountRow = new($"{"Insert coupon code",-labelPad} : ");
 
-    public OrderingViewState(ViewStateMachine stateMachine, Cart cart) : base(stateMachine)
+    private PaymentMethod? chosenMethod;
+
+    public OrderingViewState(ViewStateMachine stateMachine) : base(stateMachine)
     {
-        this.cart = cart;
     }
 
     protected override void InitialPrinterBuild(ConsolePrinter printer)
@@ -59,7 +58,7 @@ internal class OrderingViewState : ViewState
 
         printer.AddRow(StandardRenderables.StandardSeparator.ToBasicConsoleRow());
 
-        printer.AddRow(new InteractableConsoleRow(new Text("Save changes"), (row, own) =>
+        printer.AddRow(new InteractableConsoleRow(new Text("Order"), (row, own) =>
         {
             if (SessionData.HasSessionExpired(out User loggedUser))
             {
@@ -76,54 +75,62 @@ internal class OrderingViewState : ViewState
                 return;
 
             using var context = new XkomContext();
+            //REFACTOR forgive me
+            try { context.Attach(loggedUser); }
+            catch(InvalidOperationException) { }
+
             var shipmentInfo = new ShipmentInfo()
             {
                 CityName = CityNameRow.CurrentInput,
                 StreetName = StreetNameRow.CurrentInput,
-                BuildingNumber = int.Parse(BuildingNumberRow.CurrentInput),
-                ApartmentNumber = int.Parse(ApartmentNumberRow.CurrentInput)
+                BuildingNumber = int.Parse(BuildingNumberRow.CurrentInput),//TEMP
+                ApartmentNumber = int.Parse(ApartmentNumberRow.CurrentInput)//TEMP
             };
             context.Add(shipmentInfo);
 
+            var activeCart = context.Carts
+                .Include(x => x.CartProducts)
+                    .ThenInclude(x => x.Product)
+                .SingleOrDefault(x => x.Id == loggedUser.ActiveCartId);
+
+            if(activeCart is null || activeCart.CartProducts.IsNullOrEmpty())
+            {
+                fsm.Checkout(new MessageViewState(fsm,
+                    message: $"[red]Your cart is empty[/]",
+                    buttonTarget: this,
+                    buttonMessage: "Back to cart"
+                ));
+                return;
+            }
+
             var order = new Order()
             {
-                Cart = cart,
+                Cart = activeCart,
                 Status = RandomStatus(),
                 OrderDate = DateTime.Now,
                 PaymentMethod = chosenMethod,
-                Price = 10,
+                Price = activeCart.CartProducts.Aggregate(0m, (acc, current) => acc + current.Product.Price * current.Amount),
                 ShipmentInfo = shipmentInfo,
-                NeedInstallationAssistance = true, //bool.Parse(AssistanceChoiceRow.CurrentInput),
-                Discount = 12//(discount.Percentage) * Price
+                NeedInstallationAssistance = true, //TEMP
+                Discount = 12 //TEMP
             };
+
+            loggedUser.ActiveCart = null;
             context.Add(order);
             context.SaveChanges();
 
-
+            fsm.Checkout(new UserDetailsViewState(fsm));
         }));
         printer.StartGroup("errors");
     }
     public override void OnEnter()
     {
         base.OnEnter();
-        RefreshMethods();
-    }
-    private static OrderStatus RandomStatus()
-    {
-        using var context = new XkomContext();
-        var rand = new Random();
-        int number = rand.Next(1, 4);
-        var orderStatus = context.OrderStatuses.Single(x => x.Id == number);
 
-        return orderStatus;
-    }
-
-    private void RefreshMethods()
-    {
         if (SessionData.HasSessionExpired(out User loggedUser))
         {
             fsm.Checkout(new FastLoginViewState(fsm,
-                markupMessage: "[red]Session expired[/]",
+                markupMessage: $"[red]Session expired[/]",
                 loginRollbackTarget: this,
                 abortRollbackTarget: fsm.GetSavedState("mainMenu"),
                 abortMarkupMessage: "Back to main menu"
@@ -131,13 +138,48 @@ internal class OrderingViewState : ViewState
             return;
         }
 
+        using var context = new XkomContext();
+        var activeCart = context.Carts
+            .Find(loggedUser.ActiveCartId);
+
+        if (activeCart is null || !context.CartProducts.Any(x => x.CartId == activeCart.Id))
+        {
+            fsm.Checkout(new MessageViewState(fsm,
+                message: $"[red]Your cart is empty[/]",
+                buttonTarget: this,
+                buttonMessage: "Back to cart"
+            ));
+            return;
+        }
+
+        ResetInputs();
+        RefreshMethods();
+    }
+
+
+    private static OrderStatus RandomStatus()
+    {
+        using var context = new XkomContext();
+
+        var statuses = context.OrderStatuses.AsNoTracking().ToList();
+
+        var rand = new Random();
+        int number = rand.Next(0, statuses.Count);
+
+        return statuses[number];
+    }
+
+    private void RefreshMethods()
+    {
         printer.ClearMemoryGroup("method");
 
         using var context = new XkomContext();
-        var methods = context.PaymentMethods;
+        var methods = context.PaymentMethods.ToList();
+
         if (!methods.Any())
-            printer.AddRow(new Text("No methods were found").ToBasicConsoleRow(), "method");
-        methods.ToList().ForEach(x =>
+            printer.AddRow(new Text("No payment methods are available").ToBasicConsoleRow(), "method");
+
+        methods.ForEach(x =>
         {
             printer.AddRow(new InteractableConsoleRow(new Markup(x.Name), (row, printer) =>
             {
@@ -151,6 +193,7 @@ internal class OrderingViewState : ViewState
                     ));
                     return;
                 }
+
                 chosenMethod = x;
 
             }), "method");
@@ -163,59 +206,55 @@ internal class OrderingViewState : ViewState
 
         bool isValid = true;
 
-        string City = CityNameRow.CurrentInput;
-        string Street = StreetNameRow.CurrentInput;
-        int Building = int.Parse(BuildingNumberRow.CurrentInput);
-        int Apartment = int.Parse(ApartmentNumberRow.CurrentInput);
-        int Assistance = int.Parse(AssistanceChoiceRow.CurrentInput);
-        string Discount = DiscountRow.CurrentInput;
+        string city = CityNameRow.CurrentInput;
+        string street = StreetNameRow.CurrentInput;
+        string building = BuildingNumberRow.CurrentInput;
+        string apartment = ApartmentNumberRow.CurrentInput;
+        string assistance = AssistanceChoiceRow.CurrentInput;
+        string promoCode = DiscountRow.CurrentInput;
 
-        if (City.Length < 1)
+        if (city.Length < 1)
         {
-            printer.AddRow(new Markup("[red]City name cannot be empty[/]").ToBasicConsoleRow(), "errors");
+            printer.AddRow(new Markup("[red]Please provide city name[/]").ToBasicConsoleRow(), "errors");
             isValid = false;
         }
-
-        if (Street.Length < 1)
+        
+        if (chosenMethod is null)
         {
-            printer.AddRow(new Markup("[red]Street name cannot be empty[/]").ToBasicConsoleRow(), "errors");
-            isValid = false;
-        }
-
-        if (BuildingNumberRow.CurrentInput.Length < 1)
-        {
-            printer.AddRow(new Markup("[red]Building number cannot be empty[/]").ToBasicConsoleRow(), "errors");
-            isValid = false;
-        }
-        else if (Building < 1)
-        {
-            printer.AddRow(new Markup("[red]There are no buildings numbered 0[/]").ToBasicConsoleRow(), "errors");
+            printer.AddRow(new Markup("[red]Please choose payment method[/]").ToBasicConsoleRow(), "errors");
             isValid = false;
         }
 
-        if (ApartmentNumberRow.CurrentInput.Length < 1)
+        if (street.Length < 1)
         {
-            printer.AddRow(new Markup("[red]Apartment number cannot be empty[/]").ToBasicConsoleRow(), "errors");
-            isValid = false;
-        }
-        else if (Apartment < 1)
-        {
-            printer.AddRow(new Markup("[red]There are no apartments numbered 0[/]").ToBasicConsoleRow(), "errors");
+            printer.AddRow(new Markup("[red]Please provide street name[/]").ToBasicConsoleRow(), "errors");
             isValid = false;
         }
 
-        if (Assistance != 0 && Assistance != 1)
+        if (building.Length < 1)
         {
-            printer.AddRow(new Markup("[red]You need to choose between 0 and 1[/]").ToBasicConsoleRow(), "errors");
+            printer.AddRow(new Markup("[red]Please provide building number[/]").ToBasicConsoleRow(), "errors");
             isValid = false;
         }
 
-        if (Assistance != 0 && Assistance != 1)
+        if (apartment.Length < 1)
         {
-            printer.AddRow(new Markup("[red]You need to choose between 0 and 1[/]").ToBasicConsoleRow(), "errors");
+            printer.AddRow(new Markup("[red]Please provide apartment number[/]").ToBasicConsoleRow(), "errors");
             isValid = false;
         }
 
         return isValid;
+    }
+
+
+    private void ResetInputs()
+    {
+        chosenMethod = null;
+        CityNameRow.ResetInput();
+        StreetNameRow.ResetInput();
+        BuildingNumberRow.ResetInput();
+        ApartmentNumberRow.ResetInput();
+        AssistanceChoiceRow.ResetInput();
+        DiscountRow.ResetInput();
     }
 }
