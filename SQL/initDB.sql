@@ -121,8 +121,8 @@ CREATE TABLE [ShipmentInfo]
 	[ID] INT PRIMARY KEY IDENTITY(1,1) NOT NULL,
 	[CityName] VARCHAR(64) NOT NULL,
 	[StreetName] VARCHAR(64) NOT NULL,
-	[BuildingNumber] INT NOT NULL,
-	[ApartmentNumber] INT NOT NULL
+	[BuildingNumber] VARCHAR(4) NOT NULL,
+	[ApartmentNumber] VARCHAR(4) NOT NULL
 );
 
 CREATE TABLE [OrderStatus]

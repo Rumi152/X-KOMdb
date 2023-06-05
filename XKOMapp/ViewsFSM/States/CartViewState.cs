@@ -29,7 +29,20 @@ internal class CartViewState : ViewState
 
         printer.AddRow(new InteractableConsoleRow(new Text("Back to searching porducts"), (row, owner) => fsm.Checkout("productsSearch")));
         printer.AddRow(new InteractableConsoleRow(new Text("Back to menu"), (row, owner) => fsm.Checkout("mainMenu")));
-        printer.AddRow(new InteractableConsoleRow(new Text("Go to ordering"), (row, own) => throw new NotImplementedException()));//TODO ordering viewstate
+        printer.AddRow(new InteractableConsoleRow(new Markup("Go to ordering [red](COMING SOON)[/]"), (row, own) => 
+        {
+            if (SessionData.HasSessionExpired(out User loggedUser))
+            {
+                fsm.Checkout(new FastLoginViewState(fsm,
+                    markupMessage: $"[red]Session expired[/]",
+                    loginRollbackTarget: this,
+                    abortRollbackTarget: fsm.GetSavedState("mainMenu"),
+                    abortMarkupMessage: "Back to main menu"
+                ));
+                return;
+            }
+            //fsm.Checkout(new OrderingViewState(fsm));
+        }));
 
         printer.AddRow(StandardRenderables.StandardSeparator.ToBasicConsoleRow());
 
