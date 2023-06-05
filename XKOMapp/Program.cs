@@ -38,6 +38,7 @@ internal class Program
             catch (Exception ex)
             {
                 fsm.Checkout(new ErrorViewState(fsm, ex));
+                throw;
             }
         }
     }

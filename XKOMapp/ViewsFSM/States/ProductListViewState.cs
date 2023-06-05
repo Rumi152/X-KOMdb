@@ -85,11 +85,11 @@ internal class ProductListViewState : ViewState
 
         using var context = new XkomContext();
         context.Attach(loggedUser);
-        var lists = context.Lists.Where(x => x.User == loggedUser);
+        var lists = context.Lists.Where(x => x.User == loggedUser).ToList();
         if (!lists.Any())
             printer.AddRow(new Text("No lists were found").ToBasicConsoleRow(), "lists");
 
-        lists.ToList().ForEach(iteratedList =>
+        lists.ForEach(iteratedList =>
         {
 
             printer.AddRow(new InteractableConsoleRow(new Markup(iteratedList.Name), (row, printer) =>
